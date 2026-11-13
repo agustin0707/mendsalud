@@ -1,0 +1,168 @@
+<!--{"titulo":"Para equipos de salud · Mend salud","descripcion":"El panel del kinesiólogo y el resumen para el control: lo que tus pacientes con artrosis hacen en casa, ordenado para actuar a tiempo. Sin instalar nada.","actual":"equipos","css":["paginas","mockups"]}-->
+<header class="pagina-cabeza" data-tono="claro">
+  <div class="envoltura">
+    <p class="ceja-sec entra-pagina">Equipos</p>
+    <h1 class="entra-pagina" style="--n:1">Lo que pasa en casa, a la vista <span class="acento">antes</span> del control.</h1>
+    <p class="entrada-sec entra-pagina" style="--n:2">Mend le da al kinesiólogo un panel con la semana de cada paciente y al médico un resumen para el control. Tus pacientes hacen sus rutinas en casa y ustedes ven a tiempo quién necesita atención.</p>
+    <div class="botones entra-pagina" style="--n:3">
+      <a class="boton boton-oscuro" href="#conversemos">Conversemos<span class="circulo">{{i:ArrowRight}}</span></a>
+      <a class="boton boton-borde" href="https://demo.mendsalud.cl">Probar la demo</a>
+    </div>
+  </div>
+</header>
+
+<section class="seccion seccion-pegada" data-tono="claro" data-fondo="bruma-medio" aria-label="El panel del kinesiólogo">
+  <div class="envoltura">
+    <div class="escena escena-equipos revela">
+      <div class="laptop"><div class="laptop-pantalla"><img src="{{base}}/fotos/app/kine.jpg" alt="Panel del kinesiólogo: la lista de pacientes ordenada por quién necesita atención primero, con señales de alarma, molestias altas y posibles abandonos." width="1600" height="1000" fetchpriority="high"></div><div class="laptop-base"></div></div>
+      <figure class="marco-tel"><img src="{{base}}/fotos/app/paciente-inicio.jpg" alt="La app de la persona en el teléfono: su semana y la pregunta de cómo están sus articulaciones hoy." width="780" height="1688" loading="lazy"></figure>
+      <p class="flota f1"><span class="ic-caja alerta">{{i:Siren}}</span><span><b>Rosa Díaz</b><small>Señal de alarma · ayer</small></span></p>
+      <p class="flota f2" style="--f:1"><span class="ic-caja">{{i:EnvelopeSimple}}</span><span><b>Tienes un aviso nuevo</b><small>Correo de Mend</small></span></p>
+    </div>
+    <p class="nota-escena">Panel del kinesiólogo y app de la persona, con datos de ejemplo. <a href="https://demo.mendsalud.cl">Pruébala tú</a>: entra como persona, kinesiólogo o médico.</p>
+  </div>
+</section>
+
+<!-- Kinesiólogo -->
+<section class="seccion seccion-pegada" data-tono="claro" id="kinesiologo" aria-labelledby="t-kine">
+  <div class="envoltura">
+    <div class="cabeza-sec revela">
+      <div><p class="ceja-sec">Kinesiología</p>
+      <h2 class="titulo-sec" id="t-kine">Una lista que te dice <span class="acento">por dónde</span> empezar.</h2></div>
+      <p class="entrada-sec">Al abrir el panel, tus pacientes aparecen ordenados por quién necesita atención primero. Cada uno tiene su ficha con la semana, las molestias y cómo ha ido desde que empezó.</p>
+    </div>
+    <ul class="partes">
+      <li class="revela">{{i:Siren}}<h3>Señales a la vista</h3><p>Señales de alarma, molestias altas y posibles abandonos, arriba de la lista y con una etiqueta clara.</p></li>
+      <li class="revela" style="--d:1">{{i:CalendarCheck}}<h3>La semana de un vistazo</h3><p>Rutinas hechas, días en que se sintió más sensible y molestias, en la ficha de cada paciente.</p></li>
+      <li class="revela" style="--d:2">{{i:HandsClapping}}<h3>Un toque basta</h3><p>Un aplauso o un mensaje breve desde la ficha, para que tu paciente sepa que lo estás viendo.</p></li>
+    </ul>
+    <figure class="dos-ventanas revela">
+      <div class="ventana"><div class="ventana-barra"><i><span></span></i><span class="ventana-url">app.mendsalud.cl/kine</span></div><img src="{{base}}/fotos/app/kine-ficha.jpg" alt="Ficha de un paciente: su semana, la rutina asignada y las molestias que marcó." width="1600" height="1000" loading="lazy"></div>
+      <div class="ventana"><div class="ventana-barra"><i><span></span></i><span class="ventana-url">app.mendsalud.cl/kine</span></div><img src="{{base}}/fotos/app/kine-evolucion.jpg" alt="Evolución de un paciente: semanas cumplidas y molestias a lo largo del tiempo." width="1600" height="1000" loading="lazy"></div>
+      <figcaption>La ficha de cada paciente y cómo ha ido desde que empezó, con datos de ejemplo.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Avisos -->
+<section class="seccion" data-tono="oscuro" data-fondo="oscuro" id="avisos" aria-labelledby="t-avisos">
+  <div class="iso-vidrio" aria-hidden="true"><span class="vidrio-r"></span><span class="sombra-r"></span><span class="luz-r"></span></div>
+  <div class="envoltura fila-func">
+    <div class="revela">
+      <p class="ceja-sec">Avisos</p>
+      <h2 class="titulo-sec" id="t-avisos">Un correo cuando <span class="acento">conviene</span> mirar.</h2>
+      <p class="entrada-sec" style="margin-top:24px">Si alguien marca una molestia de 7 o más, te llega un correo para que lo revises ese mismo día.</p>
+      <ul class="lista-check">
+        <li>{{i:Check}}<span>Por seguridad, el correo no trae nombres ni datos de salud: los ves al entrar a tu panel.</span></li>
+        <li>{{i:Check}}<span>Si hay varios avisos juntos, llegan en un solo correo.</span></li>
+      </ul>
+    </div>
+    <figure class="ventana ventana-correo revela" style="--d:1">
+      <div class="ventana-barra"><i><span></span></i><span class="ventana-url">Correo</span></div>
+      <div class="correo-cabeza"><span class="remitente">{{isotipo}}</span><b>Mend · Tienes un aviso nuevo en Mend</b><span>contacto@mendsalud.cl</span></div>
+      <div class="ventana-cuerpo"><img src="{{base}}/fotos/app/correo-aviso.jpg" alt="El correo de aviso: Tienes un aviso nuevo. Uno de tus pacientes dejó un aviso que conviene revisar hoy. Ábrelo en tu panel. Botón Abrir mi panel." width="960" height="1350" loading="lazy"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- Médico -->
+<section class="seccion seccion-suave" data-tono="claro" data-fondo="arena" id="medico" aria-labelledby="t-medico">
+  <div class="envoltura fila-func">
+    <div class="revela">
+      <p class="ceja-sec">Control</p>
+      <h2 class="titulo-sec" id="t-medico">Un resumen que se lee en <span class="acento">un minuto.</span></h2>
+      <ul class="lista-check">
+        <li>{{i:Check}}<span>Semanas con la meta cumplida, rutinas hechas y días en que la persona se sintió más sensible.</span></li>
+        <li>{{i:Check}}<span>Las señales de alarma desde que empezó.</span></li>
+        <li>{{i:Check}}<span>Las preguntas que la persona quiere conversar en el control.</span></li>
+      </ul>
+    </div>
+    <figure class="revela" style="--d:1">
+      <div class="laptop"><div class="laptop-pantalla"><img src="{{base}}/fotos/app/medico-resumen.jpg" alt="Resumen para el control médico: adherencia por semana, molestias y señales de alarma desde el inicio." width="1600" height="1000" loading="lazy"></div><div class="laptop-base"></div></div>
+      <figcaption class="nota-escena">Resumen para el control, con datos de ejemplo.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- Cómo se suma un centro -->
+<section class="seccion" data-tono="claro" id="como-se-suma" aria-labelledby="t-suma">
+  <div class="envoltura">
+    <div class="cabeza-sec revela">
+      <div><p class="ceja-sec">Implementación</p>
+      <h2 class="titulo-sec" id="t-suma">Sumar un centro, <span class="acento">sin</span> instalar nada.</h2></div>
+      <p class="entrada-sec">Mend funciona en el navegador: en el computador del box para el equipo y en el teléfono que ya tiene la persona.</p>
+    </div>
+    <ol class="pasos">
+      <li class="revela"><span class="paso-num">01</span><h3>Conversamos</h3><p>Nos cuentas cómo trabaja tu equipo con las personas con artrosis y vemos juntos si Mend les sirve.</p></li>
+      <li class="revela" style="--d:1"><span class="paso-num">02</span><h3>Cuentas para el equipo</h3><p>Cada kinesiólogo y cada médico entra con su propia cuenta y ve solo a sus pacientes.</p></li>
+      <li class="revela" style="--d:2"><span class="paso-num">03</span><h3>Invitas a tus pacientes</h3><p>En la consulta le das el acceso a la persona y eliges su rutina. Desde ese día, su semana llega a tu panel.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- Preguntas de equipos -->
+<section class="seccion seccion-pegada" data-tono="claro" data-fondo="bruma" id="preguntas" aria-labelledby="t-preguntas">
+  <div class="envoltura preguntas-grid">
+    <div class="revela">
+      <p class="ceja-sec">Preguntas</p>
+      <h2 class="titulo-sec" id="t-preguntas">Lo que suelen <span class="acento">preguntar</span> los equipos.</h2>
+    </div>
+    <div class="acordeon revela" style="--d:1">
+      <details>
+        <summary>¿Quién elige las rutinas?<span class="mas" aria-hidden="true"></span></summary>
+        <div><p>El kinesiólogo, desde un catálogo de rutinas de cadera y rodilla hechas a partir de las guías clínicas. Si la persona marca que amaneció rígida o muy sensible, la rutina de ese día se ajusta sola.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué hace la persona si le molesta un ejercicio?<span class="mas" aria-hidden="true"></span></summary>
+        <div><p>Usa una escala de molestias de 0 a 10 que revisó un kinesiólogo: de 0 a 3 sigue, de 4 a 6 lo hace más fácil y de 7 a 10 no hace ese ejercicio. Desde 7, a ti te llega un aviso. Las señales para consultar o ir a urgencia las revisó una reumatóloga.</p><p><a class="enlace-texto" href="/evidencia/#seguridad">Ver la escala y las señales</a></p></div>
+      </details>
+      <details>
+        <summary>¿Cuánto tiempo le quita al equipo?<span class="mas" aria-hidden="true"></span></summary>
+        <div><p>Está pensado para que revisar la semana de un paciente tome poco: la lista ya viene ordenada y la ficha muestra primero lo que importa.</p></div>
+      </details>
+      <details>
+        <summary>¿Qué pasa con los datos de los pacientes?<span class="mas" aria-hidden="true"></span></summary>
+        <div><p>Solo los ve la persona y su equipo de salud. Son datos de salud y se tratan según la Ley 19.628; Mend se diseñó también para cumplir la Ley 21.719 de protección de datos personales.</p></div>
+      </details>
+      <details>
+        <summary>¿Está disponible para mi centro?<span class="mas" aria-hidden="true"></span></summary>
+        <div><p>Hoy Mend está en piloto en un centro de atención primaria. Si te interesa para tu equipo, escríbenos y lo conversamos.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- Conversemos -->
+<section class="seccion seccion-pegada" data-tono="claro" id="conversemos" aria-labelledby="t-conversemos">
+  <div class="envoltura">
+    <div class="caja-contacto revela">
+      <div class="caja-contacto-texto" data-tono-cab="oscuro">
+        <p class="ceja-sec">Conversemos</p>
+        <h2 class="titulo-sec" id="t-conversemos">Veamos si Mend le sirve a tu <span class="acento">equipo.</span></h2>
+        <p>Cuéntanos de tu centro y te respondemos por correo. Si prefieres, escríbenos directo a <a href="mailto:contacto@mendsalud.cl">contacto@mendsalud.cl</a>.</p>
+      </div>
+      <form class="formulario" action="/api/contacto" method="post" data-formulario novalidate>
+        <template class="icono-gracias">{{i:CheckCircle}}</template>
+        <div class="campo"><label for="f-nombre">Nombre</label><input id="f-nombre" name="nombre" autocomplete="name" required></div>
+        <div class="campo"><label for="f-centro">Centro o institución</label><input id="f-centro" name="centro" autocomplete="organization" required></div>
+        <div class="campo"><label for="f-rol">Tu rol</label>
+          <select id="f-rol" name="rol" required>
+            <option value="" selected disabled>Elige una opción</option>
+            <option>Kinesiología</option>
+            <option>Medicina</option>
+            <option>Jefatura o dirección</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="campo"><label for="f-correo">Correo</label><input id="f-correo" name="correo" type="email" autocomplete="email" inputmode="email" required></div>
+        <div class="campo campo-ancho"><label for="f-mensaje">Mensaje</label><textarea id="f-mensaje" name="mensaje" rows="4" required></textarea></div>
+        <div class="campo-trampa" aria-hidden="true"><label for="f-sitio">No llenar</label><input id="f-sitio" name="sitio" tabindex="-1" autocomplete="off"></div>
+        <p class="campo-ancho nota-form">Usamos estos datos solo para responderte. <a href="/privacidad/">Privacidad</a></p>
+        <div class="campo-ancho envio">
+          <button class="boton boton-oscuro" type="submit"><span class="txt">Enviar</span><span class="circulo">{{i:PaperPlaneTilt}}</span></button>
+          <p class="estado-form" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

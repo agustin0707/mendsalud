@@ -1,0 +1,271 @@
+/* Barra rediseñada (ronda 3, 12 nov). Se elige con <body data-nav="n1|n2|n3">.
+   Sin data-nav queda la barra de la ronda 2 (cabecera.css), para el antes y después.
+   Notas de Agustín: menos carga visual, un vidrio mucho mejor, botones de la derecha más atractivos,
+   animaciones y hovers profesionales.
+   El vidrio va en un ::before (no en la cabecera) para que el menú del celular, que es fixed, no quede atrapado. */
+
+[data-nav] {
+  --sp: cubic-bezier(0.22, 1, 0.36, 1);        /* salida suave, sin rebote */
+  --vb-blur: blur(24px) saturate(180%);
+}
+
+/* ---------- Común a las tres ---------- */
+[data-nav] .cab-sitio[data-sobre] {
+  isolation: isolate;
+  animation: cab-entra 0.9s var(--sp) 0.1s both;
+  transition: top 0.5s var(--sp), width 0.5s var(--sp), padding 0.5s var(--sp), color 0.4s var(--ease-calma);
+}
+@keyframes cab-entra { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+[data-nav] .cab-sitio[data-sobre]::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  transition: background 0.5s var(--ease-calma), box-shadow 0.5s var(--ease-calma), opacity 0.5s var(--ease-calma);
+}
+/* Grano de la marca sobre el vidrio */
+[data-nav] .cab-sitio[data-sobre]::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--grano); background-size: 160px; mix-blend-mode: soft-light; opacity: 0.35;
+  transition: opacity 0.5s var(--ease-calma);
+}
+[data-nav] .cab-sitio[data-sobre] .nav-vidrio {
+  background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  padding: 0; gap: 2px; color: var(--vb-texto);
+}
+[data-nav] .cab-sitio[data-sobre] .nav-vidrio a {
+  min-height: 40px; padding: 0 15px; gap: 7px; color: var(--vb-texto);
+  font-size: 0.9375rem; font-weight: 500; letter-spacing: 0;
+  transition: color 0.3s var(--ease-calma), background-color 0.35s var(--ease-calma), padding 0.45s var(--sp);
+}
+[data-nav] .cab-sitio[data-sobre] .nav-vidrio a.bajo,
+[data-nav] .cab-sitio[data-sobre] .nav-vidrio a[aria-current="page"]:not(.fuera) { color: var(--vb-texto-activo); }
+[data-nav] .cab-sitio[data-sobre] .nav-vidrio a:active { transform: scale(0.97); }
+[data-nav] .cab-sitio[data-sobre] .nav-capsula {
+  top: 0; bottom: 0; background: var(--vb-capsula); box-shadow: var(--vb-capsula-sombra, none);
+  transition: transform 0.45s var(--sp), width 0.45s var(--sp), opacity 0.25s var(--ease-calma), background-color 0.4s var(--ease-calma);
+}
+[data-nav] .cab-sitio[data-sobre] .marca { width: 118px; transition: opacity 0.3s; }
+[data-nav] .cab-sitio[data-sobre] .marca:hover { opacity: 0.8; }
+
+/* Entrar: texto con el ícono, sin píldora */
+[data-nav] .cab-sitio[data-sobre] .entrar {
+  background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
+  min-height: 40px; padding: 0 14px; gap: 7px; color: var(--vb-texto);
+  font-size: 0.9375rem; font-weight: 500;
+}
+[data-nav] .cab-sitio[data-sobre] .entrar .ic { width: 18px; height: 18px; }
+[data-nav] .cab-sitio[data-sobre] .entrar:hover { background: var(--vb-capsula-suave); }
+[data-nav] .cab-sitio[data-sobre] .entrar:hover .ic { transform: translateX(3px); }
+
+/* Conversemos: al pasar, el círculo crece hasta llenar la píldora y la flecha gira */
+[data-nav] .cab-sitio[data-sobre] .boton-cab {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 42px; padding: 4px 4px 4px 18px; gap: 10px; font-size: 0.9375rem;
+  background: var(--bc-fondo); color: var(--bc-texto); box-shadow: none;
+  transition: color 0.45s var(--sp), transform 0.3s var(--sp);
+}
+[data-nav] .cab-sitio[data-sobre] .boton-cab::before {
+  content: ""; position: absolute; z-index: -1; right: 4px; top: 50%; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--bc-circulo); transform: translateY(-50%) scale(1);
+  transition: transform 0.6s var(--sp), background-color 0.4s var(--ease-calma);
+}
+[data-nav] .cab-sitio[data-sobre] .boton-cab .circulo { width: 34px; height: 34px; background: none; color: var(--bc-flecha); transition: transform 0.5s var(--sp), color 0.45s var(--sp); }
+[data-nav] .cab-sitio[data-sobre] .boton-cab .circulo svg { width: 17px; height: 17px; }
+[data-nav] .cab-sitio[data-sobre] .boton-cab:hover { color: var(--bc-texto-lleno); box-shadow: none; }
+[data-nav] .cab-sitio[data-sobre] .boton-cab:hover::before { transform: translateY(-50%) scale(9); }
+[data-nav] .cab-sitio[data-sobre] .boton-cab:hover .circulo { transform: none; color: var(--bc-texto-lleno); }
+[data-nav] .cab-sitio[data-sobre] .boton-cab:hover .circulo svg { transform: rotate(-45deg); }
+[data-nav] .cab-sitio[data-sobre] .boton-cab:active { transform: scale(0.97); }
+
+[data-nav] .cab-sitio[data-sobre] .acciones { gap: 4px; }
+[data-nav] :focus-visible { outline: 2px solid var(--vb-foco, var(--mar)); outline-offset: 2px; }
+
+/* ---------- N1 · Una pieza clara ----------
+   Todo en una sola cápsula de vidrio claro, centrada: logo, enlaces de texto y acciones.
+   Texto Petróleo: pasa AA sobre cualquier foto. Sobre Hueso solo gana opacidad y sombra. */
+[data-nav="n1"] .cab-sitio[data-sobre] {
+  top: 14px; left: 0; right: 0; margin-inline: auto; width: min(100% - 2 * var(--margen), 1120px);
+  grid-template-columns: auto 1fr auto; gap: 12px; padding: 6px 6px 6px 22px; border-radius: 999px;
+  color: var(--petroleo);
+  --vb-texto: var(--petroleo); --vb-texto-activo: var(--petroleo);
+  --vb-capsula: rgb(36 74 83 / 0.09); --vb-capsula-suave: rgb(36 74 83 / 0.06);
+  --bc-fondo: var(--petroleo); --bc-texto: var(--blanco); --bc-circulo: var(--bruma); --bc-flecha: var(--petroleo); --bc-texto-lleno: var(--petroleo);
+  --vb-foco: var(--petroleo);
+}
+[data-nav="n1"] .cab-sitio[data-sobre]::before {
+  background: linear-gradient(180deg, rgb(253 253 253 / 0.8), rgb(253 253 253 / 0.72));
+  -webkit-backdrop-filter: var(--vb-blur); backdrop-filter: var(--vb-blur);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 0 0 1px rgb(255 255 255 / 0.4), 0 1px 2px rgb(16 33 37 / 0.06), 0 14px 40px rgb(16 33 37 / 0.18);
+}
+[data-nav="n1"] .cab-sitio[data-sobre="claro"]::before {
+  background: linear-gradient(180deg, rgb(253 253 253 / 0.9), rgb(253 253 253 / 0.84));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 1), inset 0 0 0 1px rgb(36 74 83 / 0.08), 0 1px 2px rgb(16 33 37 / 0.05), 0 10px 32px rgb(36 74 83 / 0.12);
+}
+[data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio { justify-self: center; }
+[data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio .ic { display: none; }
+[data-nav="n1"] .cab-sitio[data-compacta="true"] { top: 10px; width: min(100% - 2 * var(--margen), 1040px); }
+
+/* ---------- N2 · Isla con íconos ----------
+   Una isla oscura que se ajusta a su contenido. Los enlaces son íconos; al pasar o en la página
+   actual se abre el nombre dentro de una píldora clara. Sobre Hueso se da vuelta (V1). */
+[data-nav="n2"] .cab-sitio[data-sobre] {
+  top: 14px; left: 0; right: 0; margin-inline: auto; width: max-content; max-width: calc(100% - 2 * var(--margen));
+  grid-template-columns: auto auto auto; gap: 10px; padding: 6px 6px 6px 20px; border-radius: 999px;
+  color: var(--blanco);
+  --vb-texto: var(--blanco); --vb-texto-activo: var(--petroleo);
+  --vb-capsula: rgb(253 253 253 / 0.96); --vb-capsula-suave: rgb(253 253 253 / 0.12);
+  --vb-capsula-sombra: 0 2px 10px rgb(16 33 37 / 0.2);
+  --bc-fondo: var(--blanco); --bc-texto: var(--petroleo); --bc-circulo: var(--petroleo); --bc-flecha: var(--blanco); --bc-texto-lleno: var(--blanco);
+  --vb-foco: var(--bruma);
+}
+[data-nav="n2"] .cab-sitio[data-sobre]::before {
+  background: linear-gradient(180deg, rgb(36 74 83 / 0.7), rgb(29 60 67 / 0.78));
+  -webkit-backdrop-filter: var(--vb-blur); backdrop-filter: var(--vb-blur);
+  box-shadow: inset 0 1px 0 rgb(253 253 253 / 0.22), inset 0 0 0 1px rgb(253 253 253 / 0.1), 0 14px 40px rgb(16 33 37 / 0.28);
+}
+[data-nav="n2"] .cab-sitio[data-sobre="claro"] {
+  color: var(--petroleo);
+  --vb-texto: var(--petroleo); --vb-texto-activo: var(--blanco);
+  --vb-capsula: var(--petroleo); --vb-capsula-suave: rgb(36 74 83 / 0.07);
+  --bc-fondo: var(--petroleo); --bc-texto: var(--blanco); --bc-circulo: var(--blanco); --bc-flecha: var(--petroleo); --bc-texto-lleno: var(--petroleo);
+  --vb-foco: var(--petroleo);
+}
+[data-nav="n2"] .cab-sitio[data-sobre="claro"]::before {
+  background: linear-gradient(180deg, rgb(253 253 253 / 0.86), rgb(253 253 253 / 0.78));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 1), inset 0 0 0 1px rgb(36 74 83 / 0.08), 0 10px 32px rgb(36 74 83 / 0.14);
+}
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio a { padding: 0 11px; gap: 0; }
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio .ic { width: 20px; height: 20px; }
+/* El nombre se abre con un ancho animado; sigue en el DOM para lectores de pantalla */
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio a .nombre {
+  position: static; width: auto; height: auto; clip: auto;
+  display: inline-block; max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+  transition: max-width 0.5s var(--sp), opacity 0.3s var(--ease-calma), margin 0.5s var(--sp);
+}
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio a:is(.bajo, [aria-current="page"]:not(.fuera)) { padding: 0 16px 0 13px; }
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio a:is(.bajo, [aria-current="page"]:not(.fuera)) .nombre { max-width: 12em; opacity: 1; margin-left: 8px; }
+[data-nav="n2"] .cab-sitio[data-sobre] .acciones::before {
+  content: ""; width: 1px; height: 22px; margin: 0 6px 0 2px; background: currentColor; opacity: 0.22;
+}
+
+/* ---------- N3 · Transparente que se arma ----------
+   Arriba no hay caja: logo, enlaces y acciones sueltos sobre la foto, con un velo suave desde arriba.
+   Al bajar, aparece una barra de vidrio de lado a lado y se achica. Enlaces subrayados al pasar. */
+[data-nav="n3"] .cab-sitio[data-sobre] {
+  padding: 18px var(--margen);
+  --vb-texto: var(--blanco); --vb-texto-activo: var(--blanco);
+  --vb-capsula: transparent; --vb-capsula-suave: rgb(253 253 253 / 0.1);
+  --bc-fondo: var(--blanco); --bc-texto: var(--petroleo); --bc-circulo: var(--petroleo); --bc-flecha: var(--blanco); --bc-texto-lleno: var(--blanco);
+  --vb-foco: var(--bruma);
+}
+[data-nav="n3"] .cab-sitio[data-sobre]::before {
+  background: linear-gradient(180deg, rgb(36 74 83 / 0.74) 0%, rgb(36 74 83 / 0.5) 55%, rgb(36 74 83 / 0) 100%);
+  height: 170%; inset: 0 0 auto 0;
+}
+[data-nav="n3"] .cab-sitio[data-sobre]::after { opacity: 0; }
+[data-nav="n3"] .cab-sitio[data-compacta="true"] { padding-block: 10px; }
+[data-nav="n3"] .cab-sitio[data-compacta="true"]::before {
+  height: 100%;
+  background: linear-gradient(180deg, rgb(36 74 83 / 0.8), rgb(36 74 83 / 0.74));
+  -webkit-backdrop-filter: var(--vb-blur); backdrop-filter: var(--vb-blur);
+  box-shadow: inset 0 -1px 0 rgb(253 253 253 / 0.12), 0 10px 30px rgb(16 33 37 / 0.16);
+}
+[data-nav="n3"] .cab-sitio[data-compacta="true"]::after { opacity: 0.35; }
+[data-nav="n3"] .cab-sitio[data-sobre="claro"] {
+  color: var(--petroleo);
+  --vb-texto: var(--petroleo); --vb-texto-activo: var(--petroleo); --vb-capsula-suave: rgb(36 74 83 / 0.06);
+  --bc-fondo: var(--petroleo); --bc-texto: var(--blanco); --bc-circulo: var(--blanco); --bc-flecha: var(--petroleo); --bc-texto-lleno: var(--petroleo);
+  --vb-foco: var(--petroleo);
+}
+[data-nav="n3"] .cab-sitio[data-sobre="claro"]::before {
+  background: linear-gradient(180deg, rgb(251 249 244 / 0.9), rgb(251 249 244 / 0.82));
+  box-shadow: inset 0 -1px 0 rgb(36 74 83 / 0.1), 0 10px 30px rgb(36 74 83 / 0.08);
+}
+[data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio .ic { display: none; }
+[data-nav="n3"] .cab-sitio[data-sobre] .nav-capsula { display: none; }
+[data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio a::after {
+  content: ""; position: absolute; left: 15px; right: 15px; bottom: 7px; height: 1.5px; border-radius: 2px;
+  background: currentColor; transform: scaleX(0); transform-origin: right center;
+  transition: transform 0.5s var(--sp);
+}
+[data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio a:is(:hover, :focus-visible, [aria-current="page"])::after { transform: scaleX(1); transform-origin: left center; }
+[data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio:hover a[aria-current="page"]:not(:hover)::after { transform: scaleX(0); }
+
+/* ---------- Pantallas medianas ---------- */
+@media (max-width: 1180px) {
+  [data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio a, [data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio a { padding: 0 11px; }
+  [data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio a .nombre, [data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio a .nombre { position: static; width: auto; height: auto; clip: auto; }
+  [data-nav] .cab-sitio[data-sobre] .entrar .nombre { display: none; }
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 760px) {
+  [data-nav="n1"] .cab-sitio[data-sobre], [data-nav="n2"] .cab-sitio[data-sobre] {
+    top: 10px; width: calc(100% - 24px); max-width: none; grid-template-columns: 1fr auto; padding: 5px 5px 5px 18px;
+  }
+  [data-nav="n3"] .cab-sitio[data-sobre] { grid-template-columns: 1fr auto; padding: 12px var(--margen); }
+  [data-nav] .cab-sitio[data-sobre] .marca { width: 104px; }
+  [data-nav] .cab-sitio[data-sobre] .menu-boton {
+    min-height: 44px; padding: 0 16px 0 12px; box-shadow: none; border: 0;
+    background: var(--vb-capsula-suave); color: var(--vb-texto); -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  [data-nav="n3"] .cab-sitio[data-sobre]:not([data-compacta="true"]) .menu-boton { background: var(--vidrio-tenido); -webkit-backdrop-filter: var(--vb-blur); backdrop-filter: var(--vb-blur); }
+  /* La hoja del menú */
+  [data-nav] .cab-sitio.abierta .nav-vidrio {
+    top: 74px; padding: 8px; border-radius: 26px; gap: 2px;
+    -webkit-backdrop-filter: var(--vb-blur) !important; backdrop-filter: var(--vb-blur) !important;
+    box-shadow: 0 18px 50px rgb(16 33 37 / 0.3) !important;
+  }
+  [data-nav="n1"] .cab-sitio.abierta .nav-vidrio { background: rgb(253 253 253 / 0.94) !important; color: var(--petroleo) !important; }
+  [data-nav="n1"] .cab-sitio.abierta .nav-vidrio a { color: var(--petroleo) !important; }
+  [data-nav="n1"] .cab-sitio.abierta .nav-vidrio a[aria-current="page"] { background: rgb(36 74 83 / 0.08); }
+  [data-nav] .cab-sitio.abierta .nav-vidrio .ic { display: inline-grid; }
+  [data-nav="n2"] .cab-sitio.abierta .nav-vidrio a .nombre { max-width: none; opacity: 1; margin-left: 10px; }
+  [data-nav] .cab-sitio.abierta .nav-vidrio a { padding: 0 16px !important; gap: 10px; animation: item-entra 0.5s var(--sp) both; }
+  [data-nav] .cab-sitio.abierta .nav-vidrio a::after { display: none; }
+  [data-nav] .cab-sitio.abierta .nav-vidrio a:nth-of-type(2) { animation-delay: 0.04s; }
+  [data-nav] .cab-sitio.abierta .nav-vidrio a:nth-of-type(3) { animation-delay: 0.08s; }
+  [data-nav] .cab-sitio.abierta .nav-vidrio a:nth-of-type(4) { animation-delay: 0.12s; }
+  [data-nav] .cab-sitio.abierta .acciones { top: calc(74px + 4 * 58px + 30px); animation: item-entra 0.5s var(--sp) 0.16s both; }
+  [data-nav] .cab-sitio.abierta .acciones::before { display: none; }
+  [data-nav] .cab-sitio.abierta .acciones .entrar { min-height: 48px; padding: 0 18px; border-radius: 999px; background: var(--vidrio-tenido-respaldo); color: var(--blanco); }
+  [data-nav] .cab-sitio.abierta .acciones .entrar .nombre { display: inline; }
+  [data-nav] .cab-sitio.abierta .acciones .boton-cab { --bc-fondo: var(--blanco); --bc-texto: var(--petroleo); --bc-circulo: var(--petroleo); --bc-flecha: var(--blanco); min-height: 48px; }
+}
+@keyframes item-entra { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-nav="n1"] .cab-sitio[data-sobre]::before { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgb(253 253 253 / 0.97); }
+  [data-nav="n2"] .cab-sitio[data-sobre]::before, [data-nav="n3"] .cab-sitio[data-compacta="true"]::before { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--vidrio-tenido-respaldo); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-nav] .cab-sitio[data-sobre] { animation: none; }
+}
+
+/* N2: la píldora es el propio enlace, que se abre con su nombre (la cápsula que se desliza no sigue un ancho que cambia) */
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-capsula { display: none; }
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio a:is(.bajo, [aria-current="page"]:not(.fuera)) { background: var(--vb-capsula); box-shadow: var(--vb-capsula-sombra, none); }
+[data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio a:not(.bajo):not([aria-current="page"]):hover { background: var(--vb-capsula-suave); }
+/* N2: ancho fijo para que la isla no salte al abrirse un nombre más largo que otro */
+@media (min-width: 761px) { [data-nav="n2"] .cab-sitio[data-sobre] .nav-vidrio { width: 352px; justify-content: center; } }
+
+/* Celular: la hoja ocupa todo el ancho y las acciones van dentro de ella, abajo */
+@media (max-width: 760px) {
+  [data-nav] .cab-sitio.abierta .nav-vidrio { justify-self: stretch; width: auto; padding-bottom: 66px; }
+  [data-nav] .cab-sitio.abierta .acciones { top: 322px; left: calc(var(--margen) + 8px); right: calc(var(--margen) + 8px); gap: 8px; z-index: 2; }
+  [data-nav] .cab-sitio.abierta .acciones > * { flex: 1; justify-content: center; }
+  [data-nav] .cab-sitio.abierta .acciones .boton-cab { padding-left: 18px; justify-content: space-between; }
+  [data-nav="n2"] .cab-sitio.abierta .nav-vidrio a[aria-current="page"] { background: rgb(253 253 253 / 0.14) !important; box-shadow: none !important; }
+  [data-nav="n1"] .cab-sitio.abierta .acciones .entrar { background: rgb(36 74 83 / 0.08); color: var(--petroleo); }
+  [data-nav="n1"] .cab-sitio.abierta .acciones .boton-cab { --bc-fondo: var(--petroleo); --bc-texto: var(--blanco); --bc-circulo: var(--bruma); --bc-flecha: var(--petroleo); }
+}
+@media (max-width: 760px) {
+  [data-nav] .cab-sitio.abierta[data-sobre] .nav-vidrio a { min-height: 52px; font-size: 1.0625rem; }
+  [data-nav] .cab-sitio.abierta .acciones { top: 306px; }
+  [data-nav] .cab-sitio.abierta .acciones > .entrar { flex: 0 0 auto; padding: 0 20px; }
+}
+
+/* Ronda 3, notas de Agustín: nombres de una palabra y una barra más limpia.
+   Logo sin «salud» en la barra (el manual lo pide para tamaños chicos) y más aire entre enlaces. */
+[data-nav="n1"] .cab-sitio[data-sobre] .marca { width: 92px; }
+[data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio { gap: 4px; }
+[data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio a { padding: 0 16px; }
+@media (max-width: 760px) { [data-nav="n1"] .cab-sitio[data-sobre] .marca { width: 84px; } }

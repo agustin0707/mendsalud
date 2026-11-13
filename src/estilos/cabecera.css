@@ -1,0 +1,107 @@
+/* Cabecera común: logo, barra de vidrio en píldora con íconos Phosphor (idea de Agustín y ref. 02),
+   «Entrar» y «Conversemos». El tono cambia según lo que pasa por debajo (data-sobre="oscuro" o "claro"). */
+.cab-sitio {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  padding: 18px var(--margen);
+  color: var(--blanco);
+  transition: color 0.4s var(--ease-calma), transform 0.5s var(--ease-salida);
+}
+.cab-sitio[data-sobre="claro"] { color: var(--petroleo); }
+.cab-sitio .marca { justify-self: start; display: block; width: 132px; color: inherit; border-radius: 6px; }
+.cab-sitio .marca svg { width: 100%; height: auto; }
+
+/* La barra: vidrio teñido (receta de la barra de la app: Petróleo 55 %) o ligero, según la versión */
+.nav-vidrio {
+  position: relative; display: flex; gap: 2px; padding: 5px; border-radius: 999px;
+  background: rgb(36 74 83 / 0.74);
+  border: 1px solid rgb(253 253 253 / 0.22);
+  box-shadow: inset 0 1px 0 rgb(253 253 253 / 0.25), var(--sombra-vidrio);
+  -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%);
+  color: var(--blanco);
+}
+[data-barra="ligera"] .nav-vidrio { background: rgb(253 253 253 / 0.14); border-color: rgb(253 253 253 / 0.32); }
+[data-barra="ligera"] .cab-sitio[data-sobre="claro"] .nav-vidrio { background: var(--vidrio-tenido); }
+.nav-vidrio a {
+  position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 16px 0 13px; border-radius: 999px;
+  font-size: 0.9375rem; font-weight: 500; letter-spacing: 0.005em; text-decoration: none; white-space: nowrap;
+  transition: color 0.35s var(--ease-calma);
+}
+.nav-vidrio .ic { position: relative; width: 20px; height: 20px; }
+.nav-vidrio .ic svg { position: absolute; inset: 0; transition: opacity 0.3s var(--ease-calma), transform 0.45s var(--ease-circulo); }
+.nav-vidrio .ic .lleno { opacity: 0; transform: scale(0.7); }
+.nav-vidrio a:is(:hover, [aria-current="page"], .bajo) .ic .lleno { opacity: 1; transform: scale(1); }
+.nav-vidrio a:is(:hover, [aria-current="page"], .bajo) .ic .linea { opacity: 0; transform: scale(1.15); }
+.nav-vidrio a.bajo, .nav-vidrio a[aria-current="page"]:not(.fuera) { color: var(--petroleo); }
+/* Sobre Hueso la barra se da vuelta: vidrio claro con texto Petróleo y la cápsula en Petróleo */
+.cab-sitio[data-sobre="claro"] .nav-vidrio { background: rgb(253 253 253 / 0.66); border-color: rgb(36 74 83 / 0.14); color: var(--petroleo); box-shadow: inset 0 1px 0 rgb(253 253 253 / 0.8), 0 10px 28px rgb(36 74 83 / 0.12); }
+.cab-sitio[data-sobre="claro"] .nav-capsula { background: var(--petroleo); box-shadow: 0 4px 14px rgb(36 74 83 / 0.25); }
+.cab-sitio[data-sobre="claro"] .nav-vidrio a.bajo, .cab-sitio[data-sobre="claro"] .nav-vidrio a[aria-current="page"]:not(.fuera) { color: var(--blanco); }
+.nav-vidrio, .nav-capsula { transition-property: transform, width, opacity, background-color, color, border-color; }
+
+/* La cápsula: vidrio claro que se desliza bajo el ítem y se asienta en seco (curva de la barra de la app) */
+.nav-capsula {
+  position: absolute; z-index: 0; top: 5px; bottom: 5px; left: 0; width: 0; border-radius: 999px;
+  background: linear-gradient(180deg, rgb(253 253 253 / 0.98), rgb(253 253 253 / 0.86));
+  box-shadow: 0 4px 14px rgb(36 74 83 / 0.25), inset 0 1px 0 rgb(253 253 253 / 1);
+  transform: translateX(var(--x, 0)); width: var(--w, 0);
+  transition: transform 0.5s var(--ease-circulo), width 0.5s var(--ease-circulo), opacity 0.3s var(--ease-calma);
+}
+
+.cab-sitio .acciones { justify-self: end; display: flex; align-items: center; gap: 6px; }
+.entrar {
+  display: inline-flex; align-items: center; gap: 8px; min-height: var(--toque); padding: 0 16px; border-radius: 999px;
+  font-size: 0.9375rem; font-weight: 500; text-decoration: none; color: inherit;
+  transition: background-color 0.3s var(--ease-calma);
+}
+.entrar .ic { width: 20px; height: 20px; transition: transform 0.45s var(--ease-circulo); }
+.entrar { background: rgb(36 74 83 / 0.74); color: var(--blanco); border: 1px solid rgb(253 253 253 / 0.22); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); }
+.entrar:hover { background: rgb(36 74 83 / 0.85); }
+.cab-sitio[data-sobre="claro"] .entrar { background: rgb(253 253 253 / 0.66); color: var(--petroleo); border-color: rgb(36 74 83 / 0.14); }
+.cab-sitio[data-sobre="claro"] .entrar:hover { background: var(--blanco); }
+.entrar:hover .ic { transform: translateX(3px); }
+.cab-sitio .boton { font-size: 0.9375rem; }
+.cab-sitio[data-sobre="claro"] .boton-claro { background: var(--petroleo); color: var(--blanco); }
+.cab-sitio[data-sobre="claro"] .boton-claro .circulo { background: var(--blanco); color: var(--petroleo); }
+
+.menu-boton { display: none; }
+
+/* Pantallas medianas: la barra solo con íconos y nombre del activo */
+@media (max-width: 1180px) {
+  .nav-vidrio a { padding: 0 13px; }
+  .nav-vidrio a:not([aria-current="page"]) .nombre { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .entrar .nombre { display: none; }
+}
+/* Celular: logo y un botón de menú de vidrio; la barra se abre como hoja */
+@media (max-width: 760px) {
+  .cab-sitio { grid-template-columns: 1fr auto; padding: 12px var(--margen); }
+  .cab-sitio .marca { width: 112px; }
+  .nav-vidrio, .cab-sitio .acciones { display: none; }
+  .menu-boton {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--toque); padding: 0 18px 0 14px; border-radius: 999px;
+    border: 1px solid rgb(253 253 253 / 0.22); background: var(--vidrio-tenido); color: var(--blanco);
+    -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%);
+    font: 500 1rem/1 var(--texto); box-shadow: var(--sombra-vidrio);
+  }
+  .menu-boton .ic { width: 22px; height: 22px; }
+  .cab-sitio.abierta .nav-vidrio {
+    display: flex; flex-direction: column; position: fixed; top: 76px; left: var(--margen); right: var(--margen);
+    padding: 8px; border-radius: 28px; background: var(--vidrio-tenido-respaldo) !important; border-color: rgb(253 253 253 / 0.22) !important; color: var(--blanco) !important;
+  }
+  .cab-sitio.abierta .nav-vidrio a { min-height: 56px; font-size: 1.125rem; padding: 0 18px; color: var(--blanco) !important; }
+  .cab-sitio.abierta .nav-vidrio a[aria-current="page"] { background: rgb(253 253 253 / 0.14); }
+  .cab-sitio.abierta .nav-vidrio a .ic .lleno { opacity: 0; } .cab-sitio.abierta .nav-vidrio a .ic .linea { opacity: 1; transform: none; }
+  .cab-sitio.abierta .nav-vidrio a[aria-current="page"] .ic .lleno { opacity: 1; transform: none; } .cab-sitio.abierta .nav-vidrio a[aria-current="page"] .ic .linea { opacity: 0; }
+  .cab-sitio.abierta .nav-capsula { display: none; }
+  .cab-sitio.abierta .nav-vidrio a .nombre { position: static; width: auto; height: auto; clip: auto; }
+  .cab-sitio.abierta .acciones { display: flex; position: fixed; top: calc(76px + 4 * 56px + 32px); left: var(--margen); right: var(--margen); justify-content: space-between; }
+  .cab-sitio.abierta .acciones .entrar { color: var(--blanco); background: var(--vidrio-tenido-respaldo); }
+  .cab-sitio.abierta .acciones .boton-claro { background: var(--blanco); color: var(--petroleo); }
+  .cab-sitio.abierta .acciones .boton-claro .circulo { background: var(--petroleo); color: var(--blanco); }
+  .cab-sitio.abierta .acciones .entrar .nombre { display: inline; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .nav-vidrio, .menu-boton { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--vidrio-tenido-respaldo); }
+}

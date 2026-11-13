@@ -1,0 +1,44 @@
+/* Ritmo de fondos (ronda 6, 12 nov; PA elegida el 13 nov). Cada sección dice su fondo con data-fondo: bruma, arena, oscuro o bruma-medio.
+   <body data-fondos> acepta varias palabras: la forma (paneles, bandas…) y lo que va dentro (ver fondos-variantes.css, ronda 7).
+   Para probar en local: ?fondos=paneles,aurora */
+:root { --arena: #f2ede3; --bruma-clara: #dcf0ef; --panel-m: clamp(8px, 1.2vw, 18px); --panel-r: clamp(28px, 3.2vw, 52px); }
+
+.seccion[data-fondo] { background: transparent; isolation: isolate; }
+/* El fondo se arma en capas: grano, una capa opcional (--capa: aurora, foto…) y el tono */
+.seccion[data-fondo]::before {
+  content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none;
+  background: var(--grano), var(--capa, linear-gradient(#0000, #0000)), var(--tono-fondo);
+  background-blend-mode: soft-light, normal, normal, normal, normal, normal;
+}
+.seccion[data-fondo="bruma"], .seccion[data-fondo="bruma-medio"] { --tono-fondo: linear-gradient(180deg, var(--bruma-clara), #cdeae9); }
+.seccion[data-fondo="arena"] { --tono-fondo: linear-gradient(180deg, #f3eee5, #ebe4d6); }
+.seccion[data-fondo="oscuro"] { --tono-fondo: radial-gradient(90% 70% at 15% 0%, #3a6670, var(--petroleo) 55%, #1b3940); }
+
+.seccion[data-fondo].seccion-pegada { padding-top: clamp(88px, 11vw, 168px); }
+.seccion[data-fondo="bruma-medio"].seccion-pegada { padding-top: 0; }
+.seccion[data-fondo="bruma-medio"]::before { top: 42%; }
+
+/* Paneles: recuadros redondeados con un margen */
+[data-fondos~="paneles"] .seccion[data-fondo]::before { inset: 4px var(--panel-m); border-radius: var(--panel-r); }
+[data-fondos~="paneles"] .seccion[data-fondo="bruma-medio"]::before { top: 42%; }
+[data-fondos~="paneles"] .seccion[data-fondo]:not([data-fondo="bruma-medio"]) { clip-path: inset(4px var(--panel-m) round var(--panel-r)); }
+
+/* Texto sobre el fondo oscuro */
+.seccion[data-fondo="oscuro"] { color: var(--blanco); }
+.seccion[data-fondo="oscuro"] :is(.titulo-sec, .ceja-sec, .riel h3, .fila-func h3, .autor b) { color: var(--blanco); }
+.seccion[data-fondo="oscuro"] :is(.entrada-sec, .texto-sec, .texto-sec p, .riel p, .lista-check li, .cita-linea, .autor span) { color: rgb(253 253 253 / 0.86); }
+.seccion[data-fondo="oscuro"] .lista-check .ic { background: rgb(253 253 253 / 0.16); color: var(--blanco); }
+.seccion[data-fondo="oscuro"] .enlace-flecha { color: var(--blanco); border-color: rgb(253 253 253 / 0.4); }
+.seccion[data-fondo="oscuro"] .enlace-flecha:hover { border-color: var(--blanco); }
+.seccion[data-fondo="oscuro"] .clip { box-shadow: 0 30px 50px -30px rgb(0 0 0 / 0.5); }
+.seccion[data-fondo="oscuro"] .ventana { box-shadow: 0 60px 90px -40px rgb(0 0 0 / 0.6); }
+.seccion[data-fondo="oscuro"] .autor-foto { background: rgb(253 253 253 / 0.14); color: var(--blanco); }
+.seccion[data-fondo="oscuro"] .riel-flechas button { background: rgb(253 253 253 / 0.96); }
+.seccion[data-fondo="arena"], .seccion[data-fondo="bruma"], .seccion[data-fondo="bruma-medio"] { --tinta-suave: #42514f; }
+
+/* La hoja: la primera sección después del inicio sube sobre la foto, con las esquinas redondeadas */
+.seccion.hoja { margin-top: calc(var(--panel-r) * -1); border-radius: var(--panel-r) var(--panel-r) 0 0; padding-top: clamp(72px, 8vw, 120px); box-shadow: 0 -30px 60px -40px rgb(16 33 37 / 0.45); }
+
+/* Placeholder de la foto del autor (la foto se hace en Firefly, 20 nov) */
+.autor-foto { display: grid; place-items: center; width: 64px; height: 64px; flex: none; border-radius: 50%; background: var(--bruma); color: var(--petroleo); }
+.autor-foto .ic { width: 34px; height: 34px; }

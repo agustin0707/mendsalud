@@ -1,0 +1,100 @@
+/* Mend · sitio. Tokens copiados de Codigos mend/src/tokens/tokens.css (manual de marca, sección 12).
+   Es el único lugar del sitio donde se escriben colores. */
+:root {
+  --carbon: #252623;
+  --petroleo: #244a53;
+  --mar: #4d9999;
+  --salvia: #729ca4;
+  --bruma: #c9e9e8;
+  --blanco: #fdfdfd;
+  --hueso: #fbf9f4;
+  --filete: #d5e6e6;
+
+  --display: "neue-haas-grotesk-display", "Neue Haas Grotesk Display Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --texto: "neue-haas-grotesk-text", "Neue Haas Grotesk Text Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --acento: "larken", "Larken", Georgia, serif;
+
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-calma: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-pagina: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-circulo: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --vidrio-tenido: rgb(36 74 83 / 0.55);
+  --vidrio-tenido-respaldo: rgb(36 74 83 / 0.94);
+  --vidrio-ligero: rgb(253 253 253 / 0.18);
+  --vidrio-ligero-borde: rgb(253 253 253 / 0.35);
+  --vidrio-ligero-respaldo: rgb(36 74 83 / 0.86);
+  --sombra-vidrio: 0 12px 32px rgb(36 74 83 / 0.22);
+
+  --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+
+  --margen: clamp(16px, 4.4vw, 64px);
+  --ancho: 1320px;
+  --toque: 48px;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--hueso);
+  color: var(--carbon);
+  font-family: var(--texto);
+  font-size: 1.125rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; text-wrap: balance; letter-spacing: -0.01em; }
+p { text-wrap: pretty; }
+img, video, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+.acento { font-family: var(--acento); font-style: italic; font-weight: 300; letter-spacing: -0.045em; padding-right: 0.06em; }
+/* Larken «350» (L35, ronda 3): el kit solo trae 300 y 400; en titulares grandes se simula con la 300 más un trazo fino */
+:is(h1, h2) .acento { -webkit-text-stroke: 0.011em currentColor; }
+.ic { display: inline-grid; place-items: center; width: 1.25em; height: 1.25em; flex: none; }
+.ic svg { width: 100%; height: 100%; }
+.solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+:focus-visible { outline: 3px solid var(--mar); outline-offset: 3px; border-radius: 999px; }
+
+.envoltura { width: min(100% - 2 * var(--margen), var(--ancho)); margin-inline: auto; }
+
+/* Botones (B1): principal en píldora con flecha en un círculo (ref. 01 y 02), secundario de vidrio */
+.boton {
+  display: inline-flex; align-items: center; gap: 12px;
+  min-height: var(--toque); padding: 6px 6px 6px 22px; border-radius: 999px;
+  font-family: var(--texto); font-size: 1rem; font-weight: 500; line-height: 1.2; text-decoration: none;
+  transition: background-color 0.3s var(--ease-calma), color 0.3s var(--ease-calma), transform 0.3s var(--ease-salida), box-shadow 0.3s var(--ease-calma);
+}
+.boton .circulo {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; flex: none;
+  transition: transform 0.45s var(--ease-circulo), background-color 0.3s var(--ease-calma);
+}
+.boton .circulo svg { width: 18px; height: 18px; transition: transform 0.45s var(--ease-circulo); }
+.boton:hover .circulo { transform: translateX(3px); }
+.boton:hover .circulo svg { transform: rotate(-45deg); }
+.boton:active { transform: scale(0.98); }
+.boton-claro { background: var(--blanco); color: var(--petroleo); }
+.boton-claro .circulo { background: var(--petroleo); color: var(--blanco); }
+.boton-claro:hover { box-shadow: 0 10px 28px rgb(36 74 83 / 0.28); }
+.boton-oscuro { background: var(--petroleo); color: var(--blanco); }
+.boton-oscuro .circulo { background: var(--blanco); color: var(--petroleo); }
+.boton-oscuro:hover { box-shadow: 0 10px 28px rgb(36 74 83 / 0.32); }
+.boton-vidrio {
+  padding: 6px 22px; color: var(--blanco); background: rgb(36 74 83 / 0.5);
+  border: 1px solid rgb(253 253 253 / 0.3);
+  -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%);
+}
+.boton-vidrio:hover { background: rgb(36 74 83 / 0.72); }
+.boton-linea { padding: 6px 22px; color: var(--petroleo); border: 1px solid rgb(36 74 83 / 0.45); background: rgb(251 249 244 / 0.55); }
+.boton-linea:hover { background: var(--blanco); border-color: var(--petroleo); }
+
+@media (prefers-reduced-transparency: reduce) {
+  .boton-vidrio { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--vidrio-ligero-respaldo); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}

@@ -1,0 +1,90 @@
+{
+ "fotos/provisoria.jpg": {
+  "cel": 437,
+  "esc": 1613
+ },
+ "fotos/app-inicio.jpg": {
+  "cel": 209,
+  "esc": 299
+ },
+ "fotos/app/rutina-ejercicio.jpg": {
+  "cel": 148,
+  "esc": 211
+ },
+ "fotos/app/aprender-podcast.jpg": {
+  "cel": 233,
+  "esc": 264
+ },
+ "fotos/app/kine.jpg": {
+  "cel": 534,
+  "esc": 919
+ },
+ "fotos/app/paciente-inicio.jpg": {
+  "cel": 157,
+  "esc": 264
+ },
+ "fotos/app/aprender-video.jpg": {
+  "cel": 212,
+  "esc": 284
+ },
+ "fotos/personas/caminar-paso-a-paso.jpg": {
+  "cel": 356,
+  "esc": 489
+ },
+ "fotos/personas/el-ejercicio-es-tratamiento.jpg": {
+  "cel": 171,
+  "esc": 363
+ },
+ "fotos/personas/lo-que-sientes-cuenta.jpg": {
+  "cel": 171,
+  "esc": 363
+ },
+ "fotos/personas/salir-del-circulo-del-miedo.jpg": {
+  "cel": 171,
+  "esc": 363
+ },
+ "fotos/app/paciente-calendario.jpg": {
+  "cel": 134,
+  "esc": 264
+ },
+ "fotos/app/medico-resumen.jpg": {
+  "cel": 303,
+  "esc": 600
+ },
+ "fotos/personas/antes-de-tu-control.jpg": {
+  "cel": 292,
+  "esc": 533
+ },
+ "fotos/app/kine-ficha.jpg": {
+  "cel": 297,
+  "esc": 876
+ },
+ "fotos/app/kine-evolucion.jpg": {
+  "cel": 297,
+  "esc": 876
+ },
+ "fotos/app/correo-aviso.jpg": {
+  "cel": 356,
+  "esc": 706
+ },
+ "fotos/personas/el-ejercicio-es-tratamiento-ancha.jpg": {
+  "cel": 356,
+  "esc": 1314
+ },
+ "fotos/app/rutina-guiada.jpg": {
+  "cel": 177,
+  "esc": 274
+ },
+ "fotos/app/rutina-ficha.jpg": {
+  "cel": 94,
+  "esc": 215
+ },
+ "fotos/personas/despertar-articular.jpg": {
+  "cel": 172,
+  "esc": 425
+ },
+ "fotos/app/explorar.jpg": {
+  "cel": 70,
+  "esc": 110
+ }
+}

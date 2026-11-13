@@ -1,0 +1,267 @@
+/* Ronda 7 (13 nov): catálogo de estilos de fondo, combinables en <body data-fondos="…">.
+   Forma: paneles (PA), abre (PE), hojas (HO), curvas (CU), diagonal (DI), fundido (DF), sigue (CS).
+   Relleno: marca (DM), aurora (AU), foto (FV), reticula (RE), luz (LU).
+   Lo que no elija Agustín se borra de este archivo. */
+
+/* Una segunda capa encima del tono, para retícula y luz (debajo del contenido) */
+.seccion::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: var(--l-luz, none), var(--l-ret, none); }
+[data-fondos~="paneles"] .seccion[data-fondo]::after { inset: 4px var(--panel-m); border-radius: var(--panel-r); }
+
+/* ───────── FORMA ───────── */
+
+/* PE · Panel que se abre: entra como panel y se abre a todo el ancho al llegar al centro (va con paneles) */
+[data-fondos~="abre"] { --m0: clamp(12px, 4vw, 60px); }
+[data-abre-activo] .seccion[data-fondo]:not([data-fondo="bruma-medio"]) {
+  --k: calc(1 - var(--abre, 0));
+  clip-path: inset(calc(4px * var(--k)) calc(var(--m0) * var(--k)) round calc(var(--panel-r) * var(--k)));
+}
+[data-abre-activo] .seccion[data-fondo]::before, [data-abre-activo] .seccion[data-fondo]::after {
+  inset: calc(4px * var(--k, 1)) calc(var(--m0) * var(--k, 1)); border-radius: calc(var(--panel-r) * var(--k, 1));
+}
+[data-abre-activo] .seccion[data-fondo="bruma-medio"]::before { top: 42%; }
+
+/* HO · Hojas: bandas a todo el ancho que suben sobre la sección anterior, con las esquinas de arriba redondeadas */
+[data-fondos~="hojas"] .seccion[data-fondo]:not([data-fondo="bruma-medio"]),
+[data-fondos~="hojas"] .seccion[data-fondo]:not([data-fondo="bruma-medio"]) + .seccion {
+  margin-top: calc(var(--panel-r) * -1); border-radius: var(--panel-r) var(--panel-r) 0 0;
+  box-shadow: 0 -30px 60px -40px rgb(16 33 37 / 0.45);
+}
+[data-fondos~="hojas"] .seccion[data-fondo]::before, [data-fondos~="hojas"] .seccion[data-fondo]::after { border-radius: inherit; }
+
+/* CU · Curvas: el borde de arriba y el de abajo en arco suave */
+[data-fondos~="curvas"] { --curva: clamp(28px, 4.5vw, 76px); }
+[data-fondos~="curvas"] .seccion[data-fondo]:not([data-fondo="bruma-medio"])::before,
+[data-fondos~="curvas"] .seccion[data-fondo]:not([data-fondo="bruma-medio"])::after { border-radius: 50% / var(--curva); }
+
+/* DI · Diagonal: cortes inclinados, alternando la dirección */
+[data-fondos~="diagonal"] { --corte: clamp(26px, 4.5vw, 76px); }
+[data-fondos~="diagonal"] .seccion[data-fondo]:not([data-fondo="bruma-medio"])::before,
+[data-fondos~="diagonal"] .seccion[data-fondo]:not([data-fondo="bruma-medio"])::after { clip-path: polygon(0 var(--corte), 100% 0, 100% calc(100% - var(--corte)), 0 100%); }
+[data-fondos~="diagonal"] .seccion[data-fondo]:nth-of-type(even):not([data-fondo="bruma-medio"])::before,
+[data-fondos~="diagonal"] .seccion[data-fondo]:nth-of-type(even):not([data-fondo="bruma-medio"])::after { clip-path: polygon(0 0, 100% var(--corte), 100% 100%, 0 calc(100% - var(--corte))); }
+
+/* DF · Fundido: sin cortes; cada tono se disuelve en el siguiente */
+[data-fondos~="fundido"] { --funde: clamp(90px, 12vw, 200px); }
+[data-fondos~="fundido"] .seccion:not(.hoja) { background: transparent; }
+[data-fondos~="fundido"] .seccion[data-fondo]::before, [data-fondos~="fundido"] .seccion[data-fondo]::after {
+  inset: calc(var(--funde) * -1) 0; border-radius: 0;
+  -webkit-mask-image: linear-gradient(180deg, #0000, #000 var(--funde), #000 calc(100% - var(--funde)), #0000);
+  mask-image: linear-gradient(180deg, #0000, #000 var(--funde), #000 calc(100% - var(--funde)), #0000);
+}
+[data-fondos~="fundido"] .seccion[data-fondo="bruma-medio"]::before { top: 30%; }
+
+/* CS · Color que sigue: el fondo de toda la página cambia entre los tonos claros al pasar de una sección a otra;
+   las secciones oscuras siguen siendo su propio recuadro, para que el texto blanco nunca quede sobre un tono claro */
+.fondo-vivo { display: none; }
+[data-fondos~="sigue"] .fondo-vivo {
+  display: block; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--hueso); background-image: var(--grano); background-blend-mode: soft-light;
+  transition: background-color 0.9s var(--ease-salida, ease);
+}
+[data-fondos~="sigue"] .seccion:not(.hoja) { background: transparent; }
+[data-fondos~="sigue"] .inicio { z-index: 2; }
+[data-fondos~="sigue"] .seccion[data-fondo]:not([data-fondo="oscuro"])::before { opacity: 0; }
+[data-fondos~="sigue"][data-vivo="bruma"] .fondo-vivo, [data-fondos~="sigue"][data-vivo="bruma-medio"] .fondo-vivo { background-color: #d4edec; }
+[data-fondos~="sigue"][data-vivo="arena"] .fondo-vivo { background-color: #efe9dd; }
+
+/* ───────── RELLENO ───────── */
+
+/* DM · Degradado de marca: Petróleo abajo a la izquierda hacia Bruma arriba a la derecha, con grano */
+[data-fondos~="marca"] .seccion[data-fondo="oscuro"] { --tono-fondo: linear-gradient(to top right, #1c3b42 0%, var(--petroleo) 45%, #2f5e68 75%, #3a6f78 100%); }
+[data-fondos~="marca"] .seccion[data-fondo="bruma"], [data-fondos~="marca"] .seccion[data-fondo="bruma-medio"] { --tono-fondo: linear-gradient(to top right, var(--hueso) 0%, var(--bruma-clara) 45%, #b6dfdd 100%); }
+[data-fondos~="marca"] .seccion[data-fondo="arena"] { --tono-fondo: linear-gradient(to top right, #efe7d7 0%, #f3eee5 45%, #d6ece8 100%); }
+
+/* AU · Aurora: manchas difusas de los colores de la marca que se mueven despacio */
+@property --a1 { syntax: "<percentage>"; inherits: false; initial-value: 18%; }
+@property --a2 { syntax: "<percentage>"; inherits: false; initial-value: 82%; }
+@property --a3 { syntax: "<percentage>"; inherits: false; initial-value: 30%; }
+.seccion[data-fondo="bruma"], .seccion[data-fondo="bruma-medio"] { --au1: #a7d9d7; --au2: #f6efe2; --au3: rgb(36 74 83 / 0.16); }
+.seccion[data-fondo="arena"] { --au1: #f7e5c4; --au2: #cde9e5; --au3: #e2d6bd; }
+.seccion[data-fondo="oscuro"] { --au1: #346670; --au2: #142d33; --au3: rgb(201 233 232 / 0.1); }
+[data-fondos~="aurora"] .seccion[data-fondo]::before {
+  --capa: radial-gradient(42% 55% at var(--a1) 25%, var(--au1), #0000 70%),
+          radial-gradient(38% 50% at var(--a2) 70%, var(--au2), #0000 70%),
+          radial-gradient(34% 44% at 55% var(--a3), var(--au3), #0000 72%);
+  animation: aurora 22s ease-in-out infinite alternate;
+}
+@keyframes aurora { 50% { --a1: 42%; --a2: 60%; --a3: 80%; } 100% { --a1: 30%; --a2: 88%; --a3: 50%; } }
+
+/* FV · Foto velada: una foto de Mend desenfocada bajo un velo del tono */
+[data-fondos~="foto"] .seccion[data-fondo="oscuro"]::before { --capa: linear-gradient(rgb(36 74 83 / 0.86), rgb(27 57 64 / 0.92)), url("../fotos/fondos/campo-velada.jpg") center / cover; }
+[data-fondos~="foto"] .seccion[data-fondo="bruma"]::before, [data-fondos~="foto"] .seccion[data-fondo="bruma-medio"]::before { --capa: linear-gradient(rgb(220 240 239 / 0.88), rgb(205 234 233 / 0.9)), url("../fotos/fondos/despertar-velada.jpg") center / cover; }
+[data-fondos~="foto"] .seccion[data-fondo="arena"]::before { --capa: linear-gradient(rgb(243 238 229 / 0.88), rgb(235 228 214 / 0.9)), url("../fotos/fondos/caminar-velada.jpg") center / cover; }
+
+/* RE · Retícula: las líneas guía del inicio siguen por todo el sitio */
+[data-fondos~="reticula"] .seccion:not(.inicio) { --ret-c: rgb(36 74 83 / 0.1); }
+[data-fondos~="reticula"] .seccion[data-fondo="oscuro"] { --ret-c: rgb(253 253 253 / 0.16); }
+[data-fondos~="reticula"] .seccion::after {
+  --l-ret:
+    linear-gradient(90deg, #0000 calc(var(--margen) - 0.5px), var(--ret-c) calc(var(--margen) - 0.5px), var(--ret-c) calc(var(--margen) + 0.5px), #0000 calc(var(--margen) + 0.5px),
+      #0000 calc(58% - 0.5px), var(--ret-c) calc(58% - 0.5px), var(--ret-c) calc(58% + 0.5px), #0000 calc(58% + 0.5px),
+      #0000 calc(100% - var(--margen) - 0.5px), var(--ret-c) calc(100% - var(--margen) - 0.5px), var(--ret-c) calc(100% - var(--margen) + 0.5px), #0000 calc(100% - var(--margen) + 0.5px)),
+    linear-gradient(180deg, var(--ret-c) 1px, #0000 1px);
+}
+
+/* LU · Luz: un halo suave sigue al cursor sobre los fondos de color (solo con mouse) */
+.seccion[data-fondo] { --luz-c: rgb(255 255 255 / 0.62); }
+.seccion[data-fondo="oscuro"] { --luz-c: rgb(201 233 232 / 0.2); }
+[data-fondos~="luz"] .seccion[data-fondo]::after { --l-luz: radial-gradient(560px circle at var(--mx, 50%) var(--my, -600px), var(--luz-c), #0000 70%); }
+
+@media (max-width: 899px) {
+  [data-fondos~="reticula"] .seccion::after { --l-ret: linear-gradient(180deg, var(--ret-c) 1px, #0000 1px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-fondos~="aurora"] .seccion[data-fondo]::before { animation: none; }
+  [data-fondos~="sigue"] .fondo-vivo { transition: none; }
+}
+
+/* ═════════ Ronda 8 (13 nov): más degradado principal y más vidrio, sobre M1 ═════════
+   Degradado principal de Mend = --gradient-marca de la app: Bruma arriba a Petróleo abajo, con grano en soft-light.
+   Vidrio = niveles del manual (sección 05). Para texto Blanco el Profundo sube de 65 % a 78 % de Petróleo y el Medio
+   con texto oscuro sube de 42 % a 72 % de Blanco, porque debajo pasa todo el degradado (anotado en CAMBIOS_AL_MANUAL). */
+:root {
+  --grad-marca: linear-gradient(180deg, var(--bruma) 0%, var(--petroleo) 100%);
+  --vidrio-claro: rgb(253 253 253 / 0.72); --vidrio-claro-borde: rgb(253 253 253 / 0.55);
+  --vidrio-oscuro: rgb(36 74 83 / 0.78); --vidrio-oscuro-borde: rgb(253 253 253 / 0.22);
+  --vidrio-blur: blur(24px) saturate(140%);
+}
+
+/* GP · Pasos sobre el degradado principal, con cada paso en una tarjeta de vidrio claro */
+[data-fondos~="gp"] #como-funciona { --tono-fondo: linear-gradient(180deg in oklab, var(--bruma) 0%, var(--bruma) 24%, color-mix(in oklab, var(--bruma) 72%, var(--petroleo)) 46%, color-mix(in oklab, var(--bruma) 34%, var(--petroleo)) 74%, var(--petroleo) 100%); }
+/* Sin aurora sobre el degradado principal: sus manchas Arena y Petróleo lo cortaban (nota de Agustín, ronda 8) */
+[data-fondos~="gp"] #como-funciona::before, [data-fondos~="gr"] #rutinas::before { --capa: linear-gradient(#0000, #0000); animation: none; }
+[data-fondos~="gp"] #como-funciona .pasos li {
+  padding: 12px 12px 26px; border-radius: 30px;
+  background: var(--vidrio-claro); -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  box-shadow: inset 0 0 0 1px var(--vidrio-claro-borde), inset 0 1px 0 rgb(253 253 253 / 0.8), 0 30px 60px -36px rgb(16 33 37 / 0.5);
+}
+[data-fondos~="gp"] #como-funciona .paso-visual { margin-bottom: 22px; border-radius: 20px; }
+[data-fondos~="gp"] #como-funciona .pasos :is(h3, p) { padding-inline: 12px; }
+[data-fondos~="gp"] #como-funciona .paso-num { top: 26px; left: 26px; }
+
+/* GR · Rutinas en el degradado invertido (Petróleo arriba, Bruma abajo) y el nombre de cada ejercicio en una cápsula de vidrio sobre el video */
+[data-fondos~="gr"] #rutinas { --tono-fondo: linear-gradient(180deg in oklab, var(--petroleo) 0%, var(--petroleo) 40%, color-mix(in oklab, var(--petroleo) 70%, var(--bruma)) 60%, color-mix(in oklab, var(--petroleo) 32%, var(--bruma)) 82%, var(--bruma) 100%); }
+[data-fondos~="gr"] #rutinas .riel li { display: grid; grid-template-rows: auto auto 1fr; grid-template-columns: minmax(0, 1fr); }
+[data-fondos~="gr"] #rutinas .riel .clip { grid-area: 1 / 1 / 4 / 2; }
+[data-fondos~="gr"] #rutinas .riel li::after {
+  content: ""; grid-area: 1 / 1 / 3 / 2; z-index: 1; margin: 10px; border-radius: 18px; pointer-events: none;
+  background: var(--vidrio-oscuro); -webkit-backdrop-filter: blur(20px) saturate(140%); backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 0 0 1px var(--vidrio-oscuro-borde), inset 0 1px 0 rgb(253 253 253 / 0.25);
+}
+[data-fondos~="gr"] #rutinas .riel h3 { grid-area: 1 / 1 / 2 / 2; z-index: 2; margin: 22px 24px 0; font-size: 1.0625rem; color: var(--blanco); }
+[data-fondos~="gr"] #rutinas .riel p { grid-area: 2 / 1 / 3 / 2; z-index: 2; margin: 2px 24px 22px; font-size: 0.875rem; color: rgb(253 253 253 / 0.86); }
+[data-fondos~="gr"] #rutinas .riel-flechas button { background: rgb(253 253 253 / 0.18); color: var(--blanco); -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur); box-shadow: inset 0 0 0 1px rgb(253 253 253 / 0.35); }
+[data-fondos~="gr"] #rutinas .riel-flechas button:hover { background: var(--blanco); color: var(--petroleo); }
+
+/* GC · Cierre de cada página sobre el degradado principal, con los dos caminos en vidrio */
+[data-fondos~="gc"] .cierre { position: relative; isolation: isolate; background: transparent; padding-top: clamp(64px, 8vw, 120px); margin-bottom: 4px; }
+[data-fondos~="gc"] .cierre::before {
+  content: ""; position: absolute; z-index: -1; inset: 0 var(--panel-m); border-radius: var(--panel-r); pointer-events: none;
+  background: var(--grano), radial-gradient(60% 50% at 80% 0%, rgb(251 249 244 / 0.55), #0000 70%), var(--grad-marca); background-blend-mode: soft-light, normal, normal;
+}
+[data-fondos~="gc"] .camino-equipo {
+  background: var(--vidrio-oscuro); -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  box-shadow: inset 0 0 0 1px var(--vidrio-oscuro-borde), inset 0 1px 0 rgb(253 253 253 / 0.25), 0 40px 70px -40px rgb(16 33 37 / 0.6);
+}
+[data-fondos~="gc"] .camino-persona {
+  background: var(--vidrio-claro); -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  box-shadow: inset 0 0 0 1px var(--vidrio-claro-borde), inset 0 1px 0 rgb(253 253 253 / 0.8), 0 40px 70px -40px rgb(16 33 37 / 0.5);
+}
+[data-fondos~="gc"] .camino-persona { --tinta-suave: #42514f; }
+
+/* IS · El isotipo en relieve de la portada del portafolio (ronda 10, misma receta): una cara de vidrio casi transparente
+   que desenfoca el fondo y dos filos, uno de luz arriba a la izquierda y otro de sombra abajo a la derecha. Tono sobre tono,
+   enorme y recortado por el borde del panel. Flota despacio y gira un poco al bajar (MG, ronda 9).
+   El fondo del panel es el mismo «mundo» de la portada: el degradado de marca de oscuro a claro con luz arriba a la derecha,
+   viñeta y grano encima del isotipo. */
+[data-fondos~="gc"] .cierre { clip-path: inset(0 var(--panel-m) round var(--panel-r)); }
+[data-fondos~="ge"] #avisos { isolation: isolate; }
+.iso-vidrio { display: none; }
+:is([data-fondos~="gc"] .cierre, [data-fondos~="ge"] #avisos) .iso-vidrio {
+  display: block; position: absolute; z-index: -1; pointer-events: none; aspect-ratio: 1; width: var(--iso-t);
+  rotate: calc(var(--giro, 0) * 0.5deg); transition: rotate 0.9s var(--ease-salida, ease-out);
+  animation: iso-flota 16s ease-in-out infinite alternate;
+}
+.iso-vidrio > span { position: absolute; inset: 0; --iso: url("../marca/isotipo-mend.svg"); }
+.iso-vidrio .vidrio-r {
+  background: rgb(255 255 255 / 0.07); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2);
+  -webkit-mask: var(--iso) 0 0 / 100% 100% no-repeat; mask: var(--iso) 0 0 / 100% 100% no-repeat;
+}
+.iso-vidrio .luz-r {
+  background: rgb(255 255 255 / 0.24);
+  -webkit-mask: var(--iso) calc(var(--filo) * -1) calc(var(--filo) * -1) / 100% 100% no-repeat, var(--iso) 0 0 / 100% 100% no-repeat; -webkit-mask-composite: xor;
+  mask: var(--iso) calc(var(--filo) * -1) calc(var(--filo) * -1) / 100% 100% no-repeat exclude, var(--iso) 0 0 / 100% 100% no-repeat;
+}
+.iso-vidrio .sombra-r {
+  background: rgb(6 28 32 / 0.28);
+  -webkit-mask: var(--iso) var(--filo) var(--filo) / 100% 100% no-repeat, var(--iso) 0 0 / 100% 100% no-repeat; -webkit-mask-composite: xor;
+  mask: var(--iso) var(--filo) var(--filo) / 100% 100% no-repeat exclude, var(--iso) 0 0 / 100% 100% no-repeat;
+}
+@keyframes iso-flota { 0% { translate: 0 0; } 50% { translate: -1.2% 1.6%; } 100% { translate: 1% -1.2%; } }
+
+/* El mundo de la portada, en el panel del cierre y en Avisos */
+:root {
+  --mundo-mend:
+    radial-gradient(35% 50% at 96% 0%, rgb(255 244 228 / 0.3), #0000 70%),
+    radial-gradient(52% 72% at 90% 0%, rgb(201 233 232 / 0.95) 0%, rgb(190 220 219 / 0.6) 38%, rgb(190 220 219 / 0) 76%),
+    radial-gradient(40% 60% at 60% 0%, rgb(168 186 182 / 0.6) 0%, rgb(168 186 182 / 0) 72%),
+    radial-gradient(60% 65% at 0% 100%, rgb(30 77 87 / 0.95) 0%, rgb(30 77 87 / 0) 72%),
+    linear-gradient(90deg, #2a5960 0%, #3a6970 22%, #5e8c91 46%, #84aeb2 70%, #8eb8bb 100%);
+  --mundo-vineta: radial-gradient(120% 110% at 60% 40%, #0000 50%, rgb(8 26 30 / 0.55));
+}
+[data-fondos~="gc"] .cierre::before { background: var(--mundo-mend); background-blend-mode: normal; }
+[data-fondos~="gc"] .cierre::after {
+  content: ""; position: absolute; z-index: -1; inset: 0 var(--panel-m); border-radius: var(--panel-r); pointer-events: none;
+  background: var(--grano), var(--mundo-vineta); background-size: 200px, auto; background-blend-mode: soft-light, normal; animation: none;
+}
+[data-fondos~="ge"] #avisos::before { background: var(--mundo-mend); background-blend-mode: normal; }
+[data-fondos~="ge"] #avisos::after { background: var(--grano), var(--mundo-vineta); background-size: 200px, auto; background-blend-mode: soft-light, normal; }
+
+/* Dónde va y de qué tamaño: arriba a la izquierda, como en la portada */
+[data-fondos~="gc"] .cierre { --iso-t: min(62vw, 900px); --filo: 3px; padding-top: clamp(150px, 15vw, 230px); }
+/* Se ubica por su centro: el nudo del asterisco queda en la franja libre de arriba y los brazos se van bajo las tarjetas y fuera del panel */
+[data-fondos~="gc"] .cierre .iso-vidrio { left: calc(var(--panel-m) + 18% - var(--iso-t) / 2); top: calc(clamp(60px, 6vw, 96px) - var(--iso-t) / 2); }
+[data-fondos~="ge"] #avisos { --iso-t: min(58vw, 840px); --filo: 3px; }
+[data-fondos~="ge"] #avisos .iso-vidrio { left: calc(var(--panel-m) - var(--iso-t) * 0.22); top: calc(var(--iso-t) * -0.2); }
+@media (max-width: 760px) {
+  [data-fondos~="gc"] .cierre { --iso-t: 112vw; --filo: 2px; padding-top: 40vw; }
+  [data-fondos~="gc"] .cierre .iso-vidrio { left: calc(30vw - var(--iso-t) / 2); top: calc(14vw - var(--iso-t) / 2); }
+  [data-fondos~="ge"] #avisos { --iso-t: 112vw; --filo: 2px; }
+  [data-fondos~="ge"] #avisos .iso-vidrio { left: calc(26vw - var(--iso-t) / 2); top: calc(12vw - var(--iso-t) / 2); }
+}
+
+/* GE · Avisos (Equipos) sobre el degradado principal, con el texto en vidrio oscuro */
+[data-fondos~="ge"] #avisos { --tono-fondo: linear-gradient(160deg, var(--petroleo) 0%, #3f727b 45%, #8fc0c0 80%, var(--bruma) 100%); }
+[data-fondos~="ge"] #avisos .fila-func > div.revela {
+  padding: clamp(28px, 3.4vw, 48px); border-radius: clamp(26px, 3vw, 36px);
+  background: var(--vidrio-oscuro); -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+  box-shadow: inset 0 0 0 1px var(--vidrio-oscuro-borde), inset 0 1px 0 rgb(253 253 253 / 0.25), 0 40px 70px -40px rgb(16 33 37 / 0.6);
+}
+
+[data-fondos~="gc"] .camino-equipo, [data-fondos~="ge"] #avisos .fila-func > div.revela { background: rgb(36 74 83 / 0.62); }
+/* En el celular el panel es más claro detrás de la tarjeta: un poco más de Petróleo para que el texto siga en AA */
+@media (max-width: 760px) { [data-fondos~="gc"] .camino-equipo, [data-fondos~="ge"] #avisos .fila-func > div.revela { background: rgb(36 74 83 / 0.74); } }
+/* Las tarjetas de vidrio del cierre y de Avisos con el mismo filo del isotipo: luz arriba a la izquierda, sombra abajo a la derecha (ronda 10) */
+[data-fondos~="gc"] .camino-equipo, [data-fondos~="ge"] #avisos .fila-func > div.revela {
+  box-shadow: inset 1.5px 1.5px 0 rgb(255 255 255 / 0.24), inset -1.5px -1.5px 0 rgb(6 28 32 / 0.32), inset 0 0 0 1px rgb(253 253 253 / 0.1), 0 40px 70px -40px rgb(8 26 30 / 0.65);
+}
+[data-fondos~="gc"] .camino-persona {
+  box-shadow: inset 1.5px 1.5px 0 rgb(255 255 255 / 0.95), inset -1.5px -1.5px 0 rgb(6 28 32 / 0.14), inset 0 0 0 1px rgb(253 253 253 / 0.4), 0 40px 70px -40px rgb(8 26 30 / 0.55);
+}
+
+/* VI · Vidrio en lo que flota: tarjetas flotantes, etiquetas de formato y chips */
+[data-fondos~="vi"] :is(.flota, .formato) {
+  background: var(--vidrio-claro); -webkit-backdrop-filter: var(--vidrio-blur); backdrop-filter: var(--vidrio-blur);
+}
+[data-fondos~="vi"] .flota { box-shadow: inset 0 0 0 1px var(--vidrio-claro-borde), inset 0 1px 0 rgb(253 253 253 / 0.8), 0 26px 44px -22px rgb(16 33 37 / 0.5); }
+[data-fondos~="vi"] .flota { background: rgb(253 253 253 / 0.8); }
+[data-fondos~="vi"] .flota small { color: #3a4441; }
+
+@media (prefers-reduced-motion: reduce) {
+  .iso-vidrio, [data-fondos~="gc"] .cierre::after { animation: none !important; transition: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .iso-vidrio .vidrio-r { background: rgb(253 253 253 / 0.1); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  [data-fondos~="gp"] #como-funciona .pasos li, [data-fondos~="gc"] .camino-persona, [data-fondos~="vi"] :is(.flota, .formato) { background: rgb(253 253 253 / 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  [data-fondos~="gr"] #rutinas .riel li::after, [data-fondos~="gc"] .camino-equipo, [data-fondos~="ge"] #avisos .fila-func > div.revela { background: rgb(36 74 83 / 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

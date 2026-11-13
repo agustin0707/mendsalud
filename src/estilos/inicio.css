@@ -1,0 +1,207 @@
+/* Inicio (fase 1): tres versiones sobre la misma estructura. La versión va en <body data-v="1|2|3">.
+   Al bajar, la foto se desenfoca y se disuelve en el degradado de Mend (campo con grano). --p va de 0 a 1 (js/inicio.js). */
+.inicio { position: relative; height: 200svh; --p: 0; }
+.inicio-pin { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.inicio-marco { position: absolute; inset: 0; overflow: hidden; background: var(--petroleo); isolation: isolate; }
+
+.inicio-foto { position: absolute; inset: 0; z-index: -3; }
+.inicio-foto img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 72% 40%;
+  transform: scale(calc(1.03 + var(--p) * 0.09));
+  filter: blur(calc(var(--p) * 16px));
+  will-change: transform, filter;
+}
+.inicio-velo { position: absolute; inset: 0; z-index: -2; pointer-events: none; }
+/* El degradado de marca: el mismo campo de la app y las presentaciones, con grano encima */
+.inicio-campo {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--grano), linear-gradient(90deg, rgb(36 74 83 / 0.62) 0%, rgb(36 74 83 / 0.42) 55%, rgb(36 74 83 / 0.3) 100%), linear-gradient(0deg, rgb(36 74 83 / 0.4) 0%, rgb(36 74 83 / 0) 50%), url("../marca/campo.jpg") center / cover no-repeat;
+  background-blend-mode: soft-light, normal, normal, normal;
+  opacity: clamp(0, calc((var(--p) - 0.08) * 1.7), 1);
+}
+.inicio-contenido {
+  position: absolute; z-index: 2;
+  opacity: clamp(0, calc(1 - var(--p) * 2.2), 1);
+  transform: translateY(calc(var(--p) * -70px));
+}
+.ceja {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 14px 0 12px; border-radius: 999px;
+  font-size: 0.9375rem; font-weight: 500; letter-spacing: 0.01em;
+}
+.ceja .punto { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: respira 3.5s var(--ease-calma) infinite; }
+@keyframes respira { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.6; } }
+.inicio h1 { font-size: clamp(2.5rem, 5.6vw, 5.25rem); line-height: 1.02; letter-spacing: -0.02em; font-weight: 500; }
+.inicio h1 .acento { font-size: 1.1em; line-height: 0.9; }
+.inicio h1 .iso-titulo { display: inline-block; width: 0.62em; height: 0.62em; vertical-align: 0.02em; margin: 0 0.12em 0 0.04em; }
+.inicio h1 .iso-titulo svg { width: 100%; height: 100%; }
+.bajada { font-size: clamp(1.125rem, 1.4vw, 1.3125rem); line-height: 1.45; max-width: 34ch; }
+.botones { display: flex; flex-wrap: wrap; gap: 10px; }
+.inicio-dato { position: absolute; z-index: 2; display: flex; align-items: center; gap: 10px; font-size: 1rem; opacity: clamp(0, calc(1 - var(--p) * 3), 1); }
+.inicio-dato .linea { width: 32px; height: 1px; background: currentColor; }
+
+/* Entrada al cargar: sube en escalera, calma (curva de página de la app) */
+.entra { animation: entra 1.1s var(--ease-pagina) both; animation-delay: calc(var(--n, 0) * 90ms + 150ms); }
+/* Parten en 0,01 y no en 0: se ve igual, pero el navegador cuenta el titular y la foto como pintados desde el primer cuadro (Lighthouse) */
+@keyframes entra { from { opacity: 0.01; transform: translateY(22px); } }
+.inicio-foto.entra { animation: aparece 1.6s var(--ease-calma) both; }
+@keyframes aparece { from { opacity: 0.01; } }
+
+/* Sección siguiente (para ver el paso): qué es Mend en tres partes */
+.siguiente { position: relative; z-index: 3; padding: clamp(80px, 12vw, 160px) 0 clamp(80px, 10vw, 140px); }
+.siguiente .ceja-sec { display: flex; align-items: center; gap: 12px; font-size: 1rem; font-weight: 500; }
+.siguiente .ceja-sec::before { content: ""; width: 32px; height: 1px; background: currentColor; }
+.siguiente h2 { margin-top: 18px; font-size: clamp(2rem, 3.8vw, 3.5rem); line-height: 1.06; max-width: 18ch; letter-spacing: -0.015em; }
+.siguiente h2 .acento { font-size: 1.1em; }
+.tres-partes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); margin-top: clamp(40px, 6vw, 72px); list-style: none; padding: 0; }
+.tres-partes li { padding-top: 22px; border-top: 1px solid currentColor; }
+.tres-partes .ic { width: 28px; height: 28px; }
+.tres-partes h3 { margin-top: 18px; font-size: 1.5rem; line-height: 1.2; }
+.tres-partes p { margin-top: 10px; font-size: 1.0625rem; max-width: 36ch; }
+.siguiente[data-tono="claro"] { background: var(--hueso); color: var(--carbon); }
+.siguiente[data-tono="claro"] h2, .siguiente[data-tono="claro"] .ceja-sec, .siguiente[data-tono="claro"] .ic { color: var(--petroleo); }
+.siguiente[data-tono="claro"] .tres-partes li { border-color: var(--filete); }
+.siguiente[data-tono="oscuro"] { color: var(--blanco); background: var(--petroleo); }
+.siguiente[data-tono="oscuro"] .tres-partes li { border-color: rgb(253 253 253 / 0.3); }
+.siguiente .mas { margin-top: 56px; }
+@media (max-width: 760px) { .tres-partes { grid-template-columns: 1fr; } }
+
+/* Escena de las cifras sobre el degradado (V1 y V2): aparece cuando la foto ya se disolvió */
+.escena-cifras {
+  position: absolute; z-index: 3; left: var(--margen); right: var(--margen); bottom: clamp(48px, 9svh, 110px); color: var(--blanco);
+  opacity: clamp(0, calc((var(--p) - 0.45) * 3), 1); transform: translateY(calc((1 - clamp(0, (var(--p) - 0.45) * 3, 1)) * 40px));
+  pointer-events: none;
+}
+[data-v="2"] .escena-cifras { left: calc(var(--margen) + 8px); right: calc(var(--margen) + 8px); }
+.escena-cifras .rotulo { display: flex; align-items: center; gap: 12px; font-size: 1rem; font-weight: 500; }
+.escena-cifras .rotulo::before { content: ""; width: 32px; height: 1px; background: currentColor; }
+.escena-cifras h2 { margin-top: 16px; font-size: clamp(1.75rem, 3.2vw, 3rem); line-height: 1.08; max-width: 22ch; }
+.escena-cifras h2 .acento { font-size: 1.08em; }
+.cifras { list-style: none; padding: 0; margin-top: clamp(32px, 6svh, 64px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 48px); }
+.cifras li { display: grid; gap: 8px; align-content: start; padding-top: 18px; border-top: 1px solid rgb(253 253 253 / 0.4); }
+.cifras b { font-family: var(--display); font-weight: 500; font-size: clamp(2.25rem, 4vw, 3.75rem); line-height: 1; letter-spacing: -0.02em; }
+.cifras span { font-size: 1.0625rem; line-height: 1.45; max-width: 30ch; }
+.cifras cite { font-style: normal; font-size: 0.875rem; opacity: 0.9; }
+@media (max-width: 760px) {
+  .escena-cifras { bottom: 28px; }
+  .cifras { grid-template-columns: 1fr; gap: 14px; margin-top: 22px; }
+  .cifras li { grid-template-columns: auto 1fr; column-gap: 14px; padding-top: 12px; }
+  .cifras b { font-size: 1.75rem; grid-row: span 2; }
+  .cifras span { font-size: 1rem; }
+}
+
+/* ───────── Versión 1 · «Luz»: foto a sangre, texto Petróleo sobre la pared con sol, barra teñida, después Hueso ───────── */
+[data-v="1"] .inicio-velo {
+  /* Velo Hueso muy suave sobre la pared, solo donde va el texto, para que las sombras de la ventana no bajen el contraste */
+  background: linear-gradient(90deg, rgb(251 249 244 / 0.62) 0%, rgb(251 249 244 / 0.5) 34%, rgb(251 249 244 / 0) 58%);
+}
+[data-v="1"] .inicio-contenido { left: var(--margen); bottom: clamp(48px, 10svh, 120px); width: min(46vw, 640px); color: var(--petroleo); display: grid; gap: 26px; justify-items: start; }
+[data-v="1"] .inicio h1 { color: var(--petroleo); }
+[data-v="1"] .bajada { color: var(--carbon); }
+[data-v="1"] .ceja { background: rgb(36 74 83 / 0.08); border: 1px solid rgb(36 74 83 / 0.18); color: var(--petroleo); }
+[data-v="1"] .inicio-dato { right: var(--margen); bottom: clamp(32px, 5svh, 56px); color: var(--blanco); min-height: 40px; padding: 0 16px; border-radius: 999px; background: rgb(36 74 83 / 0.7); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); }
+[data-v="1"] .inicio-dato .linea { display: none; }
+/* Retícula de líneas finas sobre la foto (ref. 01) */
+[data-v="1"] .inicio-reticula {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: clamp(0, calc(0.5 - var(--p)), 0.5);
+  background:
+    linear-gradient(90deg, transparent calc(var(--margen) - 0.5px), rgb(36 74 83 / 0.16) calc(var(--margen) - 0.5px), rgb(36 74 83 / 0.16) calc(var(--margen) + 0.5px), transparent calc(var(--margen) + 0.5px)),
+    linear-gradient(90deg, transparent calc(58% - 0.5px), rgb(253 253 253 / 0.3) calc(58% - 0.5px), rgb(253 253 253 / 0.3) calc(58% + 0.5px), transparent calc(58% + 0.5px)),
+    linear-gradient(180deg, transparent calc(100% - clamp(32px, 5svh, 56px) - 30px), rgb(253 253 253 / 0.25) calc(100% - clamp(32px, 5svh, 56px) - 30px), rgb(253 253 253 / 0.25) calc(100% - clamp(32px, 5svh, 56px) - 29px), transparent calc(100% - clamp(32px, 5svh, 56px) - 29px));
+}
+
+/* ───────── Versión 2 · «Velo»: el inicio como tarjeta con margen (ref. 02), velo hacia Petróleo, texto Blanco, barra ligera;
+   la sección siguiente sigue en el degradado ───────── */
+[data-v="2"] { background: var(--hueso); }
+[data-v="2"] .inicio-marco {
+  inset: calc(10px + var(--p) * 22px); border-radius: calc(28px + var(--p) * 12px);
+  clip-path: inset(0 round calc(28px + var(--p) * 12px));
+}
+[data-v="2"] .inicio-velo {
+  background:
+    linear-gradient(90deg, rgb(36 74 83 / 0.84) 0%, rgb(36 74 83 / 0.78) 36%, rgb(36 74 83 / 0.6) 50%, rgb(36 74 83 / 0.16) 64%, rgb(36 74 83 / 0) 72%),
+    linear-gradient(0deg, rgb(36 74 83 / 0.45) 0%, rgb(36 74 83 / 0) 30%);
+}
+[data-v="2"] .inicio-contenido { left: calc(var(--margen) + 8px); top: 50%; translate: 0 -46%; width: min(44vw, 640px); color: var(--blanco); display: grid; gap: 26px; justify-items: start; }
+[data-v="2"] .ceja, [data-v="3"] .ceja { background: var(--vidrio-tenido); border: 1px solid rgb(253 253 253 / 0.25); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); }
+[data-v="2"] .inicio-dato { left: calc(var(--margen) + 8px); bottom: clamp(30px, 5svh, 52px); color: var(--blanco); }
+[data-v="2"] .cab-sitio { padding-top: 26px; padding-inline: calc(var(--margen) + 8px); }
+/* La sección siguiente sigue en el degradado, como otra tarjeta con el mismo margen en que termina el inicio */
+[data-v="2"] .siguiente[data-tono="oscuro"] {
+  margin: -32px 32px 0; border-radius: 40px; overflow: hidden;
+  background: var(--grano), linear-gradient(90deg, rgb(36 74 83 / 0.82), rgb(36 74 83 / 0.7) 70%), url("../marca/campo.jpg") center / cover no-repeat;
+  background-blend-mode: soft-light, normal, normal;
+}
+
+/* ───────── Versión 3 · «Campo»: foto a sangre, titular centrado abajo (ref. 04); al bajar la foto se vuelve el degradado
+   con líneas verticales y sube el teléfono con la app (ref. 03). Después Hueso ───────── */
+[data-v="3"] .inicio { height: 260svh; }
+[data-v="3"] .inicio-velo {
+  background: linear-gradient(0deg, rgb(36 74 83 / 0.9) 0%, rgb(36 74 83 / 0.8) 30%, rgb(36 74 83 / 0.6) 46%, rgb(36 74 83 / 0.22) 62%, rgb(36 74 83 / 0) 76%),
+              linear-gradient(180deg, rgb(36 74 83 / 0.4) 0%, rgb(36 74 83 / 0) 18%);
+}
+[data-v="3"] .inicio-campo::after {
+  /* Grano de la marca encima del degradado (la textura de Mend; sin las líneas de la ref. 04) */
+  content: ""; position: absolute; inset: 0;
+  background: var(--grano); background-size: 180px; mix-blend-mode: soft-light; opacity: 0.9;
+}
+[data-v="3"] .inicio-contenido {
+  left: 50%; bottom: clamp(44px, 9svh, 110px); translate: -50% 0; width: min(100% - 2 * var(--margen), 940px);
+  color: var(--blanco); display: grid; gap: 22px; justify-items: center; text-align: center;
+  opacity: clamp(0, calc(1 - var(--p) * 2.6), 1);
+}
+[data-v="3"] .bajada { max-width: 44ch; margin-inline: auto; }
+[data-v="3"] .botones { justify-content: center; }
+[data-v="3"] .inicio-dato { display: none; }
+[data-v="3"] .escena-app {
+  position: absolute; inset: 0; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: clamp(24px, 4vw, 72px);
+  padding: 100px var(--margen) 40px; color: var(--blanco); pointer-events: none;
+}
+[data-v="3"] .escena-app > * { pointer-events: auto; }
+[data-v="3"] .escena-app .lado { opacity: clamp(0, calc((var(--p) - 0.42) * 3.2), 1); transform: translateY(calc((1 - clamp(0, (var(--p) - 0.42) * 3.2, 1)) * 30px)); }
+[data-v="3"] .inicio-campo { background: var(--grano), radial-gradient(34% 40% at 76% 56%, rgb(36 74 83 / 0.4), rgb(36 74 83 / 0)), linear-gradient(90deg, rgb(36 74 83 / 0.62) 0%, rgb(36 74 83 / 0.56) 45%, rgb(36 74 83 / 0.84) 100%), url("../marca/campo.jpg") center / cover no-repeat; background-blend-mode: soft-light, normal, normal, normal; }
+[data-v="3"] .escena-app .lado h2 { font-size: clamp(1.75rem, 2.6vw, 2.5rem); line-height: 1.1; max-width: 14ch; }
+[data-v="3"] .escena-app .lado p { margin-top: 14px; font-size: 1.0625rem; max-width: 30ch; }
+[data-v="3"] .escena-app .lado.der { justify-self: start; }
+[data-v="3"] .escena-app .lado.izq { justify-self: end; text-align: right; }
+[data-v="3"] .escena-app .lado .rotulo { display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 500; margin-bottom: 14px; }
+[data-v="3"] .escena-app .lado.izq .rotulo { justify-content: flex-end; }
+[data-v="3"] .escena-app .lado .rotulo::before { content: ""; width: 32px; height: 1px; background: currentColor; }
+.telefono {
+  position: relative; width: clamp(240px, 22vw, 320px); aspect-ratio: 1170 / 2532; border-radius: 13% / 6%;
+  padding: 9px; background: #111a1c; box-shadow: 0 40px 80px rgb(16 33 37 / 0.45), inset 0 0 0 1.5px rgb(253 253 253 / 0.18);
+}
+.telefono img { width: 100%; height: 100%; object-fit: cover; border-radius: 11.4% / 5.2%; }
+[data-v="3"] .telefono { transform: translateY(calc((1 - clamp(0, (var(--p) - 0.2) * 1.6, 1)) * 85svh)) rotate(calc((1 - clamp(0, (var(--p) - 0.2) * 1.6, 1)) * 6deg)); will-change: transform; }
+
+/* ───────── Celular ───────── */
+@media (max-width: 760px) {
+  .inicio { height: 170svh; }
+  .inicio-foto img { object-position: 78% 50%; }
+  .inicio h1 { font-size: clamp(2.375rem, 10.5vw, 3rem); }
+  [data-v="1"] .inicio-velo { background: linear-gradient(0deg, rgb(251 249 244 / 0.96) 0%, rgb(251 249 244 / 0.92) 50%, rgb(251 249 244 / 0.6) 62%, rgb(251 249 244 / 0) 74%); }
+  [data-v="1"] .inicio-contenido, [data-v="2"] .inicio-contenido { left: var(--margen); right: var(--margen); width: auto; bottom: 36px; top: auto; translate: none; gap: 18px; }
+  [data-v="1"] .inicio-dato, [data-v="1"] .inicio-reticula, [data-v="2"] .inicio-dato { display: none; }
+  [data-v="2"] .inicio-velo { background: linear-gradient(0deg, rgb(36 74 83 / 0.92) 0%, rgb(36 74 83 / 0.82) 40%, rgb(36 74 83 / 0) 66%); }
+  [data-v="2"] .inicio-marco { inset: calc(8px + var(--p) * 8px); }
+  [data-v="2"] .inicio-contenido { left: 22px; right: 22px; }
+  [data-v="3"] .inicio { height: 240svh; }
+  [data-v="3"] .inicio-velo { background: linear-gradient(0deg, rgb(36 74 83 / 0.94) 0%, rgb(36 74 83 / 0.84) 42%, rgb(36 74 83 / 0) 66%); }
+  [data-v="3"] .inicio-contenido { bottom: 36px; gap: 18px; }
+  [data-v="3"] .escena-app { grid-template-columns: 1fr; justify-items: center; align-content: center; padding-top: 84px; gap: 20px; }
+  [data-v="3"] .escena-app .lado.izq { display: none; }
+  [data-v="3"] .escena-app .lado.der { justify-self: center; text-align: center; order: -1; }
+  [data-v="3"] .escena-app .lado.der .rotulo { justify-content: center; }
+  [data-v="3"] .escena-app .lado.der p { display: none; }
+  .telefono { width: min(58vw, 250px); }
+  .bajada { font-size: 1.125rem; }
+}
+
+/* Movimiento reducido: sin el paso animado; la foto queda quieta y el degradado entra como una sección más */
+@media (prefers-reduced-motion: reduce) {
+  .inicio, [data-v="3"] .inicio { height: auto; }
+  .inicio-pin { position: relative; height: 100svh; }
+  .inicio { --p: 0 !important; }
+  [data-v="3"] .escena-app { display: none; }
+  .ceja .punto { animation: none; }
+}
+@media (max-width: 760px) { [data-v="2"] .siguiente[data-tono="oscuro"] { margin: -16px 16px 0; border-radius: 28px; background: var(--grano), linear-gradient(rgb(36 74 83 / 0.84), rgb(36 74 83 / 0.84)), url("../marca/campo.jpg") center / cover no-repeat; background-blend-mode: soft-light, normal, normal; } }
