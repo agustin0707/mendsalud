@@ -269,3 +269,45 @@
 [data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio { gap: 4px; }
 [data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio a { padding: 0 16px; }
 @media (max-width: 760px) { [data-nav="n1"] .cab-sitio[data-sobre] .marca { width: 84px; } }
+
+/* ===================== Ronda 13 (15 nov): vidrio Petróleo (VB) y Conversemos en degradado (CB) =====================
+   Pedido de Agustín: la barra «más glassmorphing, ahora se ve blanca no más» y mejorar el botón Conversemos.
+   Eligió VB y CB entre tres propuestas cada uno. Van con <body data-r13n="vb" data-r13c="cb"> (armar.mjs los pone en todas las páginas).
+   Sobre la foto y el degradado: vidrio teñido de Petróleo con texto y logo Blanco, como la barra de la app. Sobre Hueso: vidrio claro con texto Petróleo. */
+[data-r13n="vb"] .cab-sitio[data-sobre="oscuro"] {
+  color: var(--blanco);
+  --vb-texto: var(--blanco); --vb-texto-activo: var(--blanco);
+  --vb-capsula: rgb(16 33 37 / 0.26); --vb-capsula-suave: rgb(16 33 37 / 0.16);
+  --bc-fondo: var(--blanco); --bc-texto: var(--petroleo); --bc-circulo: var(--petroleo); --bc-flecha: var(--blanco); --bc-texto-lleno: var(--blanco);
+  --vb-foco: var(--bruma);
+}
+[data-nav="n1"][data-r13n="vb"] .cab-sitio[data-sobre]::before {
+  background: linear-gradient(180deg, rgb(36 74 83 / 0.72), rgb(29 60 67 / 0.8));
+  -webkit-backdrop-filter: blur(24px) saturate(170%) brightness(0.76); backdrop-filter: blur(24px) saturate(170%) brightness(0.76);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 -1px 0 rgb(255 255 255 / 0.08), inset 0 0 0 1px rgb(255 255 255 / 0.14), 0 16px 44px rgb(16 33 37 / 0.24);
+}
+[data-nav="n1"][data-r13n="vb"] .cab-sitio[data-sobre="claro"] { --vb-capsula: rgb(36 74 83 / 0.07); }
+[data-nav="n1"][data-r13n="vb"] .cab-sitio[data-sobre="claro"]::before {
+  background: linear-gradient(180deg, rgb(253 253 253 / 0.84), rgb(253 253 253 / 0.76));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 1), inset 0 0 0 1px rgb(36 74 83 / 0.08), 0 12px 34px rgb(36 74 83 / 0.12);
+}
+
+/* CB · Conversemos en el degradado de Mend: Petróleo que se aclara hacia Mar, filo Bruma y un brillo que cruza al pasar */
+[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab {
+  --bc-texto: var(--blanco); --bc-circulo: var(--bruma); --bc-flecha: var(--petroleo); --bc-texto-lleno: var(--petroleo);
+  background: linear-gradient(115deg, #3d7681 0%, #2b5963 45%, #1d3c43 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 0 0 1px rgb(201 233 232 / 0.18), 0 8px 22px rgb(29 60 67 / 0.34);
+}
+[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab .txt { position: relative; }
+[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+  transform: translateX(-110%); transition: transform 0.9s var(--sp);
+}
+[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab:hover::after { transform: translateX(110%); }
+@media (prefers-reduced-motion: reduce) { [data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab::after { display: none; } }
+@media (prefers-reduced-transparency: reduce) {
+  [data-r13n="vb"] .cab-sitio[data-sobre]::before { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  [data-r13n="vb"] .cab-sitio[data-sobre="oscuro"]::before { background: var(--vidrio-tenido-respaldo); }
+  [data-r13n="vb"] .cab-sitio[data-sobre="claro"]::before { background: rgb(253 253 253 / 0.97); }
+}
