@@ -193,7 +193,8 @@
 @media (max-width: 1180px) {
   [data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio a, [data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio a { padding: 0 11px; }
   [data-nav="n1"] .cab-sitio[data-sobre] .nav-vidrio a .nombre, [data-nav="n3"] .cab-sitio[data-sobre] .nav-vidrio a .nombre { position: static; width: auto; height: auto; clip: auto; }
-  [data-nav] .cab-sitio[data-sobre] .entrar .nombre { display: none; }
+  /* Solo el ícono, pero el nombre queda para lectores de pantalla (con display:none el enlace se quedaba sin nombre; 16 nov) */
+  [data-nav] .cab-sitio[data-sobre]:not(.abierta) .entrar .nombre { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
 /* ---------- Celular ---------- */

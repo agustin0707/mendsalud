@@ -4,12 +4,15 @@
 import { readFile, writeFile, mkdir, readdir, cp, rm } from 'node:fs/promises'
 import { readdirSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
+import { createHash } from 'node:crypto'
 
 const RAIZ = import.meta.dirname
 const SRC = join(RAIZ, 'src')
 const DIST = join(RAIZ, 'dist')
 const SITIO = 'https://mendsalud.cl'
 const indexables = [] // Para el sitemap: las páginas sin noindex
+// Versión de sitio.js por su contenido: Cloudflare guarda /js/* en su caché un día (16 nov sirvió el script viejo tras publicar)
+const VERSION_JS = createHash('sha256').update(await readFile(join(SRC, 'js', 'sitio.js'))).digest('hex').slice(0, 10)
 const leer = (r) => readFile(join(SRC, r), 'utf8')
 const limpiarSvg = (s) => s.replace(/<\?xml[^>]*>\s*/, '').replace(/<defs>[\s\S]*?<\/defs>/, '').replace(/ class="cls-1"/g, ' fill="currentColor"').replace(/ (id|data-name)="[^"]*"/g, '')
 const logo = limpiarSvg(await leer('marca/logotipo-mend-salud.svg')).replace('<svg', '<svg aria-hidden="true" focusable="false"')
@@ -103,7 +106,7 @@ ${cabecera}
 ${cuerpo}
 </main>
 ${pie}
-<script src="${base}/js/sitio.js" defer></script>
+<script src="${base}/js/sitio.js?v=${VERSION_JS}" defer></script>
 </body>
 </html>
 `
