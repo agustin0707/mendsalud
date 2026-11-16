@@ -91,7 +91,7 @@ function tono() {
   const ini = document.querySelector('.inicio')
   if (ini) {
     const r = ini.getBoundingClientRect()
-    if (r.top <= y && r.bottom > y) t = Number(ini.style.getPropertyValue('--p') || 0) > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro')
+    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro') }
   }
   if (cab) {
     cab.dataset.sobre = t
@@ -106,8 +106,18 @@ function paso() {
   if (inicio && !quieto.matches) {
     const r = inicio.getBoundingClientRect()
     const recorrido = inicio.offsetHeight - innerHeight
-    const p = recorrido > 0 ? Math.min(1, Math.max(0, -r.top / recorrido)) : 0
+    // Ronda 23: con relato, el paso del inicio se alarga en --alto-relato (svh); --p cubre el tramo de siempre y --q el del relato
+    const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
+    const base = recorrido - extra
+    const p = base > 0 ? Math.min(1, Math.max(0, -r.top / base)) : 0
     inicio.style.setProperty('--p', p.toFixed(4))
+    const escena = inicio.querySelector('.escena-app')
+    if (escena) {
+      const q = extra > 0 ? Math.min(1, Math.max(0, (-r.top - base) / extra)) : 0
+      inicio.style.setProperty('--q', q.toFixed(4))
+      escena.dataset.paso = String(q < 0.34 ? 0 : q < 0.67 ? 1 : 2)
+      escena.classList.toggle('en-uso', p > 0.84)
+    }
   }
   tono()
 }
@@ -330,4 +340,153 @@ if (titular && acento && !sinMovimiento.matches) {
     }
     titular.addEventListener('pointerenter', luz); titular.addEventListener('pointermove', luz)
   }
+}
+
+// Ronda 23 · T3: al llegar, el teléfono se inclina un poco hacia el puntero (solo con mouse y sin «reducir movimiento»)
+const dispositivos = document.querySelector('.escena-app .dispositivos')
+if (dispositivos && matchMedia('(hover: hover) and (pointer: fine)').matches && !quieto.matches) {
+  const escena = dispositivos.closest('.escena-app')
+  addEventListener('pointermove', (e) => {
+    if (document.body.dataset.r23t !== 't3' || !escena.classList.contains('en-uso')) return
+    const r = escena.getBoundingClientRect()
+    dispositivos.style.setProperty('--tx', `${((e.clientX - r.left) / r.width - 0.5) * 12}deg`)
+    dispositivos.style.setProperty('--ty', `${-((e.clientY - r.top) / r.height - 0.5) * 9}deg`)
+  })
+  document.addEventListener('pointerleave', () => { dispositivos.style.setProperty('--tx', '0deg'); dispositivos.style.setProperty('--ty', '0deg') })
+}
+
+// Ronda 23 · P3: botón para pausar la demostración del teléfono
+document.querySelector('.telefono .pausa')?.addEventListener('click', (e) => {
+  const b = e.currentTarget, escena = b.closest('.escena-app'), pausa = !escena.classList.contains('pausado')
+  escena.classList.toggle('pausado', pausa); b.setAttribute('aria-pressed', String(pausa)); b.setAttribute('aria-label', pausa ? 'Seguir la demostración' : 'Pausar la demostración')
+})
+
+// ───────── Ronda 24 · el flujo real de la app en la pantalla del teléfono (video grabado en local con datos de ejemplo) ─────────
+// Cada paso del relato reproduce su tramo (A marcar «Bien», B abrir la rutina y empezar, C ir al calendario) y se detiene al final.
+// Con data-r24v="v2" el video avanza con el scroll. Encima se dibujan los toques (data-r24q), las líneas de las tarjetas (r24b="b2")
+// y el check-in que viaja al panel del kine (r24e="e2"). Con «reducir movimiento» la escena no se arma, así que nada de esto corre.
+const escenaApp = document.querySelector('.escena-app')
+const video = escenaApp?.querySelector('.pant-video')
+if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23p === 'p2') {
+  const cuerpo = document.body.dataset
+  const pantallas = escenaApp.querySelector('.pantallas'), toques = escenaApp.querySelector('.toques'), dispo = escenaApp.querySelector('.dispositivos')
+  const svg = escenaApp.querySelector('.conectores'), viajero = escenaApp.querySelector('.viajero'), boton = escenaApp.querySelector('.telefono .pausa')
+  const tarjetas = [...escenaApp.querySelectorAll('.flota-escena')]
+  const ROTULOS = { Bien: 'Marca cómo amaneces', 'Ver rutina': 'Abre tu rutina', 'Desliza para empezar': 'Desliza para empezar', Empezar: 'Empieza', Calendario: 'Mira tu semana' }
+  // A qué apunta cada tarjeta en la pantalla (fracción del ancho y del alto): rutina, «Bien» y la tarjeta de la kine en el calendario
+  const APUNTA = [[0.5, 0.42], [0.735, 0.589], [0.24, 0.76]]
+  const PASO_DE_TARJETA = [1, 0, 2]
+  let datos = null, cargando = false, lista = false, pasoVideo = -1, meta = null, pasoViaje = -1, anim = null
+  const num = (v) => Number(inicio.style.getPropertyValue(v) || 0)
+  const cl = (v) => Math.min(1, Math.max(0, v))
+  function cargar() {
+    if (cargando) return; cargando = true
+    fetch(video.dataset.src.replace(/\.mp4$/, '.json')).then((r) => r.json()).then((d) => { datos = d; video.src = video.dataset.src; video.preload = 'auto'; video.load() }).catch(() => {})
+  }
+  video.addEventListener('loadeddata', () => { lista = true; video.classList.add('lista'); escenaApp.classList.add('con-video') }, { once: true })
+  const tramo = (k) => [datos.tramos.A, datos.tramos.B, datos.tramos.C][k]
+  function reproducir(desde, hasta, corte) {
+    meta = hasta
+    const ir = () => { if (desde !== null) video.currentTime = desde; if (!escenaApp.classList.contains('pausado')) video.play().catch(() => {}) }
+    if (corte) { video.classList.add('corte'); setTimeout(() => { ir(); setTimeout(() => video.classList.remove('corte'), 60) }, 130) } else ir()
+  }
+  function sincronizar() {
+    const p = num('--p'), k = p > 0.84 ? Number(escenaApp.dataset.paso || 0) : -1
+    if (p > 0.25) cargar()
+    if (!lista || !datos) return
+    if (cuerpo.r24v === 'v2') {
+      // Con el scroll: cada paso recorre su tramo en el primer 85 % de su parte del relato
+      let t = 0
+      if (k >= 0) { const [a, b] = tramo(k); t = a + (b - a) * cl((num('--q') - k / 3) / (0.85 / 3)) }
+      if (!video.seeking && Math.abs(video.currentTime - t) > 0.035) video.currentTime = t
+      return
+    }
+    if (k === pasoVideo) {
+      if (meta !== null && video.currentTime >= meta - 0.03) { video.pause(); meta = null }
+      return
+    }
+    if (k === -1) { video.pause(); meta = null; video.currentTime = 0 }
+    else if (k > pasoVideo) {
+      const [a, b] = tramo(k)
+      // Si viene del final del paso anterior, sigue sin saltar; si no, parte desde el comienzo de su tramo
+      const seguido = k === pasoVideo + 1 && Math.abs(video.currentTime - a) < 0.25
+      reproducir(seguido ? null : a, b, k === 2)
+    } else { const [, b] = tramo(k); video.pause(); meta = null; video.classList.add('corte'); setTimeout(() => { video.currentTime = b - 0.04; video.classList.remove('corte') }, 130) }
+    pasoVideo = k
+  }
+  boton?.addEventListener('click', () => { if (escenaApp.classList.contains('pausado')) video.pause(); else if (meta !== null) video.play().catch(() => {}) })
+
+  // Toques: aparecen, presionan, se abre la onda y se van; el rótulo dice la acción. Q4: el punto viaja entre toques.
+  function dibujarToques() {
+    if (!cuerpo.r24q || !datos) return
+    const t = video.currentTime, L = datos.toques
+    let x = 0.5, y = 0.5, ap = 0, pr = 0, on = 0, onv = 0, ra = 0, rot = ''
+    for (const q of L) {
+      const a = q.t - 0.35, z = q.fin + 0.6
+      if (t < a || t > z) continue
+      ap = t < q.t ? (t - a) / 0.35 : t > q.fin + 0.25 ? 1 - (t - q.fin - 0.25) / 0.35 : 1
+      pr = t >= q.t && t <= q.fin ? 1 : t > q.fin && t < q.fin + 0.15 ? 1 - (t - q.fin) / 0.15 : t > q.t - 0.1 && t < q.t ? (t - q.t + 0.1) / 0.1 : 0
+      on = t >= q.t ? cl((t - q.t) / 0.6) : 0; onv = t >= q.t && t < q.t + 0.6 ? 1 : 0
+      const u = q.tipo === 'arrastre' ? cl((t - q.t) / (q.fin - q.t)) : 0
+      x = q.x + ((q.x2 ?? q.x) - q.x) * u; y = q.y + ((q.y2 ?? q.y) - q.y) * u
+      ra = cl(Math.min((t - a) / 0.3, (q.fin + 0.9 - t) / 0.3)); rot = ROTULOS[q.nombre] ?? q.nombre
+      break
+    }
+    if (cuerpo.r24q === 'q4' && ap === 0) {
+      // Entre dos toques del mismo tramo, el punto se desliza del primero al siguiente
+      for (let i = 0; i < L.length - 1; i++) {
+        const A = L[i], B = L[i + 1], s = A.fin + 0.25, e = B.t - 0.35
+        if (t > s && t < e && B.t - A.fin < 2.6) { const u = cl((t - s) / (e - s)), k = u * u * (3 - 2 * u); x = (A.x2 ?? A.x) + (B.x - (A.x2 ?? A.x)) * k; y = (A.y2 ?? A.y) + (B.y - (A.y2 ?? A.y)) * k; ap = 0.9; break }
+      }
+    }
+    const st = toques.style
+    st.setProperty('--x', `${(x * 100).toFixed(2)}%`); st.setProperty('--y', `${(y * 100).toFixed(2)}%`)
+    st.setProperty('--ap', cl(ap).toFixed(3)); st.setProperty('--pr', cl(pr).toFixed(3)); st.setProperty('--on', on.toFixed(3)); st.setProperty('--onv', String(onv)); st.setProperty('--ra', ra.toFixed(3))
+    const r = toques.querySelector('.toque-rotulo'); if (r.textContent !== rot && rot) r.textContent = rot; r.dataset.lado = x > 0.6 ? 'izq' : x < 0.4 ? 'der' : ''
+  }
+
+  // Líneas de las tarjetas (B2): de la tarjeta del paso activo a lo que señala en la pantalla
+  function dibujarLineas() {
+    if (cuerpo.r24b !== 'b2' || !svg || innerWidth <= 760) return
+    const D = dispo.getBoundingClientRect(), S = pantallas.getBoundingClientRect(), paso = num('--p') > 0.84 ? Number(escenaApp.dataset.paso || 0) : -1
+    tarjetas.forEach((c, i) => {
+      const linea = svg.querySelector(`.con[data-c="${i + 1}"]`), punto = svg.querySelector(`.con-punto[data-c="${i + 1}"]`)
+      const activa = PASO_DE_TARJETA[i] === paso
+      linea.classList.toggle('ve', activa); punto.classList.toggle('ve', activa)
+      if (!activa) return
+      const R = c.getBoundingClientRect(), izq = R.left + R.width / 2 < S.left + S.width / 2
+      const ax = (izq ? R.right : R.left) - D.left, ay = R.top + R.height / 2 - D.top
+      const tx = S.left + S.width * APUNTA[i][0] - D.left, ty = S.top + S.height * APUNTA[i][1] - D.top, dx = tx - ax
+      linea.setAttribute('d', `M${ax.toFixed(1)} ${ay.toFixed(1)} C${(ax + dx * 0.55).toFixed(1)} ${ay.toFixed(1)} ${(tx - dx * 0.25).toFixed(1)} ${ty.toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)}`)
+      linea.setAttribute('pathLength', '1'); punto.setAttribute('cx', tx.toFixed(1)); punto.setAttribute('cy', ty.toFixed(1))
+    })
+  }
+
+  // E2: al llegar al paso 3, el check-in viaja del teléfono a la fila de hoy en la ficha del kine
+  function viaje() {
+    if (cuerpo.r24e !== 'e2' || !viajero || innerWidth <= 760 || !/a3|a4/.test(cuerpo.r23a ?? '')) return
+    const paso = num('--p') > 0.84 ? Number(escenaApp.dataset.paso || 0) : -1
+    if (paso === pasoViaje) return
+    pasoViaje = paso
+    anim?.cancel(); escenaApp.classList.remove('viajando', 'llego')
+    if (paso !== 2) return
+    setTimeout(() => {
+      if (pasoViaje !== 2) return
+      const D = dispo.getBoundingClientRect(), S = pantallas.getBoundingClientRect(), E = escenaApp.querySelector('.llega').getBoundingClientRect()
+      const sx = S.left + S.width * 0.62 - D.left, sy = S.top + S.height * 0.3 - D.top, ex = E.left + E.width / 2 - D.left, ey = E.top + E.height / 2 - D.top
+      const d = `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${((sx + ex) / 2).toFixed(1)} ${(Math.min(sy, ey) - 110).toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`
+      svg.querySelector('.ruta').setAttribute('d', d)
+      viajero.style.offsetPath = `path('${d}')`
+      escenaApp.classList.add('viajando')
+      anim = viajero.animate([{ offsetDistance: '0%', opacity: 0, scale: 0.7 }, { offset: 0.12, opacity: 1, scale: 1 }, { offset: 0.85, opacity: 1, scale: 1 }, { offsetDistance: '100%', opacity: 0, scale: 0.55 }], { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' })
+      anim.onfinish = () => { escenaApp.classList.remove('viajando'); escenaApp.classList.add('llego') }
+    }, 1000)
+  }
+
+  const cuadro = () => {
+    const r = inicio.getBoundingClientRect()
+    if (r.bottom > 0 && r.top < innerHeight) { sincronizar(); if (lista) dibujarToques(); dibujarLineas(); viaje() }
+    requestAnimationFrame(cuadro)
+  }
+  requestAnimationFrame(cuadro)
 }

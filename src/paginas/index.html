@@ -15,7 +15,35 @@
       </div>
       <div class="escena-app">
         <div class="lado izq"><p class="rotulo">Para la persona</p><h2>Su rutina del día, paso a paso</h2><p>Con video, series y descansos, y una escala simple para contar las molestias.</p></div>
-        <div class="telefono"><img src="{{base}}/fotos/app-inicio.jpg" alt="Inicio de la app de Mend: la semana, las rutinas hechas y la pregunta de cómo están las articulaciones hoy." width="780" height="1688" loading="lazy"></div>
+        <!-- Ronda 23: relato en pasos (X2) y titular arriba (X3). Solo se muestran con su variante -->
+        <ol class="relato" aria-label="Cómo se usa Mend">
+          <li><span class="relato-num">01</span><div><p class="rotulo">Para la persona</p><h2>Cada día, cómo amaneces</h2><p>Marcas cómo están tus articulaciones. Si amaneces rígido o muy sensible, la rutina del día cambia.</p></div></li>
+          <li><span class="relato-num">02</span><div><p class="rotulo">Para la persona</p><h2>Tu rutina, paso a paso</h2><p>Un video corto por ejercicio, con series y descansos, a tu ritmo.</p></div></li>
+          <li><span class="relato-num">03</span><div><p class="rotulo">Para el equipo</p><h2>Lo que pasa en casa, a la vista</h2><p>Tu kinesiólogo ve tu semana en su panel y recibe un aviso si marcas una molestia de 7 o más.</p></div></li>
+        </ol>
+        <h2 class="escena-titulo">Una app para la persona, <span class="acento">un panel</span> para su equipo.</h2>
+        <div class="dispositivos">
+          <div class="ventana ventana-kine" aria-hidden="true"><div class="ventana-barra"><i><span></span></i><span class="ventana-url">app.mendsalud.cl/kine</span></div><div class="ventana-cuerpo-kine"><img src="{{base}}/fotos/app/kine-ficha.jpg" alt="" width="1600" height="1000" loading="lazy"><span class="resalte"></span><span class="llega"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M5 12.5l4.2 4L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Bien</span></div></div>
+          <svg class="conectores" aria-hidden="true"><path class="con" data-c="1"/><path class="con" data-c="2"/><path class="con" data-c="3"/><circle class="con-punto" data-c="1" r="4"/><circle class="con-punto" data-c="2" r="4"/><circle class="con-punto" data-c="3" r="4"/><path class="ruta"/></svg>
+          <span class="viajero" aria-hidden="true"><span class="ic-caja">{{i:CheckCircle}}</span>Check-in: Bien</span>
+          <div class="telefono">
+            <div class="pantallas">
+              <img class="pant" data-p2="0" data-p3="0" src="{{base}}/fotos/app-inicio.jpg" alt="Inicio de la app de Mend: la semana, las rutinas hechas y la pregunta de cómo están las articulaciones hoy." width="780" height="1688" loading="lazy">
+              <img class="pant" data-p3="1" src="{{base}}/fotos/app/rutina-ficha.jpg" alt="" width="780" height="1688" loading="lazy">
+              <img class="pant" data-p2="1" data-p3="2" src="{{base}}/fotos/app/rutina-ejercicio.jpg" alt="" width="780" height="1688" loading="lazy">
+              <img class="pant" data-p2="2" src="{{base}}/fotos/app/paciente-calendario.jpg" alt="" width="780" height="1688" loading="lazy">
+              <span class="toque" aria-hidden="true"></span>
+              <!-- Ronda 24: el flujo real de la app grabado en local con datos de ejemplo (proceso/fase-22-r24) y los toques encima -->
+              <video class="pant-video" muted playsinline preload="none" poster="{{base}}/medios/app-flujo-poster.jpg" aria-label="Demostración de la app: marcar cómo amaneces, abrir la rutina, deslizar para empezar el ejercicio e ir al calendario." data-src="{{base}}/medios/app-flujo.mp4"></video>
+              <div class="toques" aria-hidden="true"><span class="toque-onda"></span><span class="toque-punto"></span><span class="toque-rotulo"></span></div>
+            </div>
+            <span class="tel-isla" aria-hidden="true"></span><span class="tel-brillo" aria-hidden="true"></span>
+            <button class="pausa" type="button" aria-pressed="false" aria-label="Pausar la demostración"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect class="ba" x="6" y="5" width="4" height="14" rx="1.2"/><rect class="ba" x="14" y="5" width="4" height="14" rx="1.2"/><path class="pl" d="M8 5.5v13l11-6.5z"/></svg></button>
+          </div>
+          <p class="flota flota-escena" style="--f:0;--prof:1" aria-hidden="true"><span class="ic-caja">{{i:Barbell}}<svg class="w-anillo" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/></svg></span><span><b>Rutina de hoy</b><small>Fuerza de piernas · 20 min</small><span class="w-pasos"><i></i><i></i><i></i><i></i><i></i><em>5 ejercicios</em></span></span></p>
+          <p class="flota flota-escena" style="--f:1;--prof:1.8" aria-hidden="true"><span class="ic-caja">{{i:Heartbeat}}</span><span><b>Tu rutina se ajusta</b><small>Si amaneces rígido o muy sensible</small><span class="w-estados"><i>Bien</i><i>Rígido</i><i>Muy sensible</i></span></span></p>
+          <p class="flota flota-escena" style="--f:2;--prof:1.3" aria-hidden="true"><span class="ic-caja alerta">{{i:Bell}}</span><span><b>Aviso a tu kinesiólogo</b><small>Si marcas una molestia de 7 o más</small></span><span class="w-ahora">ahora</span></p>
+        </div>
         <div class="lado der"><p class="rotulo">Para el equipo</p><h2>Lo que pasa en casa, a la vista</h2><p>El kinesiólogo y el médico ven el avance y las alertas entre controles.</p></div>
       </div>
     </div>

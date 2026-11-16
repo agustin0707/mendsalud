@@ -339,3 +339,263 @@ html { background-color: #6f7a76; }
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
 }
+
+/* ═════════ Ronda 23 · Escena del teléfono. Variantes por atributo del body (se eligen en la hoja de la ronda 23):
+   data-r23t (teléfono t1-t3) · data-r23p (pantalla p1-p3) · data-r23a (alrededor a1-a3) · data-r23x (composición x1-x3) · data-r23f (fondo f1-f3).
+   Sin atributo queda igual que hoy (t1, p1, a1, x1, f1). --q va de 0 a 1 en el tramo del relato (js/sitio.js) ═════════ */
+.inicio { --q: 0; --a: clamp(0, calc((var(--p) - 0.2) * 1.6), 1); --ve: clamp(0, calc((var(--p) - 0.42) * 3.2), 1); }
+.dispositivos { position: relative; display: grid; place-items: center; }
+/* Igual que los lados (ronda 22): lo que no se toca no tapa el puntero sobre el titular mientras está invisible */
+[data-v="3"] .escena-app .dispositivos, [data-v="3"] .escena-app .relato, [data-v="3"] .escena-app .escena-titulo { pointer-events: none; }
+[data-v="3"] .escena-app .telefono { pointer-events: auto; }
+.telefono .pantallas { position: relative; width: 100%; height: 100%; border-radius: 11.4% / 5.2%; overflow: hidden; isolation: isolate; background: #244a53; }
+.telefono .pant { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.telefono .pant:not(:first-child) { visibility: hidden; }
+.relato, .escena-titulo, .ventana-kine, .escena-app .flota-escena, .toque, .tel-isla, .tel-brillo, .telefono .pausa { display: none; }
+/* Las tarjetas de la escena no se balancean sin fin (WCAG 2.2.2): solo entran con el paso */
+.escena-app .flota-escena { animation: none; }
+
+/* Arreglo AA (ronda 23): el centro del degradado quedaba claro y «Para el equipo» daba 4,35 : 1. Un velo Petróleo lo baja en la escena */
+[data-v="3"] .escena-app::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(70% 80% at 50% 50%, rgb(36 74 83 / 0.42), rgb(36 74 83 / 0.3)); opacity: clamp(0, calc((var(--p) - 0.2) * 2.5), 1); }
+[data-r23f="f3"] .escena-app::after { display: none; }
+
+/* ── T2 «Titanio»: canto metálico, isla, botones, reflejo del vidrio y sombra en capas ── */
+[data-r23t="t2"] .telefono, [data-r23t="t3"] .telefono {
+  padding: 10px;
+  background: linear-gradient(150deg, #5d7175 0%, #1a2629 18%, #0c1416 50%, #1c2a2d 82%, #627579 100%);
+  box-shadow: inset 0 0 0 1px rgb(253 253 253 / 0.3), inset 0 0 0 3.5px #0a1012, inset 0 0 0 4.5px rgb(253 253 253 / 0.08),
+              0 2px 3px rgb(6 14 16 / 0.35), 0 24px 40px -18px rgb(6 18 21 / 0.6), 0 70px 110px -40px rgb(6 18 21 / 0.7);
+}
+[data-r23t="t2"] .telefono::before, [data-r23t="t3"] .telefono::before, [data-r23t="t2"] .telefono::after, [data-r23t="t3"] .telefono::after {
+  content: ""; position: absolute; width: 3px; border-radius: 2px; background: linear-gradient(90deg, #6b7e82, #24343a);
+}
+[data-r23t="t2"] .telefono::before, [data-r23t="t3"] .telefono::before { left: -2.5px; top: 21%; height: 11%; box-shadow: 0 -9% 0 0 #3a4b4f; }
+[data-r23t="t2"] .telefono::after, [data-r23t="t3"] .telefono::after { right: -2.5px; top: 28%; height: 14%; background: linear-gradient(270deg, #6b7e82, #24343a); }
+[data-r23t="t2"] .tel-isla, [data-r23t="t3"] .tel-isla { display: block; position: absolute; z-index: 3; top: calc(10px + 1.7%); left: 50%; width: 30%; height: 3.2%; translate: -50% 0; border-radius: 99px; background: #050a0b; box-shadow: inset 0 0 0 1px rgb(253 253 253 / 0.04); }
+[data-r23t="t2"] .tel-brillo, [data-r23t="t3"] .tel-brillo {
+  display: block; position: absolute; z-index: 2; inset: 10px; border-radius: 11.4% / 5.2%; pointer-events: none;
+  background: linear-gradient(118deg, rgb(253 253 253 / 0.16) 0%, rgb(253 253 253 / 0.05) 22%, rgb(253 253 253 / 0) 34%);
+  box-shadow: inset 0 0 0 1px rgb(253 253 253 / 0.06);
+}
+/* ── T3 «En el espacio»: entra inclinado en 3D y se endereza al llegar; después se inclina un poco con el puntero ── */
+@property --tx { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+@property --ty { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+[data-r23t="t3"] .dispositivos { perspective: 1400px; transition: --tx 0.8s var(--ease-salida), --ty 0.8s var(--ease-salida); }
+[data-r23t="t3"][data-v="3"] .telefono {
+  transform: translateY(calc((1 - var(--a)) * 80svh)) rotateX(calc((1 - var(--a)) * 34deg + var(--ty))) rotateY(calc((1 - var(--a)) * -22deg + var(--tx))) rotateZ(calc((1 - var(--a)) * 5deg));
+}
+
+/* ── P2 «Recorrido»: la pantalla cambia con el relato (inicio → ejercicio → calendario), como un empuje de iOS ── */
+[data-r23p="p2"] .telefono .pant { visibility: hidden; transition: transform 0.75s var(--ease-pagina), filter 0.75s var(--ease-pagina), visibility 0s 0.75s; }
+[data-r23p="p2"] .telefono .pant[data-p2] { visibility: visible; transform: translateX(100%); transition: transform 0.75s var(--ease-pagina), filter 0.75s var(--ease-pagina); }
+[data-r23p="p2"] .telefono .pant[data-p2="0"] { transform: none; }
+[data-r23p="p2"] [data-paso="1"] .pant[data-p2="0"], [data-r23p="p2"] [data-paso="2"] .pant[data-p2="0"], [data-r23p="p2"] [data-paso="2"] .pant[data-p2="1"] { transform: translateX(-28%); filter: brightness(0.55); }
+[data-r23p="p2"] [data-paso="1"] .pant[data-p2="1"], [data-r23p="p2"] [data-paso="2"] .pant[data-p2="2"] { transform: none; }
+[data-r23p="p2"] .telefono .pant[data-p2="1"] { z-index: 1; } [data-r23p="p2"] .telefono .pant[data-p2="2"] { z-index: 2; }
+
+/* ── P3 «Se usa sola»: al llegar, un toque marca «Bien», se abre la rutina, se desliza para empezar y corre el ejercicio (10 s, en bucle) ── */
+[data-r23p="p3"] .telefono .pant[data-p3] { visibility: visible; }
+[data-r23p="p3"] .telefono .pant[data-p3="1"] { z-index: 1; transform: translateX(100%); } [data-r23p="p3"] .telefono .pant[data-p3="2"] { z-index: 2; transform: translateX(100%); }
+[data-r23p="p3"] .en-uso .pant[data-p3="0"] { animation: uso-0 10s var(--ease-calma) infinite; }
+[data-r23p="p3"] .en-uso .pant[data-p3="1"] { animation: uso-1 10s var(--ease-calma) infinite; }
+[data-r23p="p3"] .en-uso .pant[data-p3="2"] { animation: uso-2 10s var(--ease-calma) infinite; }
+[data-r23p="p3"] .toque { display: block; position: absolute; z-index: 5; left: 76%; top: 58.5%; width: 15%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: rgb(253 253 253 / 0.38); box-shadow: 0 0 0 1.5px rgb(253 253 253 / 0.75), 0 6px 18px rgb(6 18 21 / 0.35); opacity: 0; }
+[data-r23p="p3"] .en-uso .toque { animation: uso-toque 10s var(--ease-calma) infinite; }
+/* Pausa (WCAG 2.2.2: lo que se mueve solo más de 5 s se tiene que poder detener) */
+[data-r23p="p3"] .telefono .pausa { display: grid; place-items: center; position: absolute; z-index: 6; right: -58px; bottom: 6px; width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer;
+  color: var(--blanco); background: var(--vidrio-tenido); border: 1px solid rgb(253 253 253 / 0.35); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  opacity: clamp(0, calc((var(--p) - 0.8) * 5), 1); transition: background 0.3s var(--ease-calma); }
+[data-r23p="p3"] .telefono .pausa:hover { background: var(--vidrio-tenido-respaldo); }
+[data-r23p="p3"] .telefono .pausa:focus-visible { outline: 2px solid var(--bruma); outline-offset: 3px; }
+.telefono .pausa svg { fill: currentColor; } .telefono .pausa .pl { display: none; }
+.escena-app.pausado .pausa .ba { display: none; } .escena-app.pausado .pausa .pl { display: block; }
+.escena-app.pausado .pant, .escena-app.pausado .toque { animation-play-state: paused !important; }
+[data-r23f="f3"][data-r23p="p3"] .telefono .pausa { color: var(--petroleo); background: rgb(253 253 253 / 0.6); border-color: rgb(36 74 83 / 0.25); }
+@keyframes uso-0 { 0%, 16% { transform: none; filter: none; } 24%, 66% { transform: translateX(-28%); filter: brightness(0.55); } 67%, 100% { transform: none; filter: none; } }
+@keyframes uso-1 { 0%, 16% { transform: translateX(100%); opacity: 1; } 24%, 56% { transform: none; filter: none; opacity: 1; } 64% { transform: translateX(-28%); filter: brightness(0.55); opacity: 1; } 65%, 99% { opacity: 0; transform: translateX(100%); } 100% { opacity: 1; transform: translateX(100%); } }
+@keyframes uso-2 { 0%, 56% { transform: translateX(100%); opacity: 1; } 64%, 90% { transform: none; opacity: 1; } 100% { transform: none; opacity: 0; } }
+@keyframes uso-toque {
+  0% { opacity: 0; left: 76%; top: 58.5%; scale: 1.25; } 7% { opacity: 1; scale: 1; } 11% { scale: 0.78; } 15% { opacity: 0; scale: 1.4; }
+  36% { opacity: 0; left: 14%; top: 92%; scale: 1.2; } 41% { opacity: 1; left: 14%; top: 92%; scale: 0.9; } 51% { opacity: 1; left: 74%; top: 92%; scale: 0.9; } 55%, 100% { opacity: 0; left: 74%; top: 92%; scale: 1.3; }
+}
+
+/* ── Relato (X2 y P2): el paso del inicio se alarga para que haya tramo después de que llega el teléfono ── */
+[data-v="3"][data-r23x="x2"] .inicio, [data-v="3"][data-r23p="p2"] .inicio { --alto-relato: 210; height: calc((260 + var(--alto-relato)) * 1svh); }
+
+/* ── X2 «Relato en pasos»: tres pasos a la izquierda (el activo se abre) y los dispositivos a la derecha ── */
+[data-r23x="x2"] .escena-app { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 96px); padding-inline: max(var(--margen), calc((100vw - 1240px) / 2)); }
+[data-r23x="x2"] .escena-app .lado { display: none; }
+[data-r23x="x2"] .relato { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0 0 0 26px; position: relative; max-width: 470px; justify-self: end; width: 100%;
+  opacity: var(--ve); transform: translateY(calc((1 - var(--ve)) * 30px)); }
+[data-r23x="x2"] .relato::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: rgb(253 253 253 / 0.2); }
+[data-r23x="x2"] .relato::after { content: ""; position: absolute; left: 0; top: 8px; width: 2px; border-radius: 2px; height: calc((100% - 16px) * (0.12 + var(--q) * 0.88)); background: var(--bruma); }
+.relato li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 14px 0; opacity: 0.74; transition: opacity 0.5s var(--ease-calma); }
+.relato .relato-num { font-size: 0.875rem; font-weight: 500; padding-top: 0.45em; align-self: start; font-variant-numeric: tabular-nums; }
+.relato .rotulo { font-size: 0.875rem; font-weight: 500; color: var(--bruma); max-height: 0; overflow: hidden; opacity: 0; transition: opacity 0.4s var(--ease-calma), max-height 0.5s var(--ease-calma), margin 0.5s var(--ease-calma); }
+[data-paso="0"] .relato li:nth-child(1) .rotulo, [data-paso="1"] .relato li:nth-child(2) .rotulo, [data-paso="2"] .relato li:nth-child(3) .rotulo { max-height: 2em; opacity: 1; margin-bottom: 6px; }
+.relato h2 { font-size: clamp(1.5rem, 2.1vw, 2.125rem); line-height: 1.12; }
+.relato h2 + p { margin-top: 0; font-size: 1.0625rem; line-height: 1.5; max-width: 36ch; opacity: 0; transition: opacity 0.4s var(--ease-calma), margin 0.5s var(--ease-calma); max-height: 0; overflow: hidden; }
+[data-paso="0"] .relato li:nth-child(1), [data-paso="1"] .relato li:nth-child(2), [data-paso="2"] .relato li:nth-child(3) { opacity: 1; }
+[data-paso="0"] .relato li:nth-child(1) h2 + p, [data-paso="1"] .relato li:nth-child(2) h2 + p, [data-paso="2"] .relato li:nth-child(3) h2 + p { opacity: 1; max-height: 8em; margin-top: 12px; transition: opacity 0.5s 0.15s var(--ease-calma), max-height 0.6s var(--ease-calma), margin 0.5s var(--ease-calma); }
+[data-r23x="x2"] .dispositivos { justify-self: start; width: 100%; }
+
+/* ── X3 «Titular y dispositivos»: un titular arriba y los dispositivos al centro, sin textos a los lados ── */
+[data-r23x="x3"] .escena-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); justify-items: center; align-items: center; gap: clamp(20px, 3svh, 36px); padding-top: clamp(96px, 13svh, 128px); padding-bottom: 24px; }
+[data-r23x="x3"] .escena-app .lado { display: none; }
+[data-r23x="x3"] .escena-titulo { display: block; text-align: center; font-size: clamp(1.875rem, 3.2vw, 3.25rem); line-height: 1.06; max-width: 22ch; opacity: var(--ve); transform: translateY(calc((1 - var(--ve)) * 30px)); }
+[data-r23x="x3"] .escena-titulo .acento { font-family: var(--acento); font-style: italic; font-weight: 300; }
+[data-r23x="x3"] .dispositivos { height: 100%; width: 100%; }
+[data-r23x="x3"] .telefono { height: min(100%, 700px); width: auto; }
+
+/* ── A2 «Tarjetas» (y A4 = A2 + A3): datos de la app flotan junto al teléfono, a distintas profundidades. Con X2 se ve la del paso activo; con X3, las tres ── */
+.dispositivos { --tw: clamp(240px, 22vw, 320px); --dx: 0px; }
+:is([data-r23a="a2"], [data-r23a="a4"]):is([data-r23x="x2"], [data-r23x="x3"]) .escena-app .flota-escena { display: flex; z-index: 4;
+  opacity: clamp(0, calc((var(--p) - 0.72) * 4), 1); translate: var(--dx) calc((1 - clamp(0, calc((var(--p) - 0.5) * 2), 1)) * var(--prof) * 140px);
+  transition: opacity 0.5s var(--ease-calma), translate 0.9s var(--ease-pagina); }
+.flota-escena:nth-of-type(1) { top: 24%; right: calc(50% + var(--tw) / 2 - 40px); }
+.flota-escena:nth-of-type(2) { top: 50%; left: calc(50% + var(--tw) / 2 - 40px); }
+.flota-escena:nth-of-type(3) { top: 72%; right: calc(50% + var(--tw) / 2 - 30px); }
+/* Con X2 solo se ve la tarjeta del paso activo (más específico que la regla de arriba) */
+:is([data-r23a="a2"], [data-r23a="a4"])[data-r23x="x2"] .escena-app .flota-escena { opacity: 0; }
+:is([data-r23a="a2"], [data-r23a="a4"])[data-r23x="x2"] .escena-app[data-paso="0"] .flota-escena:nth-of-type(2), :is([data-r23a="a2"], [data-r23a="a4"])[data-r23x="x2"] .escena-app[data-paso="1"] .flota-escena:nth-of-type(1), :is([data-r23a="a2"], [data-r23a="a4"])[data-r23x="x2"] .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { opacity: clamp(0, calc((var(--p) - 0.72) * 4), 1); }
+[data-r23x="x3"] .dispositivos { --tw: calc(min(100cqh, 700px) * 1170 / 2532); container-type: size; }
+
+/* ── A3 «Panel del kine»: la ventana del panel queda detrás del teléfono (en X2 entra en el paso 3) ── */
+:is([data-r23a="a3"], [data-r23a="a4"]):is([data-r23x="x2"], [data-r23x="x3"]) .ventana-kine { display: block; position: absolute; z-index: 0; width: min(640px, 46vw); top: 50%; left: 50%;
+  box-shadow: 0 0 0 1px rgb(253 253 253 / 0.18), 0 40px 90px -30px rgb(6 18 21 / 0.65); transition: opacity 0.7s var(--ease-calma), translate 0.9s var(--ease-pagina); }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x3"] .ventana-kine { translate: -18% -50%; opacity: clamp(0, calc((var(--p) - 0.5) * 3), 1); }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x3"] .telefono { translate: -13vw 0; z-index: 1; }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x3"] .dispositivos { --dx: -13vw; }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x2"] .ventana-kine { left: auto; right: 0; width: min(600px, 40vw); translate: 8% -42%; opacity: 0; }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x2"] [data-paso="2"] .ventana-kine { translate: 0 -50%; opacity: 1; }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x2"] [data-paso="2"] .dispositivos { --dx: -9vw; }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x2"] .telefono { z-index: 1; transition: translate 0.9s var(--ease-pagina); }
+:is([data-r23a="a3"], [data-r23a="a4"])[data-r23x="x2"] [data-paso="2"] .telefono { translate: -9vw 0; }
+
+/* ── F2 «Halo»: luz Bruma detrás de los dispositivos y una sombra de apoyo ── */
+[data-r23f="f2"] .dispositivos::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: calc(var(--tw) * 2.5); aspect-ratio: 0.72; translate: calc(-50% + var(--dx)) -50%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(201 233 232 / 0.4), rgb(201 233 232 / 0.14) 50%, rgb(201 233 232 / 0) 100%); transition: translate 0.9s var(--ease-pagina); opacity: clamp(0, calc((var(--p) - 0.45) * 2.4), 1); pointer-events: none; }
+
+/* ── F3 «Bruma»: el degradado se aclara a Bruma para que la app Petróleo resalte; el texto pasa a Petróleo ── */
+[data-r23f="f3"] .escena-app::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--grano), radial-gradient(60% 70% at 62% 50%, #e4f4f3 0%, rgb(228 244 243 / 0) 70%), linear-gradient(160deg, #d9efee 0%, var(--bruma) 48%, #b4d7d7 100%);
+  background-size: 180px, auto, auto; background-blend-mode: soft-light, normal, normal; opacity: clamp(0, calc((var(--p) - 0.28) * 2.6), 1); }
+[data-r23f="f3"] .escena-app { color: var(--petroleo); }
+[data-r23f="f3"] .relato .rotulo { color: var(--petroleo); }
+[data-r23f="f3"] .relato::before { background: rgb(36 74 83 / 0.18); } [data-r23f="f3"] .relato::after { background: var(--petroleo); }
+
+/* ── Celular ── */
+@media (max-width: 760px) {
+  [data-v="3"][data-r23x="x2"] .inicio, [data-v="3"][data-r23p="p2"] .inicio { --alto-relato: 190; height: calc((240 + var(--alto-relato)) * 1svh); }
+  [data-r23x="x2"] .escena-app, [data-r23x="x3"] .escena-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); align-content: stretch; justify-items: center; padding: 88px var(--margen) 28px; gap: 18px; }
+  [data-r23x="x2"] .relato { padding: 0; max-width: none; justify-self: stretch; display: grid; text-align: center; }
+  [data-r23x="x2"] .relato::before, [data-r23x="x2"] .relato::after { display: none; }
+  [data-r23x="x2"] .relato li { grid-area: 1 / 1; display: block; padding: 0; opacity: 0; transition: opacity 0.45s var(--ease-calma); }
+  [data-r23x="x2"] .relato .relato-num { display: none; }
+  [data-r23x="x2"] .relato h2 { font-size: 1.625rem; }
+  [data-r23x="x2"] .relato h2 + p { font-size: 1rem; max-width: 34ch; margin-inline: auto; }
+  [data-paso="0"] .relato li:nth-child(1), [data-paso="1"] .relato li:nth-child(2), [data-paso="2"] .relato li:nth-child(3) { opacity: 1; }
+  [data-r23x="x2"] .dispositivos, [data-r23x="x3"] .dispositivos { justify-self: center; height: 100%; width: 100%; }
+  [data-r23x="x2"] .telefono, [data-r23x="x3"] .telefono { height: min(100%, 520px); width: auto; }
+  [data-r23x="x3"] .escena-titulo { font-size: 1.75rem; max-width: 17ch; }
+  :is([data-r23a="a2"], [data-r23a="a4"]):is([data-r23x="x2"], [data-r23x="x3"]) .flota-escena { font-size: 0.8125rem; padding: 8px 14px 8px 8px; }
+  .flota-escena .ic-caja { width: 32px; height: 32px; }
+  .dispositivos { --dx: 0px !important; }
+  .flota-escena:nth-of-type(1) { top: 8%; left: 0; right: auto; }
+  .flota-escena:nth-of-type(2) { top: 46%; right: 0; left: auto; }
+  .flota-escena:nth-of-type(3) { top: auto; bottom: 8%; left: 0; right: auto; }
+  :is([data-r23a="a2"], [data-r23a="a4"])[data-r23x="x3"] .escena-app .flota-escena:nth-of-type(2) { display: none; }
+  :is([data-r23a="a3"], [data-r23a="a4"]) .ventana-kine { display: none !important; }
+  [data-v="3"] .escena-app::after { background: radial-gradient(70% 80% at 50% 50%, rgb(36 74 83 / 0.5), rgb(36 74 83 / 0.38)); }
+  [data-r23p="p3"] .telefono .pausa { right: -50px; }
+  :is([data-r23a="a3"], [data-r23a="a4"]) .telefono { translate: none !important; }
+}
+@media (prefers-reduced-motion: reduce) { .toque { display: none !important; } }
+
+/* ═════════ Ronda 24 · el flujo real de la app (video) con sus toques, y lo que rodea al teléfono.
+   data-r24v (v1 por paso, v2 con el scroll) · data-r24q (toque q1-q4) · data-r24b (tarjetas b1-b3) · data-r24e (paso del equipo e1-e2).
+   Sin atributo: v1, sin toques dibujados, b1 y e1 ═════════ */
+.pant-video, .toques, .conectores, .viajero, .resalte, .llega, .flota .w-anillo, .flota .w-pasos, .flota .w-estados, .flota .w-ahora { display: none; }
+[data-r23p="p2"] .pant-video.lista { display: block; position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; object-fit: cover; background: #244a53; transition: opacity 0.22s var(--ease-calma); }
+.pant-video.corte { opacity: 0; transition-duration: 0.12s; }
+/* Pausa también para el video (el tramo de la rutina dura 9 s: WCAG 2.2.2) */
+[data-r23p="p2"] .con-video .telefono .pausa { display: grid; place-items: center; position: absolute; z-index: 6; right: -58px; bottom: 6px; width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer;
+  color: var(--blanco); background: var(--vidrio-tenido); border: 1px solid rgb(253 253 253 / 0.35); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); opacity: clamp(0, calc((var(--p) - 0.8) * 5), 1); }
+[data-r23p="p2"] .con-video .telefono .pausa:focus-visible { outline: 2px solid var(--bruma); outline-offset: 3px; }
+@media (max-width: 760px) { [data-r23p="p2"] .con-video .telefono .pausa { right: -50px; } }
+
+/* ── Toques: el JS pone --x, --y (en % de la pantalla), --ap (aparece), --pr (presiona), --on (onda) y el rótulo ── */
+[data-r24q] .con-video .toques { display: block; position: absolute; inset: 0; z-index: 4; pointer-events: none; --x: 50%; --y: 50%; --ap: 0; --pr: 0; --on: 0; }
+.toques > span { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; }
+.toque-onda, .toque-rotulo { display: none; }
+/* Q1 «Toque de iOS»: el disco gris de las grabaciones de pantalla del iPhone */
+[data-r24q="q1"] .toque-punto { width: 13%; aspect-ratio: 1; border-radius: 50%; background: rgb(253 253 253 / 0.4); border: 1.5px solid rgb(253 253 253 / 0.75); box-shadow: 0 4px 14px rgb(6 18 21 / 0.35); opacity: var(--ap); scale: calc(1 - var(--pr) * 0.2); }
+/* Q2 «Onda Bruma»: un punto Bruma y una onda que se abre al tocar */
+:is([data-r24q="q2"], [data-r24q="q3"], [data-r24q="q4"]) .toque-punto { width: 6.5%; aspect-ratio: 1; border-radius: 50%; background: var(--bruma); box-shadow: 0 0 0 2.5px rgb(253 253 253 / 0.9), 0 0 0 calc(5px + var(--pr) * 3px) rgb(201 233 232 / 0.35), 0 6px 16px rgb(6 18 21 / 0.4); opacity: var(--ap); scale: calc(1 - var(--pr) * 0.25); }
+:is([data-r24q="q2"], [data-r24q="q3"], [data-r24q="q4"]) .toque-onda { display: block; width: calc(6% + var(--on) * 34%); aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--bruma); opacity: calc((1 - var(--on)) * var(--onv, 0) * 0.9); }
+/* Q3 «Toque con rótulo»: Q2 y una cápsula de vidrio que dice la acción */
+[data-r24q="q3"] .toque-rotulo { display: block; translate: -50% calc(-100% - 26px); white-space: nowrap; padding: 6px 12px; border-radius: 99px; font-size: clamp(0.6875rem, 0.85vw, 0.8125rem); font-weight: 500; line-height: 1.2; color: var(--petroleo); background: rgb(253 253 253 / 0.94); box-shadow: 0 8px 20px rgb(6 18 21 / 0.35); opacity: var(--ra, 0); scale: calc(0.9 + var(--ra, 0) * 0.1); }
+/* Q4 «Dedo que viaja»: el punto se desliza de un toque al siguiente, dibujando el flujo */
+[data-r24q="q4"] .toque-punto { box-shadow: 0 0 0 2.5px rgb(253 253 253 / 0.9), 0 0 18px 6px rgb(201 233 232 / 0.45), 0 6px 16px rgb(6 18 21 / 0.4); }
+
+/* ── B2 «Vidrio con línea»: tarjetas de vidrio unidas por una línea a lo que señalan en la pantalla ── */
+[data-r24b] .escena-app .flota-escena { transition: opacity 0.45s var(--ease-calma), translate 0.9s var(--ease-pagina), scale 0.7s cubic-bezier(0.34, 1.5, 0.64, 1), filter 0.5s var(--ease-calma); }
+[data-r24b] .escena-app .flota-escena { scale: 0.9; filter: blur(6px); }
+[data-r24b] .escena-app[data-paso="0"] .flota-escena:nth-of-type(2), [data-r24b] .escena-app[data-paso="1"] .flota-escena:nth-of-type(1), [data-r24b] .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { scale: 1; filter: none; }
+[data-r24b="b2"] .escena-app .flota-escena { background: rgb(36 74 83 / 0.52); -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); color: var(--blanco); box-shadow: inset 0 0 0 1px rgb(253 253 253 / 0.28), 0 24px 44px -20px rgb(6 18 21 / 0.6); }
+[data-r24b="b2"] .escena-app .flota-escena b { color: var(--blanco); } [data-r24b="b2"] .escena-app .flota-escena small { color: #d9eeee; }
+[data-r24b="b2"] .flota-escena .ic-caja { background: rgb(201 233 232 / 0.18); color: var(--bruma); box-shadow: inset 0 0 0 1px rgb(201 233 232 / 0.3); }
+[data-r24b="b2"] .flota-escena .ic-caja.alerta { background: rgb(246 227 207 / 0.2); color: #f6e3cf; box-shadow: inset 0 0 0 1px rgb(246 227 207 / 0.35); }
+[data-r24b="b2"] .conectores { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 3; pointer-events: none; }
+.conectores .con { fill: none; stroke: var(--bruma); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0.85; transition: stroke-dashoffset 0.7s var(--ease-calma) 0.25s, opacity 0.3s; }
+.conectores .con.ve { stroke-dashoffset: 0; }
+.conectores .con-punto { fill: var(--bruma); stroke: rgb(253 253 253 / 0.9); stroke-width: 2; opacity: 0; transition: opacity 0.3s 0.8s; }
+.conectores .con-punto.ve { opacity: 1; animation: con-late 1.6s 0.9s var(--ease-calma) 2; }
+@keyframes con-late { 50% { r: 7; } }
+.conectores .ruta { display: none; }
+
+/* ── B3 «Widgets vivos»: cada tarjeta trae su dato animado (una vez, sin bucles) ── */
+[data-r24b="b3"] .flota .w-anillo { display: block; position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px); rotate: -90deg; }
+[data-r24b="b3"] .flota .ic-caja { position: relative; }
+.w-anillo circle { fill: none; stroke: var(--mar); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 126; stroke-dashoffset: 126; transition: stroke-dashoffset 1.3s var(--ease-calma) 0.4s; }
+[data-r24b="b3"] .flota .w-pasos { display: flex; align-items: center; gap: 3px; margin-top: 7px; }
+.w-pasos i { width: 16px; height: 4px; border-radius: 2px; background: rgb(36 74 83 / 0.14); transition: background 0.3s; }
+.w-pasos em { font-style: normal; font-size: 0.75rem; color: #4f5551; margin-left: 6px; }
+[data-r24b="b3"] .flota .w-estados { display: flex; gap: 4px; margin-top: 7px; }
+.w-estados i { font-style: normal; font-size: 0.6875rem; padding: 2px 8px; border-radius: 99px; color: var(--petroleo); box-shadow: inset 0 0 0 1px rgb(36 74 83 / 0.2); transition: background 0.35s, color 0.35s; }
+[data-r24b="b3"] .flota .w-ahora { display: block; align-self: flex-start; margin-left: 4px; font-size: 0.6875rem; color: #6b4013; background: #f6e3cf; padding: 2px 7px; border-radius: 99px; scale: 0; transition: scale 0.5s cubic-bezier(0.34, 1.6, 0.64, 1) 0.9s; }
+/* Cuando su paso está activo: el anillo se cierra, los ejercicios se llenan de a uno, el estado recorre las tres opciones y la campana suena */
+.escena-app[data-paso="1"] .flota-escena:nth-of-type(1) .w-anillo circle { stroke-dashoffset: 0; }
+.escena-app[data-paso="1"] .flota-escena:nth-of-type(1) .w-pasos i { background: var(--mar); }
+.w-pasos i:nth-child(2) { transition-delay: 0.25s; } .w-pasos i:nth-child(3) { transition-delay: 0.5s; } .w-pasos i:nth-child(4) { transition-delay: 0.75s; } .w-pasos i:nth-child(5) { transition-delay: 1s; }
+.escena-app[data-paso="0"] .flota-escena:nth-of-type(2) .w-estados i { animation: estado 2.4s var(--ease-calma) both; }
+.w-estados i:nth-child(1) { animation-delay: 0.3s !important; } .w-estados i:nth-child(2) { animation-delay: 0.9s !important; } .w-estados i:nth-child(3) { animation-delay: 1.5s !important; }
+@keyframes estado { 0% { background: transparent; color: var(--petroleo); } 15%, 40% { background: var(--petroleo); color: var(--blanco); } 60%, 100% { background: transparent; color: var(--petroleo); } }
+.escena-app[data-paso="2"] .flota-escena:nth-of-type(3) .ic-caja.alerta { animation: campana 0.9s 0.6s var(--ease-calma) both; }
+.escena-app[data-paso="2"] .flota-escena:nth-of-type(3) .w-ahora { scale: 1; }
+@keyframes campana { 15% { rotate: 14deg; } 30% { rotate: -12deg; } 45% { rotate: 9deg; } 60% { rotate: -6deg; } 75% { rotate: 3deg; } 100% { rotate: 0deg; } }
+
+/* ── E2 «Llega al panel»: en el paso 3, el check-in viaja del teléfono a la ficha del kine y llena la fila de hoy ── */
+.ventana-cuerpo-kine { position: relative; }
+[data-r24e="e2"]:is([data-r23a="a3"], [data-r23a="a4"]) .ventana-kine { transform: perspective(1400px) rotateY(-14deg) scale(0.94); transform-origin: 100% 50%; transition: opacity 0.7s var(--ease-calma), translate 0.9s var(--ease-pagina), transform 1.1s var(--ease-pagina); }
+[data-r24e="e2"]:is([data-r23a="a3"], [data-r23a="a4"]) [data-paso="2"] .ventana-kine { transform: perspective(1400px) rotateY(-5deg) scale(1); }
+[data-r24e="e2"] .resalte { display: block; position: absolute; left: 29%; top: 88.2%; width: 66.6%; height: 6.4%; border-radius: 8px; box-shadow: inset 0 0 0 2px var(--mar); background: rgb(77 153 153 / 0.1); opacity: 0; transition: opacity 0.4s var(--ease-calma); }
+[data-r24e="e2"] .llega { display: inline-flex; align-items: center; gap: 4px; position: absolute; left: 38.6%; top: 88.6%; height: 5.6%; padding: 0 1.4% 0 1%; border-radius: 99px; background: var(--mar); color: var(--blanco); box-shadow: 0 0 0 3px #fbf9f4, 0 6px 14px rgb(36 74 83 / 0.3); font-size: clamp(0.5rem, 0.7vw, 0.75rem); font-weight: 600; white-space: nowrap; opacity: 0; scale: 0.6; transition: opacity 0.3s, scale 0.45s cubic-bezier(0.34, 1.6, 0.64, 1); }
+.escena-app.llego .resalte { opacity: 1; } .escena-app.llego .llega { opacity: 1; scale: 1; }
+[data-r24e="e2"] .viajero { display: flex; align-items: center; gap: 8px; position: absolute; left: 0; top: 0; z-index: 5; padding: 6px 14px 6px 6px; border-radius: 99px; background: var(--blanco); color: var(--petroleo); font-size: 0.8125rem; font-weight: 500; white-space: nowrap; box-shadow: 0 14px 30px -10px rgb(6 18 21 / 0.55); opacity: 0; offset-rotate: 0deg; offset-anchor: 50% 50%; pointer-events: none; }
+[data-r24e="e2"] .viajero .ic-caja { width: 26px; height: 26px; border-radius: 50%; background: var(--bruma); display: grid; place-items: center; }
+[data-r24e="e2"] .viajero .ic { width: 15px; height: 15px; }
+[data-r24e="e2"] .conectores { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 3; pointer-events: none; }
+[data-r24e="e2"] .conectores .ruta { display: block; fill: none; stroke: rgb(201 233 232 / 0.7); stroke-width: 1.4; stroke-dasharray: 3 6; opacity: 0; transition: opacity 0.4s; }
+[data-r24e="e2"] .escena-app.viajando .conectores .ruta { opacity: 1; }
+@media (max-width: 760px) { [data-r24e="e2"] .viajero, [data-r24e="e2"] .conectores .ruta { display: none; } }
+/* B2: las tarjetas se separan del teléfono para que la línea se vea */
+/* Las tres van a la izquierda del teléfono, donde hay espacio (a la derecha la del paso 1 se salía en 1440) */
+[data-r24b="b2"] .flota-escena:nth-of-type(n) { left: auto; right: calc(50% + var(--tw) / 2 + 22px); }
+[data-r24b="b2"] .flota-escena:nth-of-type(2) { top: 56%; }
+@media (max-width: 760px) { [data-r24b] .conectores { display: none !important; } [data-r24b="b2"] .flota-escena:nth-of-type(1), [data-r24b="b2"] .flota-escena:nth-of-type(3) { right: auto; } [data-r24b="b2"] .flota-escena:nth-of-type(2) { left: auto; } }
+[data-r24q="q3"] .toque-rotulo[data-lado="izq"] { translate: calc(-100% + 18px) calc(-100% - 26px); }
+[data-r24q="q3"] .toque-rotulo[data-lado="der"] { translate: -18px calc(-100% - 26px); }
+@media (max-width: 760px) { [data-r24b="b2"] .flota-escena:nth-of-type(n) { left: 0; right: auto; } [data-r24b="b2"] .flota-escena:nth-of-type(2) { left: auto; right: 0; top: 8%; } }
+@media (max-width: 760px) { [data-r24b="b2"] .escena-app .flota-escena { background: rgb(36 74 83 / 0.86); } }
+@media (max-width: 760px) { [data-r24q] .escena-app .flota-escena:nth-of-type(2) { top: 8%; } }
