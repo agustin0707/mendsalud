@@ -79,7 +79,7 @@ async function pagina(origen, destino) {
   const hojas = ['base', 'cabecera', 'barra', ...(meta.css ?? []), ...(meta.css?.includes('paginas') ? ['fondos', 'fondos-variantes'] : [])]
   const css = `<style>\n${(await Promise.all(hojas.map((c) => leer(`estilos/${c}.css`)))).join('\n').replace(/url\((["']?)\.\.\//g, 'url($1{{base}}/')}\n</style>`
   // La barra elegida es N1 (ronda 3, 12 nov); una propuesta puede pedir otra con data-nav
-  const attrs = Object.entries({ 'data-nav': 'n1', 'data-r13n': 'vb', 'data-r13c': 'cb', 'data-fondos': 'paneles abre marca aurora gp gr gc ge vi', ...(meta.cuerpo ?? {}) }).map(([k, v]) => ` ${k}="${v}"`).join('')
+  const attrs = Object.entries({ 'data-nav': 'n1', 'data-r13n': 'vb', 'data-r14c': 'c2', 'data-r15n': 'p2', 'data-r16h': 'h5', 'data-r16i': 'i2', 'data-r18m': 'm2', 'data-r19b': 'b2', 'data-fondos': 'paneles abre marca aurora gp gr gc ge vi', ...(meta.cuerpo ?? {}) }).map(([k, v]) => ` ${k}="${v}"`).join('')
   let html = `<!doctype html>
 <html lang="es-CL">
 <head>

@@ -34,7 +34,7 @@
 .inicio h1 .acento { font-size: 1.1em; line-height: 0.9; }
 .inicio h1 .iso-titulo { display: inline-block; width: 0.62em; height: 0.62em; vertical-align: 0.02em; margin: 0 0.12em 0 0.04em; }
 .inicio h1 .iso-titulo svg { width: 100%; height: 100%; }
-.bajada { font-size: clamp(1.125rem, 1.4vw, 1.3125rem); line-height: 1.45; max-width: 34ch; }
+.bajada { font-size: clamp(1rem, 1.1vw, 1.125rem); line-height: 1.5; max-width: 34ch; }
 .botones { display: flex; flex-wrap: wrap; gap: 10px; }
 .inicio-dato { position: absolute; z-index: 2; display: flex; align-items: center; gap: 10px; font-size: 1rem; opacity: clamp(0, calc(1 - var(--p) * 3), 1); }
 .inicio-dato .linea { width: 32px; height: 1px; background: currentColor; }
@@ -152,6 +152,17 @@
   --zoom: 1.45; object-position: 50% 0%; transform-origin: 52% 6%;
   transform: scale(calc(var(--zoom) + var(--p) * 0.09));
 }
+/* Ronda 14: la foto se dibuja ya agrandada (ancho y alto por el zoom) en vez de escalarla después.
+   Con transform: scale, Chrome pinta la foto a su tamaño sin zoom y después estira esa imagen: se veía blanda. */
+[data-v="3"] .inicio-foto img {
+  position: absolute; max-width: none;
+  width: calc(var(--zoom) * 100%); height: calc(var(--zoom) * 100%);
+  left: calc((1 - var(--zoom)) * 52%); top: calc((1 - var(--zoom)) * 6%);
+  transform: scale(calc(1 + var(--p) * 0.09 / var(--zoom)));
+}
+/* Ronda 14: la foto no se puede arrastrar ni seleccionar */
+.inicio-foto, .inicio-foto img { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+.inicio-foto img { pointer-events: none; }
 [data-v="3"] .inicio-campo::after {
   /* Grano de la marca encima del degradado (la textura de Mend; sin las líneas de la ref. 04) */
   content: ""; position: absolute; inset: 0;
@@ -209,7 +220,7 @@
   [data-v="3"] .escena-app .lado.der .rotulo { justify-content: center; }
   [data-v="3"] .escena-app .lado.der p { display: none; }
   .telefono { width: min(58vw, 250px); }
-  .bajada { font-size: 1.125rem; }
+  .bajada { font-size: 1rem; }
 }
 
 /* Movimiento reducido: sin el paso animado; la foto queda quieta y el degradado entra como una sección más */
@@ -226,38 +237,73 @@
    El lienzo toma el color del borde de arriba del inicio (medido en la captura); abajo queda junto al pie Petróleo. */
 html { background-color: #6f7a76; }
 
-/* ===================== Ronda 13 (15 nov): los dos botones del inicio, BC «Par de vidrio» =====================
-   Agustín eligió BC entre tres propuestas: dos píldoras de vidrio del mismo tamaño (56 px), una clara y una teñida de Petróleo,
-   que repiten el vidrio de la barra. Va con <body data-r13b="bc"> (en el comentario de la página). */
-.inicio .boton .circulo.bajar { display: none; }
-[data-r13b] .inicio .botones { gap: 12px; }
-[data-r13b] .inicio .boton { min-height: 56px; font-size: 1.0625rem; padding: 6px 6px 6px 26px; gap: 14px; position: relative; isolation: isolate; overflow: hidden; }
-[data-r13b] .inicio .boton .circulo { width: 44px; height: 44px; }
-[data-r13b] .inicio .boton .circulo.bajar { display: grid; }
-[data-r13b] .inicio .boton:hover .circulo.bajar { transform: translateY(2px); }
-[data-r13b] .inicio .boton:hover .circulo.bajar svg { transform: none; }
+/* ===================== Ronda 14 (15 nov): botones del inicio B2 y degradado D3 oscurecido =====================
+   Agustín eligió B2 (Blanco y contorno, como Hinge Health) y D3 (foco bajo el texto), este último «un poco más oscuro, entre D3 y D5».
+   Van con <body data-r14b="b2" data-r14d="d3"> (en el comentario de la página). */
+[data-r14b] .inicio .botones { gap: 12px; }
+[data-r14b] .inicio .boton { position: relative; isolation: isolate; overflow: hidden; }
+[data-r14b] .inicio .boton .circulo.bajar { display: grid; }
+[data-r14b] .inicio .boton:hover .circulo.bajar { transform: translateY(3px); }
+[data-r14b] .inicio .boton:hover .circulo.bajar svg { transform: none; }
+[data-r14b] .inicio .boton-vidrio { -webkit-backdrop-filter: none; backdrop-filter: none; }
 
-/* BC · Par de vidrio: los dos del mismo tamaño, uno claro y uno teñido, con filo de luz y un brillo que cruza al pasar */
-[data-r13b="bc"] .inicio .boton-claro {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.94), rgb(253 253 253 / 0.82));
-  -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%);
-  box-shadow: inset 0 1px 0 #ffffff, inset 0 0 0 1px rgb(255 255 255 / 0.5), 0 14px 34px rgb(16 33 37 / 0.22);
+/* B2 · Blanco y contorno (Hinge Health): mismo alto, uno lleno y uno de contorno; la flecha va suelta junto al texto */
+[data-r14b="b2"] .inicio .boton { min-height: 52px; padding: 0 24px; gap: 10px; }
+[data-r14b="b2"] .inicio .boton .circulo { width: auto; height: auto; background: none; color: inherit; }
+[data-r14b="b2"] .inicio .boton .circulo svg { width: 17px; height: 17px; }
+[data-r14b="b2"] .inicio .boton-claro { background: var(--blanco); color: var(--petroleo); }
+[data-r14b="b2"] .inicio .boton-claro:hover { box-shadow: 0 0 0 5px rgb(253 253 253 / 0.22); }
+[data-r14b="b2"] .inicio .boton-vidrio { background: transparent; border: 1.5px solid rgb(253 253 253 / 0.88); }
+[data-r14b="b2"] .inicio .boton-vidrio:hover { background: var(--blanco); color: var(--petroleo); }
+@media (max-width: 760px) {
+  [data-r14b] .inicio .botones { flex-direction: column; align-items: stretch; width: min(100%, 320px); margin-inline: auto; }
+  [data-r14b] .inicio .boton { justify-content: center; }
 }
-[data-r13b="bc"] .inicio .boton-vidrio {
-  background: linear-gradient(180deg, rgb(36 74 83 / 0.42), rgb(29 60 67 / 0.56)); border: 0;
-  -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 0 0 1px rgb(255 255 255 / 0.16), 0 14px 34px rgb(16 33 37 / 0.22);
+
+/* ───── Degradado del inicio. --k estira el velo hacia arriba en pantallas bajas y en celular, donde el titular sube ───── */
+[data-r14d] .inicio { --k: 1; }
+@media (min-width: 761px) and (max-height: 800px) { [data-r14d] .inicio { --k: 1.2; } }
+@media (max-width: 760px) { [data-r14d] .inicio { --k: 1.36; } }
+@media (max-width: 760px) and (max-height: 740px) { [data-r14d] .inicio { --k: 1.52; } }
+
+/* D3 · Foco bajo el texto, oscurecido hacia D5: una elipse Petróleo profundo detrás del titular, la foto con un leve tinte Petróleo
+   y una viñeta suave en los bordes. La foto queda limpia arriba y a los lados. */
+[data-r14d="d3"] .inicio-foto::after { content: ""; position: absolute; inset: 0; background: rgb(36 74 83 / 0.09); mix-blend-mode: multiply; pointer-events: none; }
+[data-r14d="d3"] .inicio-velo {
+  background:
+    radial-gradient(130% 120% at 50% 38%, rgb(16 33 37 / 0) 56%, rgb(16 33 37 / 0.2) 100%),
+    radial-gradient(calc(var(--k) * 96%) calc(var(--k) * 76%) at 50% 100%, rgb(28 58 65 / 0.95) 0%, rgb(31 64 72 / 0.91) 46%, rgb(34 70 79 / 0.75) 64%, rgb(36 74 83 / 0.36) 82%, rgb(36 74 83 / 0) 100%),
+    linear-gradient(0deg, rgb(24 50 57 / 0.6) 0%, rgb(24 50 57 / 0) calc(var(--k) * 38%)),
+    linear-gradient(180deg, rgb(16 33 37 / 0.42) 0%, rgb(16 33 37 / 0) 18%);
 }
-[data-r13b="bc"] .inicio .boton-vidrio .circulo { background: var(--blanco); color: var(--petroleo); }
-[data-r13b="bc"] .inicio .boton::after {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.32) 50%, transparent 70%);
-  transform: translateX(-110%); transition: transform 0.9s var(--ease-salida);
+@media (max-width: 760px) { [data-r14d="d3"] .inicio-velo { background: radial-gradient(130% 120% at 50% 38%, rgb(16 33 37 / 0) 56%, rgb(16 33 37 / 0.2) 100%), radial-gradient(150% calc(var(--k) * 60%) at 50% 100%, rgb(28 58 65 / 0.96) 0%, rgb(31 64 72 / 0.9) 50%, rgb(36 74 83 / 0.54) 74%, rgb(36 74 83 / 0) 100%), linear-gradient(180deg, rgb(16 33 37 / 0.42) 0%, rgb(16 33 37 / 0) 16%); } }
+
+/* ===================== Ronda 15 (15-16 nov): forma de los botones del inicio E2 =====================
+   Nota de Agustín: «las flechas están repetitivas». Eligió E2 (la flecha aparece al pasar, solo en el principal) y los nombres L2
+   («Conversemos · Soy paciente»). Va con <body data-r15e="e2"> (en el comentario de la página). */
+[data-r15e] .inicio .boton .circulo.bajar { display: none; }
+/* E2 · La flecha aparece al pasar, solo en el principal */
+[data-r15e="e2"] .inicio .boton-claro { gap: 0; transition: background-color 0.3s var(--ease-calma), color 0.3s var(--ease-calma), box-shadow 0.3s var(--ease-calma), padding 0.45s var(--ease-circulo); }
+[data-r15e="e2"] .inicio .boton-claro .circulo { display: grid; width: 0; margin-left: 0; opacity: 0; overflow: hidden; transform: translateX(-6px); transition: width 0.45s var(--ease-circulo), margin 0.45s var(--ease-circulo), opacity 0.3s var(--ease-calma), transform 0.45s var(--ease-circulo); }
+[data-r15e="e2"] .inicio .boton-claro:is(:hover, :focus-visible) { padding: 0 18px 0 24px; }
+[data-r15e="e2"] .inicio .boton-claro:is(:hover, :focus-visible) .circulo { width: 17px; margin-left: 10px; opacity: 1; transform: none; }
+[data-r15e="e2"] .inicio .boton-claro:hover .circulo svg { transform: none; }
+@media (prefers-reduced-motion: reduce) { [data-r15e="e2"] .inicio .boton-claro .circulo { transition: none; } }
+
+/* ===================== Ronda 16 (16 nov): hover H5 «Luz que sigue» =====================
+   Agustín eligió H5 entre seis: una luz suave sigue al puntero dentro del botón (sitio.js pone --mx y --my).
+   Pidió otro color para la luz de Conversemos; se prueba con <body data-r16l="bruma|arena|salvia|sombra|mar">.
+   La misma luz va en el Conversemos de la barra (barra.css), para que respondan igual. */
+/* Ronda 17 (16 nov): eligió C3, Sombra (Petróleo al 13 %). Texto Petróleo sobre el centro de la luz: 7,65:1. */
+[data-r16h] { --luz-cta: rgb(36 74 83 / 0.13); }
+[data-r16h="h5"] .inicio .boton::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(110px circle at var(--mx, 50%) var(--my, 50%), var(--luz), transparent 72%);
+  transition: opacity 0.5s var(--sp);
 }
-[data-r13b="bc"] .inicio .boton:hover::after { transform: translateX(110%); }
-@media (max-width: 760px) { [data-r13b] .inicio .botones { flex-direction: column; align-items: stretch; width: min(100%, 320px); margin-inline: auto; } [data-r13b] .inicio .boton { justify-content: space-between; } }
-@media (prefers-reduced-transparency: reduce) {
-  [data-r13b] .inicio .boton { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-  [data-r13b="bc"] .inicio .boton-vidrio { background: var(--vidrio-tenido-respaldo); }
-  [data-r13b="bc"] .inicio .boton-claro { background: var(--blanco); }
-}
+[data-r16h="h5"] .inicio .boton-claro { --luz: var(--luz-cta); }
+[data-r16h="h5"] .inicio .boton-vidrio { --luz: rgb(253 253 253 / 0.22); }
+[data-r16h="h5"] .inicio .boton:is(:hover, :focus-visible)::after { opacity: 1; }
+[data-r16h="h5"] .inicio .boton-claro:hover { box-shadow: none; }
+[data-r16h="h5"] .inicio .boton-vidrio { transition: border-color 0.45s var(--sp), color 0.45s var(--sp), background-color 0.45s var(--sp); }
+[data-r16h="h5"] .inicio .boton-vidrio:hover { background: transparent; color: var(--blanco); border-color: var(--blanco); }

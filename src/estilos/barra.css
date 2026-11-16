@@ -32,7 +32,7 @@
 }
 [data-nav] .cab-sitio[data-sobre] .nav-vidrio a {
   min-height: 40px; padding: 0 15px; gap: 7px; color: var(--vb-texto);
-  font-size: 0.9375rem; font-weight: 500; letter-spacing: 0;
+  font-size: 0.9375rem; font-weight: 400; letter-spacing: 0.005em;
   transition: color 0.3s var(--ease-calma), background-color 0.35s var(--ease-calma), padding 0.45s var(--sp);
 }
 [data-nav] .cab-sitio[data-sobre] .nav-vidrio a.bajo,
@@ -49,7 +49,7 @@
 [data-nav] .cab-sitio[data-sobre] .entrar {
   background: none; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
   min-height: 40px; padding: 0 14px; gap: 7px; color: var(--vb-texto);
-  font-size: 0.9375rem; font-weight: 500;
+  font-size: 0.9375rem; font-weight: 400; letter-spacing: 0.005em;
 }
 [data-nav] .cab-sitio[data-sobre] .entrar .ic { width: 18px; height: 18px; }
 [data-nav] .cab-sitio[data-sobre] .entrar:hover { background: var(--vb-capsula-suave); }
@@ -272,7 +272,7 @@
 
 /* ===================== Ronda 13 (15 nov): vidrio Petróleo (VB) y Conversemos en degradado (CB) =====================
    Pedido de Agustín: la barra «más glassmorphing, ahora se ve blanca no más» y mejorar el botón Conversemos.
-   Eligió VB y CB entre tres propuestas cada uno. Van con <body data-r13n="vb" data-r13c="cb"> (armar.mjs los pone en todas las páginas).
+   Eligió VB y CB entre tres propuestas cada uno; CB se reemplazó en la ronda 14 por C2. VB va con <body data-r13n="vb"> (armar.mjs).
    Sobre la foto y el degradado: vidrio teñido de Petróleo con texto y logo Blanco, como la barra de la app. Sobre Hueso: vidrio claro con texto Petróleo. */
 [data-r13n="vb"] .cab-sitio[data-sobre="oscuro"] {
   color: var(--blanco);
@@ -292,22 +292,169 @@
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 1), inset 0 0 0 1px rgb(36 74 83 / 0.08), 0 12px 34px rgb(36 74 83 / 0.12);
 }
 
-/* CB · Conversemos en el degradado de Mend: Petróleo que se aclara hacia Mar, filo Bruma y un brillo que cruza al pasar */
-[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab {
-  --bc-texto: var(--blanco); --bc-circulo: var(--bruma); --bc-flecha: var(--petroleo); --bc-texto-lleno: var(--petroleo);
-  background: linear-gradient(115deg, #3d7681 0%, #2b5963 45%, #1d3c43 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 0 0 1px rgb(201 233 232 / 0.18), 0 8px 22px rgb(29 60 67 / 0.34);
-}
-[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab .txt { position: relative; }
-[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab::after {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
-  transform: translateX(-110%); transition: transform 0.9s var(--sp);
-}
-[data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab:hover::after { transform: translateX(110%); }
-@media (prefers-reduced-motion: reduce) { [data-r13c="cb"] .cab-sitio[data-sobre] .boton-cab::after { display: none; } }
 @media (prefers-reduced-transparency: reduce) {
   [data-r13n="vb"] .cab-sitio[data-sobre]::before { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   [data-r13n="vb"] .cab-sitio[data-sobre="oscuro"]::before { background: var(--vidrio-tenido-respaldo); }
   [data-r13n="vb"] .cab-sitio[data-sobre="claro"]::before { background: rgb(253 253 253 / 0.97); }
 }
+
+/* ===================== Ronda 14 (15 nov): Conversemos de la barra C2 «Blanco con ícono» =====================
+   Agustín eligió C2 (Blanco sobre la foto y Petróleo sobre Hueso, como Neko Health y Levels) y pidió cambiar la flecha:
+   ahora lleva ChatsCircle (dos globos de conversación). Va con <body data-r14c="c2"> (armar.mjs lo pone en todas las páginas). */
+[data-r14c] .cab-sitio[data-sobre]:not(.abierta) .boton-cab { min-height: 40px; padding: 0 20px; gap: 8px; box-shadow: none; font-weight: 500; transition: background-color 0.35s var(--ease-calma), color 0.35s var(--ease-calma), box-shadow 0.35s var(--ease-calma), transform 0.3s var(--sp); }
+[data-r14c] .cab-sitio[data-sobre]:not(.abierta) .boton-cab::before { display: none; }
+[data-r14c] .cab-sitio[data-sobre]:not(.abierta) .boton-cab .circulo { display: none; }
+[data-r14c] .cab-sitio[data-sobre]:not(.abierta) .boton-cab:hover .circulo svg { transform: none; }
+
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab { padding: 0 16px 0 20px; }
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab .circulo { display: grid; width: 20px; height: 20px; color: inherit; }
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab .circulo svg { width: 19px; height: 19px; transition: transform 0.45s var(--sp); }
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab:hover .circulo { transform: none; }
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab:hover .circulo svg { transform: rotate(-10deg) scale(1.1); }
+[data-r14c="c2"] .cab-sitio[data-sobre="oscuro"]:not(.abierta) .boton-cab { background: var(--blanco); color: var(--petroleo); --bc-texto-lleno: var(--petroleo); }
+[data-r14c="c2"] .cab-sitio[data-sobre="oscuro"]:not(.abierta) .boton-cab:hover { box-shadow: 0 0 0 4px rgb(253 253 253 / 0.22); }
+[data-r14c="c2"] .cab-sitio[data-sobre="claro"]:not(.abierta) .boton-cab { background: var(--petroleo); color: var(--blanco); --bc-texto-lleno: var(--blanco); }
+[data-r14c="c2"] .cab-sitio[data-sobre="claro"]:not(.abierta) .boton-cab:hover { background: #1d3c43; }
+/* En el menú abierto del celular el globo no gira como la flecha */
+[data-r14c] .cab-sitio .boton-cab:hover .circulo svg { transform: none; }
+
+/* ===================== Ronda 15 (15-16 nov): vidrio más leve P2 «Vidrio con canto de luz» =====================
+   Pedido de Agustín: «la nav bar con el Petróleo más leve, así se nota un poco más el vidrio». Eligió P2 entre tres; va con <body data-r15n="p2"> (armar.mjs).
+   Solo cambia el vidrio sobre la foto y el degradado (data-sobre="oscuro"); sobre Hueso queda como está.
+   Para que el texto Blanco siga en AA con menos tinte, el fondo que se ve a través se oscurece (brightness) en vez de taparlo. */
+[data-nav="n1"][data-r15n] .cab-sitio[data-sobre="oscuro"] { --vb-capsula: rgb(16 33 37 / 0.24); --vb-capsula-suave: rgb(16 33 37 / 0.14); }
+/* P2 · Vidrio con canto de luz: la mitad del tinte, un reflejo arriba a la izquierda y el canto más marcado */
+[data-nav="n1"][data-r15n="p2"] .cab-sitio[data-sobre="oscuro"]::before {
+  background: radial-gradient(120% 160% at 12% 0%, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 55%), linear-gradient(180deg, rgb(36 74 83 / 0.4), rgb(29 60 67 / 0.5));
+  -webkit-backdrop-filter: blur(20px) saturate(200%) brightness(0.44); backdrop-filter: blur(20px) saturate(200%) brightness(0.44);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 1px rgb(255 255 255 / 0.22), 0 16px 44px rgb(16 33 37 / 0.2);
+}
+
+/* Arreglo (16 nov): el grano con mix-blend-mode en ::after anulaba el backdrop-filter del ::before en Chrome:
+   la barra no desenfocaba lo que pasaba detrás (se veía nítido, tapado solo por el tinte). El grano queda en mezcla normal y muy suave. */
+[data-nav] .cab-sitio[data-sobre]::after { mix-blend-mode: normal; opacity: 0.08; }
+[data-nav="n3"] .cab-sitio[data-sobre]::after { opacity: 0; }
+[data-nav="n3"] .cab-sitio[data-compacta="true"]::after { opacity: 0.08; }
+/* Arreglo 2 (16 nov): en Chrome, el backdrop-filter puesto en el ::before tampoco desenfocaba algunas secciones (los títulos
+   del inicio se veían nítidos detrás de la barra, también en Chrome 157 real). Puesto en la cabecera misma sí funciona.
+   La cabecera solo lo lleva con el menú cerrado: un backdrop-filter atraparía el menú fixed del celular. Con el menú abierto vuelve al ::before. */
+[data-nav="n1"] .cab-sitio[data-sobre] { --cab-bd: var(--vb-blur); }
+[data-nav="n1"][data-r13n="vb"] .cab-sitio[data-sobre="oscuro"] { --cab-bd: blur(24px) saturate(170%) brightness(0.76); }
+[data-nav="n1"][data-r15n="p2"] .cab-sitio[data-sobre="oscuro"] { --cab-bd: blur(20px) saturate(200%) brightness(0.56); }
+[data-nav="n1"] .cab-sitio[data-sobre]:not(.abierta) { -webkit-backdrop-filter: var(--cab-bd); backdrop-filter: var(--cab-bd); }
+[data-nav="n1"] .cab-sitio[data-sobre]:not(.abierta)::before { -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-nav="n1"] .cab-sitio[data-sobre].abierta::before { -webkit-backdrop-filter: var(--cab-bd); backdrop-filter: var(--cab-bd); }
+@media (prefers-reduced-transparency: reduce) { [data-nav="n1"] .cab-sitio[data-sobre] { --cab-bd: none; } }
+/* Arriba, sobre la foto (antes de bajar), el vidrio puede ser más luminoso: la foto es pareja y el texto pasa AA igual.
+   Al bajar, sobre textos y fotos claras del contenido, se oscurece lo de atrás para mantener AA. */
+[data-nav="n1"][data-r15n="p2"] .cab-sitio[data-sobre="oscuro"][data-compacta="false"] { --cab-bd: blur(20px) saturate(200%) brightness(1); }
+[data-nav="n1"] .cab-sitio[data-sobre]:not(.abierta) { transition: top 0.5s var(--sp), width 0.5s var(--sp), padding 0.5s var(--sp), color 0.4s var(--ease-calma), -webkit-backdrop-filter 0.5s var(--ease-calma), backdrop-filter 0.5s var(--ease-calma); }
+
+/* Ronda 15 (16 nov), K1 más fluido: el texto cambia de color al ritmo de la cápsula y Entrar responde con la misma suavidad */
+[data-nav] .cab-sitio[data-sobre] .nav-vidrio a { transition: color 0.4s var(--sp), background-color 0.4s var(--sp), padding 0.45s var(--sp); }
+[data-nav] .cab-sitio[data-sobre] .entrar { transition: background-color 0.45s var(--sp), color 0.4s var(--sp); }
+[data-nav] .cab-sitio[data-sobre] .entrar .ic { transition: transform 0.55s var(--sp); }
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab .circulo svg { transition: transform 0.6s var(--sp); }
+[data-r14c="c2"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab { transition: background-color 0.45s var(--sp), color 0.45s var(--sp), box-shadow 0.5s var(--sp), transform 0.3s var(--sp); }
+
+/* Ronda 16 (16 nov): el Conversemos de la barra lleva la misma luz H5 que los botones del inicio (en vez del halo) */
+[data-r16h="h5"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(90px circle at var(--mx, 50%) var(--my, 50%), var(--luz), transparent 72%);
+  transition: opacity 0.5s var(--sp);
+}
+[data-r16h="h5"] .cab-sitio[data-sobre="oscuro"] .boton-cab { --luz: var(--luz-cta); }
+[data-r16h="h5"] .cab-sitio[data-sobre="claro"] .boton-cab { --luz: rgb(253 253 253 / 0.18); }
+[data-r16h="h5"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab:is(:hover, :focus-visible)::after { opacity: 1; }
+[data-r16h="h5"] .cab-sitio[data-sobre]:not(.abierta) .boton-cab:hover { box-shadow: none; }
+[data-r16h="h5"] .cab-sitio[data-sobre="claro"]:not(.abierta) .boton-cab:hover { background: var(--petroleo); }
+
+/* Ronda 16 (16 nov): ¿hace falta Inicio? Se prueba con <body data-r16i="i2|i3">.
+   I2: sin Inicio en la barra de escritorio, sí en el menú del celular. I3: sin Inicio en ninguna parte. El logo siempre lleva al inicio. */
+/* Ronda 17 (16 nov): eligió I2. Sin Inicio en la barra del computador (el logo lleva al inicio); el menú del celular lo conserva. */
+@media (min-width: 761px) { [data-r16i="i2"] .nav-vidrio a[href="/"] { display: none; } }
+
+/* ===================== Ronda 18 (16 nov): menú del celular en vidrio e ícono de Inicio =====================
+   Pedido de Agustín: «que no sea blanco el fondo, y que sea del mismo estilo que la nav bar», y otro ícono para Inicio.
+   Eligió M2 «La barra se abre» (va con <body data-r18m="m2">, armar.mjs) y la casa de siempre para Inicio, con los íconos
+   del menú más chicos (16 px en vez de 20, al tamaño de la letra). Con el menú abierto la barra es siempre
+   el vidrio oscuro P2, también sobre Hueso, para que barra y menú se lean como una sola pieza. */
+@media (max-width: 760px) {
+  /* El vidrio del menú */
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta[data-sobre] {
+    color: var(--blanco);
+    --vb-texto: var(--blanco); --vb-texto-activo: var(--blanco);
+    --vb-capsula: rgb(16 33 37 / 0.26); --vb-capsula-suave: rgb(16 33 37 / 0.16);
+    --vb-foco: var(--bruma);
+    --menu-vidrio: radial-gradient(120% 50% at 12% 0%, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 55%), linear-gradient(180deg, rgb(36 74 83 / 0.62), rgb(29 60 67 / 0.74));
+    --menu-bd: blur(24px) saturate(180%) brightness(0.56);
+    --menu-canto: inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 1px rgb(255 255 255 / 0.22), 0 18px 50px rgb(16 33 37 / 0.3);
+  }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta[data-sobre]::before {
+    background: radial-gradient(120% 160% at 12% 0%, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0) 55%), linear-gradient(180deg, rgb(36 74 83 / 0.62), rgb(29 60 67 / 0.7));
+    -webkit-backdrop-filter: var(--menu-bd); backdrop-filter: var(--menu-bd); box-shadow: var(--menu-canto);
+  }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta[data-sobre] .menu-boton { background: rgb(16 33 37 / 0.26); color: var(--blanco); }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .nav-vidrio {
+    background: var(--menu-vidrio) !important; color: var(--blanco) !important; border: 0 !important;
+    -webkit-backdrop-filter: var(--menu-bd) !important; backdrop-filter: var(--menu-bd) !important; box-shadow: var(--menu-canto) !important;
+  }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .nav-vidrio { padding-bottom: 72px; }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .nav-vidrio a { color: var(--blanco) !important; transition: background-color 0.3s var(--sp); }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .nav-vidrio a[aria-current="page"] { background: rgb(16 33 37 / 0.3); }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .nav-vidrio a:active { background: rgb(16 33 37 / 0.2); }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .acciones .entrar { background: rgb(253 253 253 / 0.12); color: var(--blanco); }
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .acciones .boton-cab { --bc-fondo: var(--blanco); --bc-texto: var(--petroleo); --bc-circulo: var(--petroleo); --bc-flecha: var(--blanco); }
+
+  /* M2 · La barra se abre: el vidrio de la barra crece hacia abajo y el menú queda dentro de ella */
+  [data-nav="n1"][data-r18m="m2"] .cab-sitio.abierta[data-sobre]::before { opacity: 0; }
+  [data-nav="n1"][data-r18m="m2"] .cab-sitio.abierta .nav-vidrio {
+    top: 10px; left: 12px; right: 12px; z-index: -1; padding-top: 64px; border-radius: 27px;
+    animation: menu-crece 0.55s var(--sp) both;
+  }
+  [data-nav="n1"][data-r18m="m2"] .cab-sitio.abierta .acciones { left: 20px; right: 20px; }
+
+  /* Íconos más chicos, al tamaño de la letra (pedido de Agustín) */
+  [data-nav="n1"][data-r18m] .cab-sitio.abierta .nav-vidrio a .ic, [data-nav="n1"][data-r18m] .cab-sitio.abierta .acciones .entrar .ic { width: 16px; height: 16px; }
+}
+@keyframes menu-crece { from { clip-path: inset(0 0 calc(100% - 54px) 0 round 27px); } to { clip-path: inset(0 0 0 0 round 27px); } }
+@media (prefers-reduced-motion: reduce) { [data-r18m] .cab-sitio.abierta .nav-vidrio { animation: none !important; } }
+
+/* Arreglo 3 (16 nov): la entrada de la barra (cab-entra, con fill «both») dejaba puesto un transform identidad al terminar.
+   Ese transform hacía de la cabecera el bloque contenedor del menú fixed del celular (lo descuadraba 10-12 px)
+   y le cortaba el backdrop-filter: el menú abierto no desenfocaba lo de atrás. Con «backwards» no queda nada al terminar. */
+[data-nav] .cab-sitio[data-sobre] { animation-fill-mode: backwards; }
+
+/* ===================== Ronda 19 (16 nov): el botón del menú del celular =====================
+   Pedido de Agustín: «el Cerrar sobra, y se puede transformar la burger en una X y viceversa».
+   Eligió B2 «Tres líneas» (va con <body data-r19b="b2">, armar.mjs): botón redondo, la línea del medio se recoge y las otras dos forman la X. Las líneas son dibujadas (.hb) para poder animarlas hasta la X:
+   al abrir, primero se juntan al centro y después giran; al cerrar, al revés.
+   El nombre («Menú» / «Cerrar», que pone sitio.js) sigue en el botón para lectores de pantalla aunque no se vea. */
+.menu-boton .hb { display: none; }
+@media (max-width: 760px) {
+  [data-r19b] .cab-sitio[data-sobre] .menu-boton .ic { display: none; }
+  [data-r19b] .cab-sitio[data-sobre] .menu-boton .hb { display: block; position: relative; width: 20px; height: 12px; flex: none; }
+  [data-r19b] .menu-boton .hb i {
+    position: absolute; left: 0; right: 0; height: 1.75px; border-radius: 2px; background: currentColor;
+    transition: top 0.26s var(--sp) 0.2s, transform 0.3s var(--sp), opacity 0.2s var(--ease-calma), left 0.4s var(--sp);
+  }
+  [data-r19b] .abierta .menu-boton .hb i { transition: top 0.26s var(--sp), transform 0.42s var(--sp) 0.18s, opacity 0.2s var(--ease-calma), left 0.4s var(--sp); }
+  /* Posición base de las líneas */
+  [data-r19b] .menu-boton .hb i:nth-child(1) { top: 2.25px; }
+  [data-r19b] .menu-boton .hb i:nth-child(2) { top: 8px; }
+  [data-r19b] .menu-boton .hb i:nth-child(3) { display: none; }
+  [data-r19b] .abierta .menu-boton .hb i:nth-child(1) { top: 5.125px; transform: rotate(45deg); }
+  [data-r19b] .abierta .menu-boton .hb i:nth-child(2) { top: 5.125px; transform: rotate(-45deg); }
+  /* Botón redondo, solo las líneas */
+  [data-r19b] .cab-sitio[data-sobre] .menu-boton { width: 44px; padding: 0; justify-content: center; gap: 0; }
+  [data-r19b] .cab-sitio[data-sobre] .menu-boton .nombre { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* B2 · Tres líneas: la del medio se va */
+  [data-r19b="b2"] .menu-boton .hb { height: 14px; }
+  [data-r19b="b2"] .menu-boton .hb i:nth-child(1) { top: 0; }
+  [data-r19b="b2"] .menu-boton .hb i:nth-child(2) { top: 6.125px; transform-origin: center; }
+  [data-r19b="b2"] .menu-boton .hb i:nth-child(3) { display: block; top: 12.25px; }
+  [data-r19b="b2"] .abierta .menu-boton .hb i:nth-child(1) { top: 6.125px; transform: rotate(45deg); }
+  [data-r19b="b2"] .abierta .menu-boton .hb i:nth-child(2) { top: 6.125px; transform: scaleX(0); opacity: 0; }
+  [data-r19b="b2"] .abierta .menu-boton .hb i:nth-child(3) { top: 6.125px; transform: rotate(-45deg); }
+}
+@media (prefers-reduced-motion: reduce) { [data-r19b] .menu-boton, [data-r19b] .menu-boton * { transition-duration: 0.01s !important; transition-delay: 0s !important; } }

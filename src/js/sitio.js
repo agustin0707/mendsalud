@@ -2,22 +2,53 @@
 const cab = document.querySelector('.cab-sitio')
 const nav = cab?.querySelector('.nav-vidrio')
 const capsula = nav?.querySelector('.nav-capsula')
-const actual = nav?.querySelector('[aria-current="page"]')
+const actualDom = nav?.querySelector('[aria-current="page"]')
+// Si el enlace de la página está escondido (ronda 16: sin Inicio en la barra), la cápsula no se queda en ninguno
+const visible = (a) => (a && a.offsetWidth ? a : null)
 
-// La cápsula de vidrio claro se desliza bajo el ítem que se apunta y vuelve al de la página al salir.
+// La cápsula se desliza bajo el ítem que se apunta y vuelve al de la página al salir.
+// Ronda 15 (16 nov), nota de Agustín: «que el movimiento se sienta muy fluido, no brusco». La mueve un resorte sin rebote
+// (amortiguación crítica) en vez de una transición CSS: si cambias de ítem a mitad de camino, sigue con la velocidad que llevaba
+// en vez de partir de cero. El borde que va adelante es un poco más rápido que el de atrás, así la cápsula se estira al moverse.
+// Ronda 16: Agustín eligió F3 (el resorte lento), «muy levemente más rápido»: k 230 y 150 (F3 era 200 y 130).
+const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)")
+const borde = { izq: { p: 0, v: 0, m: 0 }, der: { p: 0, v: 0, m: 0 } }
+let cuadro = 0, antes = 0, volver = 0
+function pintar() {
+  capsula.style.setProperty('--x', `${borde.izq.p}px`)
+  capsula.style.setProperty('--w', `${Math.max(0, borde.der.p - borde.izq.p)}px`)
+}
+function pasoCapsula(t) {
+  const dt = Math.min((t - antes) / 1000, 1 / 30); antes = t
+  const haciaDer = borde.izq.m + borde.der.m > borde.izq.p + borde.der.p
+  let sigue = false
+  for (const [e, adelante] of [[borde.izq, !haciaDer], [borde.der, haciaDer]]) {
+    const k = adelante ? 230 : 150, c = 2 * Math.sqrt(k)
+    e.v += (k * (e.m - e.p) - c * e.v) * dt
+    e.p += e.v * dt
+    if (Math.abs(e.m - e.p) > 0.3 || Math.abs(e.v) > 2) sigue = true; else { e.p = e.m; e.v = 0 }
+  }
+  pintar()
+  cuadro = sigue ? requestAnimationFrame(pasoCapsula) : 0
+}
 function moverCapsula(a, sinAnimar) {
   if (!capsula) return
-  if (!a) { capsula.style.opacity = '0'; return }
-  if (sinAnimar) capsula.style.transition = 'none'
+  clearTimeout(volver)
+  if (!a) { capsula.style.opacity = '0'; nav.querySelectorAll('a').forEach((x) => x.classList.remove('bajo', 'fuera')); return }
+  // Si estaba escondida (página sin enlace en la barra), aparece ya en su lugar en vez de viajar desde el borde
+  if (capsula.style.opacity === '0') sinAnimar = true
+  capsula.style.transition = 'opacity 0.3s var(--ease-calma), background-color 0.4s var(--ease-calma)'
   capsula.style.opacity = '1'
-  capsula.style.setProperty('--x', `${a.offsetLeft}px`)
-  capsula.style.setProperty('--w', `${a.offsetWidth}px`)
+  borde.izq.m = a.offsetLeft; borde.der.m = a.offsetLeft + a.offsetWidth
+  if (sinAnimar || sinMovimiento.matches) {
+    for (const e of [borde.izq, borde.der]) { e.p = e.m; e.v = 0 }
+    cancelAnimationFrame(cuadro); cuadro = 0; pintar()
+  } else if (!cuadro) { antes = performance.now(); cuadro = requestAnimationFrame(pasoCapsula) }
   nav.querySelectorAll('a').forEach((x) => x.classList.toggle('bajo', x === a))
   nav.querySelectorAll('a').forEach((x) => x.classList.toggle('fuera', x !== a))
-  if (sinAnimar) requestAnimationFrame(() => { capsula.style.transition = '' })
 }
 if (nav) {
-  const ubicar = () => moverCapsula(actual, true)
+  const ubicar = () => moverCapsula(visible(actualDom), true)
   document.fonts?.ready.then(ubicar)
   addEventListener('resize', ubicar)
   ubicar()
@@ -25,16 +56,26 @@ if (nav) {
     a.addEventListener('pointerenter', () => moverCapsula(a))
     a.addEventListener('focus', () => moverCapsula(a))
   })
-  nav.addEventListener('pointerleave', () => moverCapsula(actual))
-  nav.addEventListener('focusout', (e) => { if (!nav.contains(e.relatedTarget)) moverCapsula(actual) })
+  // Al salir espera un instante: si el puntero vuelve enseguida, la cápsula no hace el viaje de ida y vuelta
+  nav.addEventListener('pointerleave', () => { clearTimeout(volver); volver = setTimeout(() => moverCapsula(visible(actualDom)), 140) })
+  nav.addEventListener('focusout', (e) => { if (!nav.contains(e.relatedTarget)) moverCapsula(visible(actualDom)) })
 }
+
+// Ronda 16, hover H5: la luz de los botones sigue al puntero
+document.querySelectorAll('.inicio .boton, .cab-sitio .boton-cab').forEach((el) => {
+  const pos = (e) => { const r = el.getBoundingClientRect(); el.style.setProperty('--mx', `${e.clientX - r.left}px`); el.style.setProperty('--my', `${e.clientY - r.top}px`) }
+  el.addEventListener('pointerenter', pos); el.addEventListener('pointermove', pos)
+})
 
 // Menú del celular
 const menu = cab?.querySelector('.menu-boton')
 menu?.addEventListener('click', () => {
   const abierto = cab.classList.toggle('abierta')
   menu.setAttribute('aria-expanded', String(abierto))
-  menu.querySelector('.nombre').textContent = abierto ? 'Cerrar' : 'Menú'
+  // Ronda 19: con las líneas que se vuelven X, la palabra visible no cambia (así no parpadea «Cerrar» al irse);
+  // el nombre para lectores de pantalla lo da aria-label, que incluye la palabra visible «menú»
+  if (document.body.dataset.r19b) menu.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú')
+  else menu.querySelector('.nombre').textContent = abierto ? 'Cerrar' : 'Menú'
 })
 
 // Tono de la cabecera: mira qué sección pasa bajo la barra (data-tono="claro" u "oscuro").
