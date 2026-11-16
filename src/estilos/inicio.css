@@ -197,7 +197,8 @@
   padding: 9px; background: #111a1c; box-shadow: 0 40px 80px rgb(16 33 37 / 0.45), inset 0 0 0 1.5px rgb(253 253 253 / 0.18);
 }
 .telefono img { width: 100%; height: 100%; object-fit: cover; border-radius: 11.4% / 5.2%; }
-[data-v="3"] .telefono { transform: translateY(calc((1 - clamp(0, (var(--p) - 0.2) * 1.6, 1)) * 85svh)) rotate(calc((1 - clamp(0, (var(--p) - 0.2) * 1.6, 1)) * 6deg)); will-change: transform; }
+/* Parte 115svh más abajo: con G2 el teléfono mide hasta el 80 % del alto y con 85svh asomaba bajo la portada (16 nov) */
+[data-v="3"] .telefono { transform: translateY(calc((1 - clamp(0, (var(--p) - 0.2) * 1.6, 1)) * 115svh)) rotate(calc((1 - clamp(0, (var(--p) - 0.2) * 1.6, 1)) * 6deg)); will-change: transform; }
 
 /* ───────── Celular ───────── */
 @media (max-width: 760px) {
