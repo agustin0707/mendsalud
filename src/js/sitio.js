@@ -91,7 +91,7 @@ function tono() {
   const ini = document.querySelector('.inicio')
   if (ini) {
     const r = ini.getBoundingClientRect()
-    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro') }
+    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || ini.style.getPropertyValue('--pr') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro') }
   }
   if (cab) {
     cab.dataset.sobre = t
@@ -103,20 +103,24 @@ function tono() {
 const inicio = document.querySelector('.inicio')
 const quieto = matchMedia('(prefers-reduced-motion: reduce)')
 function paso() {
-  if (inicio && !quieto.matches) {
+  // Ronda 25 · R1: con «reducir movimiento» la escena se ve igual, pero de golpe (--pr vale 0 o 1, sin pasos intermedios)
+  const porPasos = quieto.matches && document.body.dataset.r25r === 'r1'
+  if (inicio && (!quieto.matches || porPasos)) {
     const r = inicio.getBoundingClientRect()
     const recorrido = inicio.offsetHeight - innerHeight
     // Ronda 23: con relato, el paso del inicio se alarga en --alto-relato (svh); --p cubre el tramo de siempre y --q el del relato
     const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
     const base = recorrido - extra
     const p = base > 0 ? Math.min(1, Math.max(0, -r.top / base)) : 0
-    inicio.style.setProperty('--p', p.toFixed(4))
+    if (porPasos) inicio.style.setProperty('--pr', p > 0.3 ? '1' : '0')
+    else inicio.style.setProperty('--p', p.toFixed(4))
     const escena = inicio.querySelector('.escena-app')
     if (escena) {
       const q = extra > 0 ? Math.min(1, Math.max(0, (-r.top - base) / extra)) : 0
       inicio.style.setProperty('--q', q.toFixed(4))
       escena.dataset.paso = String(q < 0.34 ? 0 : q < 0.67 ? 1 : 2)
-      escena.classList.toggle('en-uso', p > 0.84)
+      escena.classList.toggle('en-uso', porPasos ? p > 0.3 : p > 0.84)
+      if (porPasos && /^e[4-8]$/.test(document.body.dataset.r26e ?? '')) escena.classList.toggle('cambio', escena.dataset.paso === '2')
     }
   }
   tono()
@@ -355,6 +359,14 @@ if (dispositivos && matchMedia('(hover: hover) and (pointer: fine)').matches && 
   document.addEventListener('pointerleave', () => { dispositivos.style.setProperty('--tx', '0deg'); dispositivos.style.setProperty('--ty', '0deg') })
 }
 
+// Ronda 25: si se llega al botón de pausa con Tab antes de que la escena esté armada, la página baja hasta ella para que el foco se vea (WCAG 2.4.11)
+document.querySelector('.telefono .pausa')?.addEventListener('focus', () => {
+  if (!inicio || quieto.matches || Number(inicio.style.getPropertyValue('--p') || 0) > 0.9) return
+  const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
+  scrollTo({ top: inicio.offsetTop + inicio.offsetHeight - innerHeight - extra, behavior: 'instant' })
+})
+// Ronda 25 · C2: la ficha del panel es la de Carmen, con la semana de hoy; el check-in llega a su fila «hoy»
+if (document.body.dataset.r25c === 'c2') { const f = document.querySelector('.ventana-cuerpo-kine img'); if (f) { f.srcset = f.srcset.replaceAll('kine-ficha-', 'kine-ficha-carmen-'); f.src = f.src.replace('kine-ficha.jpg', 'kine-ficha-carmen.jpg') } }
 // Ronda 23 · P3: botón para pausar la demostración del teléfono
 document.querySelector('.telefono .pausa')?.addEventListener('click', (e) => {
   const b = e.currentTarget, escena = b.closest('.escena-app'), pausa = !escena.classList.contains('pausado')
@@ -372,6 +384,8 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
   const pantallas = escenaApp.querySelector('.pantallas'), toques = escenaApp.querySelector('.toques'), dispo = escenaApp.querySelector('.dispositivos')
   const svg = escenaApp.querySelector('.conectores'), viajero = escenaApp.querySelector('.viajero'), boton = escenaApp.querySelector('.telefono .pausa')
   const tarjetas = [...escenaApp.querySelectorAll('.flota-escena')]
+  // Ronda 25: con T2 (tablet vertical) y L2 (acostado) la escena se arma sin líneas ni viaje, como en el celular
+  const apilado = () => innerWidth <= 760 || (cuerpo.r25t === 't2' && matchMedia('(min-width: 761px) and (max-width: 1180px) and (orientation: portrait)').matches) || (cuerpo.r25l === 'l2' && matchMedia('(max-height: 520px) and (orientation: landscape)').matches)
   const ROTULOS = { Bien: 'Marca cómo amaneces', 'Ver rutina': 'Abre tu rutina', 'Desliza para empezar': 'Desliza para empezar', Empezar: 'Empieza', Calendario: 'Mira tu semana' }
   // A qué apunta cada tarjeta en la pantalla (fracción del ancho y del alto): rutina, «Bien» y la tarjeta de la kine en el calendario
   const APUNTA = [[0.5, 0.42], [0.735, 0.589], [0.24, 0.76]]
@@ -447,7 +461,7 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
 
   // Líneas de las tarjetas (B2): de la tarjeta del paso activo a lo que señala en la pantalla
   function dibujarLineas() {
-    if (cuerpo.r24b !== 'b2' || !svg || innerWidth <= 760) return
+    if (cuerpo.r24b !== 'b2' || !svg || apilado()) return
     const D = dispo.getBoundingClientRect(), S = pantallas.getBoundingClientRect(), paso = num('--p') > 0.84 ? Number(escenaApp.dataset.paso || 0) : -1
     tarjetas.forEach((c, i) => {
       const linea = svg.querySelector(`.con[data-c="${i + 1}"]`), punto = svg.querySelector(`.con-punto[data-c="${i + 1}"]`)
@@ -463,13 +477,67 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
   }
 
   // E2: al llegar al paso 3, el check-in viaja del teléfono a la fila de hoy en la ficha del kine
+  // Ronda 27 (E6): el cambio sin cruzarse. Primero se separan hasta no tocarse (el teléfono hacia la izquierda sin pisar el relato,
+  // el panel hacia la derecha y algo más chico si no cabe), en ese momento se cambia el orden, y se vuelven a juntar con el panel adelante.
+  // Se mide en cada vez, así sirve en cualquier ancho; el estado final es el mismo de E4 (lo da el CSS con .cambio).
+  let cambios = []
+  function deshacerCambio() {
+    cambios.forEach((x) => x.cancel()); cambios = []
+    escenaApp.querySelectorAll('.telefono, .ventana-kine').forEach((e) => { e.style.transition = '' })
+  }
+  function cambiar() {
+    const tel = escenaApp.querySelector('.telefono'), ven = escenaApp.querySelector('.ventana-kine')
+    if (!/^e[678]$/.test(cuerpo.r26e ?? '') || quieto.matches || !ven.animate) { escenaApp.classList.add('cambio'); return }
+    deshacerCambio()
+    // Se mide cada aparato ya puesto en su pose del medio (sin desplazar) y se vuelve atrás sin transición
+    const medir = (el, st) => { el.style.transition = 'none'; Object.assign(el.style, st); const r = el.getBoundingClientRect(); for (const k in st) el.style[k] = ''; el.getBoundingClientRect(); return r }
+    let tope = 0
+    for (const li of escenaApp.querySelectorAll('.relato li')) { const r = document.createRange(); r.selectNodeContents(li); const b = r.getBoundingClientRect(); if (b.width) tope = Math.max(tope, b.right) }
+    // Ronda 28 (E7 y E8): además, el que se va atrás se achica y el que viene adelante se agranda, con un leve rebote al llegar
+    const V = { e6: { sT: 0.9, kP: 1, rebote: 0, dur: 2000 }, e7: { sT: 0.84, kP: 0.86, rebote: 1.07, dur: 2200 }, e8: { sT: 0.78, kP: 0.76, rebote: 1.1, dur: 2200 } }[cuerpo.r26e]
+    const sT = V.sT, sep = 40, poseK = (f) => ({ translate: '10% -51%', transform: `perspective(1400px) rotateY(-9deg) scale(${(0.88 * V.kP * f).toFixed(3)})` })
+    const Pm = medir(tel, { translate: '-4vw 1.5%', scale: String(sT) })
+    const a = Math.max(0, Math.min(Pm.width * 0.5, Pm.left - (tope + 28)))
+    const derT = Pm.right - a
+    let Km = medir(ven, poseK(1))
+    const f = Math.max(0.5, Math.min(1, (innerWidth - 20 - derT - sep) / Km.width))
+    if (f < 1) Km = medir(ven, poseK(f))
+    const b = derT + sep - Km.left
+    tel.style.transition = 'none'; ven.style.transition = 'filter 1.6s var(--ease-calma), box-shadow 1.6s var(--ease-calma)'
+    escenaApp.classList.add('cambio')
+    const e = 'cubic-bezier(0.55, 0, 0.3, 1)', o = { duration: V.dur, easing: 'linear' }, sK = 0.88 * V.kP * f
+    const tm = `calc(-4vw - ${a.toFixed(1)}px) 1.5%`, tm2 = `calc(-4vw - ${(a + 8).toFixed(1)}px) 2%`
+    cambios = [
+      tel.animate([
+        { translate: '-4vw 0', scale: '1', filter: 'brightness(1) saturate(1)', easing: e },
+        { offset: 0.42, translate: tm, scale: String(sT), filter: 'brightness(0.82) saturate(0.95)', easing: 'linear' },
+        { offset: 0.56, translate: tm2, scale: String(sT - 0.01), filter: 'brightness(0.78) saturate(0.92)', easing: e },
+        { translate: '-12vw 3%', scale: '0.86', filter: 'brightness(0.62) saturate(0.85)' },
+      ], o),
+      ven.animate([
+        { translate: '10% -50%', transform: 'perspective(1400px) rotateY(-16deg) scale(0.88)', easing: e },
+        { offset: 0.42, translate: `calc(10% + ${b.toFixed(1)}px) -51%`, transform: `perspective(1400px) rotateY(-9deg) scale(${sK.toFixed(3)})`, easing: 'linear' },
+        { offset: 0.56, translate: `calc(10% + ${(b - 10).toFixed(1)}px) -51.5%`, transform: `perspective(1400px) rotateY(-8deg) scale(${(sK + 0.01).toFixed(3)})`, easing: V.rebote ? 'cubic-bezier(0.4, 0, 0.2, 1)' : e },
+        ...(V.rebote ? [{ offset: 0.84, transform: `perspective(1400px) rotateY(-2deg) scale(${V.rebote})`, easing: 'cubic-bezier(0.3, 0, 0.3, 1)' }] : []),
+        { translate: '-2% -50%', transform: 'perspective(1400px) rotateY(-3deg) scale(1.04)' },
+      ], o),
+      // El orden cambia de golpe en el momento de mayor separación (z-index se interpolaría como número)
+      tel.animate([{ zIndex: 4 }, { offset: 0.49, zIndex: 4 }, { offset: 0.4901, zIndex: 1 }, { zIndex: 1 }], o),
+      ven.animate([{ zIndex: 1 }, { offset: 0.49, zIndex: 1 }, { offset: 0.4901, zIndex: 6 }, { zIndex: 6 }], o),
+    ]
+    cambios[0].onfinish = () => { tel.style.transition = ''; ven.style.transition = ''; cambios = [] }
+  }
   function viaje() {
-    if (cuerpo.r24e !== 'e2' || !viajero || innerWidth <= 760 || !/a3|a4/.test(cuerpo.r23a ?? '')) return
+    if (cuerpo.r24e !== 'e2' || !viajero || apilado() || !/a3|a4/.test(cuerpo.r23a ?? '')) return
     const paso = num('--p') > 0.84 ? Number(escenaApp.dataset.paso || 0) : -1
     if (paso === pasoViaje) return
     pasoViaje = paso
     anim?.cancel(); escenaApp.classList.remove('viajando', 'llego')
+    // Ronda 26 (E4 y E5): el teléfono parte adelante y muestra el calendario (el tramo C dura 3,2 s); a los 3,3 s el panel pasa al frente y, cuando termina el cambio, viaja el check-in
+    const cambia = /^e[4-8]$/.test(cuerpo.r26e ?? '')
+    clearTimeout(viaje.t); if (cambia && paso !== 2) { escenaApp.classList.remove('cambio'); deshacerCambio() }
     if (paso !== 2) return
+    if (cambia) viaje.t = setTimeout(() => { if (pasoViaje === 2) cambiar() }, 3300)
     setTimeout(() => {
       if (pasoViaje !== 2) return
       const D = dispo.getBoundingClientRect(), S = pantallas.getBoundingClientRect(), E = escenaApp.querySelector('.llega').getBoundingClientRect()
@@ -480,7 +548,7 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
       escenaApp.classList.add('viajando')
       anim = viajero.animate([{ offsetDistance: '0%', opacity: 0, scale: 0.7 }, { offset: 0.12, opacity: 1, scale: 1 }, { offset: 0.85, opacity: 1, scale: 1 }, { offsetDistance: '100%', opacity: 0, scale: 0.55 }], { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' })
       anim.onfinish = () => { escenaApp.classList.remove('viajando'); escenaApp.classList.add('llego') }
-    }, 1000)
+    }, /^e[78]$/.test(cuerpo.r26e ?? '') ? 5650 : cuerpo.r26e === 'e6' ? 5350 : cambia ? 4450 : 1000)
   }
 
   const cuadro = () => {

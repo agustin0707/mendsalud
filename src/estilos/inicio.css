@@ -599,3 +599,138 @@ html { background-color: #6f7a76; }
 @media (max-width: 760px) { [data-r24b="b2"] .flota-escena:nth-of-type(n) { left: 0; right: auto; } [data-r24b="b2"] .flota-escena:nth-of-type(2) { left: auto; right: 0; top: 8%; } }
 @media (max-width: 760px) { [data-r24b="b2"] .escena-app .flota-escena { background: rgb(36 74 83 / 0.86); } }
 @media (max-width: 760px) { [data-r24q] .escena-app .flota-escena:nth-of-type(2) { top: 8%; } }
+/* Con «reducir movimiento» el inicio no se fija: su alto vuelve a ser el del contenido (la regla de la ronda 23 le ganaba y dejaba tres pantallas vacías). */
+@media (prefers-reduced-motion: reduce) { :not([data-r25r="r1"])[data-v="3"]:is([data-r23x="x2"], [data-r23p="p2"]) .inicio { height: auto; } }
+
+/* ═════════ Ronda 25 · la escena en todo tipo de pantalla.
+   data-r25g (g2: el teléfono y el relato crecen con la pantalla) · data-r25e (e3: el panel del kine pasa adelante en el paso del equipo)
+   data-r25m (m2: en el celular también se ve el panel del kine) · data-r25r (r1: con «reducir movimiento» la escena se ve, por pasos y sin movimiento). */
+
+/* G2 · Escala: el teléfono se mide por el alto y el ancho de la ventana (antes, tope de 320 px y sin mirar el alto) */
+@media (min-width: 761px) {
+  [data-r25g="g2"] .dispositivos { --tw: clamp(210px, min(23vw, 37svh), 440px); }
+  [data-r25g="g2"] .telefono { width: var(--tw); }
+  [data-r25g="g2"][data-r23x="x2"] .escena-app { padding-inline: max(var(--margen), calc((100vw - min(1640px, 84vw)) / 2)); }
+  [data-r25g="g2"] .relato { max-width: clamp(470px, 31vw, 640px); }
+  [data-r25g="g2"] .relato h2 { font-size: clamp(1.5rem, 2.1vw, 2.875rem); }
+  [data-r25g="g2"] .relato h2 + p { font-size: clamp(1.0625rem, 0.95vw, 1.3125rem); }
+  [data-r25g="g2"] .relato .rotulo, [data-r25g="g2"] .relato .relato-num { font-size: clamp(0.875rem, 0.8vw, 1.0625rem); }
+  [data-r25g="g2"] .flota-escena { font-size: clamp(0.875rem, 0.78vw, 1.0625rem); }
+  [data-r25g="g2"] .ventana-kine { width: min(760px, 40vw) !important; }
+}
+
+/* E3 · Equipo adelante: en el paso 3 el panel del kine queda delante del teléfono, con la fila que recibe el check-in a la vista */
+@media (min-width: 761px) {
+  [data-r25e="e3"] .escena-app[data-paso="2"] .ventana-kine { z-index: 6; translate: 14% -46%; box-shadow: 0 40px 90px -30px rgb(6 18 21 / 0.75); }
+  [data-r25e="e3"] .escena-app[data-paso="2"] .dispositivos { --dx: -11vw; }
+  [data-r25e="e3"] .viajero { z-index: 7; }
+}
+
+/* M2 · Panel en el celular: en el paso 3 el panel entra desde abajo y tapa la mitad baja del teléfono; la tarjeta del aviso sube */
+@media (max-width: 760px) {
+  [data-r25m="m2"]:is([data-r23a="a3"], [data-r23a="a4"]) .ventana-kine { display: block !important; position: absolute; z-index: 5; left: 50%; right: auto; top: auto; bottom: 2%; width: min(94vw, 420px);
+    translate: -50% 24px; opacity: 0; transform: none !important; transition: opacity 0.5s var(--ease-calma), translate 0.8s var(--ease-pagina); box-shadow: 0 30px 60px -20px rgb(6 18 21 / 0.7); }
+  [data-r25m="m2"] .escena-app[data-paso="2"] .ventana-kine { opacity: 1; translate: -50% 0; }
+  [data-r25m="m2"] .escena-app[data-paso="2"] .telefono { translate: 0 -8% !important; transition: translate 0.8s var(--ease-pagina); }
+  [data-r25m="m2"] .escena-app .flota-escena:nth-of-type(3) { top: 8%; bottom: auto; }
+}
+
+/* R1 · Movimiento reducido: la escena sí aparece. Pasa de la portada a la escena y de un paso a otro de golpe, sin desplazamientos;
+   el teléfono muestra una captura fija por paso y no hay video, toques ni viaje. */
+@media (prefers-reduced-motion: reduce) {
+  [data-r25r="r1"] .inicio-pin { position: sticky; }
+  [data-r25r="r1"] .inicio { --p: var(--pr, 0) !important; }
+  [data-r25r="r1"][data-v="3"] .escena-app { display: grid; }
+  [data-r25r="r1"] .inicio *, [data-r25r="r1"] .inicio *::before, [data-r25r="r1"] .inicio *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; }
+  [data-r25r="r1"] .telefono .pausa, [data-r25r="r1"] .viajero, [data-r25r="r1"] .conectores, [data-r25r="r1"] .toques { display: none !important; }
+}
+
+/* T2 · Tablet vertical (761 a 1180 px de ancho, en vertical): la escena se apila como en el celular. El texto del paso arriba y el teléfono
+   grande al centro; las tarjetas montadas en sus bordes y el panel del kine entra desde abajo en el paso 3. */
+@media (min-width: 761px) and (max-width: 1180px) and (orientation: portrait) {
+  [data-r25t="t2"][data-r23x="x2"] .escena-app { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); align-content: stretch; justify-items: center; padding: 116px var(--margen) 44px; gap: 30px; }
+  [data-r25t="t2"][data-r23x="x2"] .relato { padding: 0; max-width: none; justify-self: stretch; text-align: center; }
+  [data-r25t="t2"][data-r23x="x2"] .relato::before, [data-r25t="t2"][data-r23x="x2"] .relato::after, [data-r25t="t2"] .relato .relato-num { display: none; }
+  [data-r25t="t2"][data-r23x="x2"] .relato li { grid-area: 1 / 1; display: block; padding: 0; opacity: 0; }
+  [data-r25t="t2"] [data-paso="0"] .relato li:nth-child(1), [data-r25t="t2"] [data-paso="1"] .relato li:nth-child(2), [data-r25t="t2"] [data-paso="2"] .relato li:nth-child(3) { opacity: 1; }
+  [data-r25t="t2"] .relato h2 { font-size: clamp(2rem, 4.4vw, 2.5rem); }
+  [data-r25t="t2"] .relato h2 + p { font-size: 1.1875rem; max-width: 40ch; margin-inline: auto; }
+  [data-r25t="t2"] .dispositivos { justify-self: center; align-self: center; width: 100%; --tw: min(44vw, calc((100svh - 420px) / 2.164)); --dx: 0px !important; }
+  [data-r25t="t2"] .telefono { width: var(--tw) !important; translate: none !important; }
+  [data-r25t="t2"] .escena-app .flota-escena:nth-of-type(1) { top: 7%; left: calc(50% - var(--tw) / 2 - 44px); right: auto; }
+  [data-r25t="t2"] .escena-app .flota-escena:nth-of-type(2) { top: 12%; right: calc(50% - var(--tw) / 2 - 44px); left: auto; }
+  [data-r25t="t2"] .escena-app .flota-escena:nth-of-type(3) { top: auto; bottom: 10%; left: calc(50% - var(--tw) / 2 - 44px); right: auto; }
+  [data-r25t="t2"]:is([data-r23a="a3"], [data-r23a="a4"]) .ventana-kine { left: 50% !important; right: auto !important; top: auto !important; bottom: 0; width: min(84vw, 640px) !important; z-index: 5;
+    translate: -50% 28px !important; opacity: 0; transform: none !important; transition: opacity 0.5s var(--ease-calma), translate 0.8s var(--ease-pagina); box-shadow: 0 30px 70px -24px rgb(6 18 21 / 0.7); }
+  [data-r25t="t2"] .escena-app[data-paso="2"] .ventana-kine { opacity: 1; translate: -50% 0 !important; }
+  [data-r25t="t2"] .escena-app[data-paso="2"] .telefono { translate: 0 -10% !important; transition: translate 0.8s var(--ease-pagina); }
+  [data-r25t="t2"] .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { bottom: auto; top: 7%; }
+  [data-r25t="t2"] .conectores, [data-r25t="t2"] .viajero { display: none !important; }
+}
+
+/* L2 · Celular o tablet acostados (alto de 520 px o menos): texto a la izquierda y el teléfono a la altura de la ventana; sin tarjetas ni panel */
+@media (max-height: 520px) and (orientation: landscape) {
+  [data-r25l="l2"][data-r23x="x2"] .escena-app { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: none; align-content: center; justify-items: stretch; padding: 64px max(var(--margen), 6vw) 10px; gap: 36px; }
+  [data-r25l="l2"][data-r23x="x2"] .relato { text-align: left; justify-self: stretch; max-width: 46ch; padding: 0; }
+  [data-r25l="l2"][data-r23x="x2"] .relato::before, [data-r25l="l2"][data-r23x="x2"] .relato::after, [data-r25l="l2"] .relato .relato-num { display: none; }
+  [data-r25l="l2"][data-r23x="x2"] .relato li { grid-area: 1 / 1; display: block; padding: 0; opacity: 0; }
+  [data-r25l="l2"] [data-paso="0"] .relato li:nth-child(1), [data-r25l="l2"] [data-paso="1"] .relato li:nth-child(2), [data-r25l="l2"] [data-paso="2"] .relato li:nth-child(3) { opacity: 1; }
+  [data-r25l="l2"] .relato h2 { font-size: 1.5rem; }
+  [data-r25l="l2"] .relato h2 + p { font-size: 1rem; margin-inline: 0; }
+  [data-r25l="l2"] .dispositivos { --tw: calc((100svh - 80px) / 2.164); --dx: 0px !important; width: auto; height: auto; justify-self: end; }
+  [data-r25l="l2"] .telefono { width: var(--tw) !important; height: auto !important; translate: none !important; }
+  [data-r25l="l2"] .escena-app .flota-escena, [data-r25l="l2"] .ventana-kine, [data-r25l="l2"] .conectores, [data-r25l="l2"] .viajero { display: none !important; }
+}
+@media (max-height: 520px) and (orientation: landscape) { [data-r25l="l2"] .dispositivos { margin-right: 62px; } }
+/* C2 · La ficha de Carmen (lunes 16, misma semana que el teléfono): la fila resaltada es «Lun 16 · hoy» y el «Bien» cae sobre «Sin check-in» */
+[data-r25c="c2"][data-r24e="e2"] .resalte { left: 31%; top: 64.4%; width: 60%; height: 5.2%; }
+[data-r25c="c2"][data-r24e="e2"] .llega { left: 40.2%; top: 64.6%; height: 4.8%; }
+/* T2 en tablet acostada (761 a 1180 px, alto mayor a 520): las tarjetas se montan en los bordes del teléfono, para no salirse ni tapar el relato */
+@media (min-width: 761px) and (max-width: 1180px) and (orientation: landscape) and (min-height: 521px) {
+  [data-r25t="t2"] .escena-app .flota-escena:nth-of-type(1) { top: 7%; left: calc(50% - var(--tw) / 2 - 36px); right: auto; }
+  [data-r25t="t2"] .escena-app .flota-escena:nth-of-type(2) { top: 14%; right: calc(50% - var(--tw) / 2 - 36px); left: auto; }
+  [data-r25t="t2"] .escena-app .flota-escena:nth-of-type(3) { top: auto; bottom: 10%; left: calc(50% - var(--tw) / 2 - 36px); right: auto; }
+  [data-r25t="t2"] .escena-app .flota-escena { max-width: calc(var(--tw) + 60px); }
+}
+/* Ronda 25 · ajustes de AA y choques medidos con todo lo recomendado */
+.relato li { opacity: 0.8; } /* los números de los pasos inactivos llegaban a 4,36 : 1 con 0,74 */
+@media (min-width: 761px) {
+  [data-r25e="e3"] .escena-app[data-paso="2"] .dispositivos { --dx: -6vw; }
+  [data-r25e="e3"] .escena-app[data-paso="2"] .ventana-kine { translate: 6% -46%; }
+  [data-r25e="e3"] .escena-app .flota-escena { z-index: 7; }
+  [data-r25e="e3"] .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { right: auto; left: calc(50% - var(--tw) / 2 - 24px); top: 76%; }
+}
+@media (max-width: 760px) { [data-r25m="m2"] .escena-app[data-paso="2"] .telefono { translate: none !important; } }
+@media (min-width: 761px) and (max-width: 1180px) and (orientation: portrait) { [data-r25t="t2"] .relato .rotulo { color: var(--blanco); } }
+@media (min-width: 761px) { [data-r25e="e3"] .escena-app .flota-escena { z-index: 8 !important; } }
+@media (min-width: 761px) and (max-width: 1180px) and (orientation: portrait) { [data-r25t="t2"] .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { top: 7% !important; bottom: auto !important; left: calc(50% - var(--tw) / 2 - 44px) !important; right: auto !important; } }
+
+/* ═════════ Ronda 26 · el paso del equipo con un cambio: el teléfono parte adelante y el panel pasa al frente (data-r26e).
+   El JS pone .cambio 0,9 s después de entrar al paso 3; el z-index se anima junto con el resto, así que se cruzan a mitad del movimiento.
+   Solo en escritorio y tablet acostada: en tablet vertical (T2) y en el celular (M2) el panel entra desde abajo. */
+@media (min-width: 1181px), (min-width: 761px) and (orientation: landscape) and (min-height: 521px) {
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app[data-paso="2"] .dispositivos { --dx: -4vw; }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app .telefono { z-index: 4; transition: translate 1.1s var(--ease-pagina), scale 1.1s var(--ease-pagina), filter 1.1s var(--ease-calma), z-index 1.1s linear; }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app[data-paso="2"] .telefono { translate: -4vw 0; }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"])[data-r24e="e2"] .escena-app .ventana-kine { z-index: 1; translate: 10% -50%; transform: perspective(1400px) rotateY(-16deg) scale(0.88); filter: brightness(0.9);
+    transition: opacity 0.7s var(--ease-calma), translate 1.1s var(--ease-pagina), transform 1.1s var(--ease-pagina), filter 1.1s var(--ease-calma), box-shadow 1.1s var(--ease-calma), z-index 1.1s linear; }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"])[data-r24e="e2"] .escena-app[data-paso="2"] .ventana-kine { opacity: 1; }
+  /* E4 · Intercambio: se separan hacia los lados y se cruzan en profundidad, como dos cartas que cambian de lugar */
+  :is([data-r26e="e4"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app.cambio .telefono { z-index: 1; translate: -12vw 3%; scale: 0.86; filter: brightness(0.62) saturate(0.85); }
+  :is([data-r26e="e4"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"])[data-r24e="e2"] .escena-app.cambio .ventana-kine { z-index: 6; translate: -2% -50%; transform: perspective(1400px) rotateY(-3deg) scale(1.04); filter: none; box-shadow: 0 50px 100px -30px rgb(6 18 21 / 0.8); }
+  /* E5 · Foco: el teléfono se aleja hacia atrás en su lugar y el panel se endereza y crece hacia el centro */
+  [data-r26e="e5"] .escena-app.cambio .telefono { z-index: 1; translate: -7vw -3%; scale: 0.8; filter: brightness(0.6) blur(1.5px); }
+  [data-r26e="e5"][data-r24e="e2"] .escena-app.cambio .ventana-kine { z-index: 6; translate: -6% -50%; transform: perspective(1400px) rotateY(0deg) scale(1.06); filter: none; box-shadow: 0 60px 120px -30px rgb(6 18 21 / 0.85); }
+  /* La tarjeta del aviso sigue al teléfono (va con él hacia atrás, pero arriba de todo para leerse) */
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app .flota-escena { z-index: 8 !important; }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { right: auto; bottom: auto; left: calc(50% - var(--tw) / 2 - 24px); top: 76%; transition: opacity 0.5s var(--ease-calma), translate 1.1s var(--ease-pagina), left 1.1s var(--ease-pagina); }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app.cambio .flota-escena:nth-of-type(3) { translate: -8vw 0; }
+  [data-r26e] .viajero { z-index: 9; }
+}
+@media (min-width: 1181px), (min-width: 761px) and (orientation: landscape) and (min-height: 521px) {
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app[data-paso="2"] .flota-escena:nth-of-type(3) { transition: opacity 0.5s var(--ease-calma), translate 1.1s var(--ease-pagina), top 1.1s var(--ease-pagina); }
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app.cambio .flota-escena:nth-of-type(3) { top: 9%; translate: -6vw 0; }
+  @media (max-height: 700px) { :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app.cambio .flota-escena:nth-of-type(3) { top: 1%; } }
+  /* El video ya terminó cuando el teléfono pasa atrás: el botón de pausa se va con él */
+  :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app.cambio .telefono .pausa { opacity: 0 !important; visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s; }
+}
