@@ -36,6 +36,8 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* Sin rebote al tirar la página más allá del borde (pedido de Agustín, 16 nov). CSS no distingue arriba de abajo: bloquea los dos. */
+html, body { overscroll-behavior-y: none; }
 body {
   margin: 0;
   background: var(--hueso);

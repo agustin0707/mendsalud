@@ -459,3 +459,16 @@
   [data-r19b="b2"] .abierta .menu-boton .hb i:nth-child(3) { top: 6.125px; transform: rotate(-45deg); }
 }
 @media (prefers-reduced-motion: reduce) { [data-r19b] .menu-boton, [data-r19b] .menu-boton * { transition-duration: 0.01s !important; transition-delay: 0s !important; } }
+
+/* ===================== Ronda 20 (16 nov): letra de la barra y hover del logotipo =====================
+   Elección de Agustín: T3 y L3. WCAG no fija un tamaño mínimo; contraste medido de 5,53:1 o más. En el celular el menú queda en 17 px. */
+@media (min-width: 761px) {
+  .cab-sitio[data-sobre]:not(.abierta) :is(.nav-vidrio a, .entrar, .boton-cab) { font-size: 0.875rem; }  /* T3: 14 px (Material 3, label large) */
+}
+/* L3 · Respira: con el puntero encima, el asterisco crece y gira un poco, lento y en bucle */
+.cab-sitio[data-sobre] .marca:hover { opacity: 1; }
+.cab-sitio .marca svg polygon { transform-box: fill-box; transform-origin: center; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cab-sitio .marca:hover svg polygon { animation: logo-respira 2.4s ease-in-out infinite; }
+}
+@keyframes logo-respira { 0%, 100% { transform: none; } 50% { transform: scale(1.14) rotate(12deg); } }

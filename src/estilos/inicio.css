@@ -181,6 +181,8 @@
   padding: 100px var(--margen) 40px; color: var(--blanco); pointer-events: none;
 }
 [data-v="3"] .escena-app > * { pointer-events: auto; }
+/* Los textos de la escena no tienen nada que tocar: sin esto, mientras están invisibles tapaban el puntero sobre el titular (ronda 22) */
+[data-v="3"] .escena-app .lado { pointer-events: none; }
 [data-v="3"] .escena-app .lado { opacity: clamp(0, calc((var(--p) - 0.42) * 3.2), 1); transform: translateY(calc((1 - clamp(0, (var(--p) - 0.42) * 3.2, 1)) * 30px)); }
 [data-v="3"] .inicio-campo { background: var(--grano), radial-gradient(34% 40% at 76% 56%, rgb(36 74 83 / 0.4), rgb(36 74 83 / 0)), linear-gradient(90deg, rgb(36 74 83 / 0.62) 0%, rgb(36 74 83 / 0.56) 45%, rgb(36 74 83 / 0.84) 100%), url("../marca/campo.jpg") center / cover no-repeat; background-blend-mode: soft-light, normal, normal, normal; }
 [data-v="3"] .escena-app .lado h2 { font-size: clamp(1.75rem, 2.6vw, 2.5rem); line-height: 1.1; max-width: 14ch; }
@@ -307,3 +309,33 @@ html { background-color: #6f7a76; }
 [data-r16h="h5"] .inicio .boton-claro:hover { box-shadow: none; }
 [data-r16h="h5"] .inicio .boton-vidrio { transition: border-color 0.45s var(--sp), color 0.45s var(--sp), background-color 0.45s var(--sp); }
 [data-r16h="h5"] .inicio .boton-vidrio:hover { background: transparent; color: var(--blanco); border-color: var(--blanco); }
+
+/* ===================== Titular: entrada W3 y hover H2 (elegidos en la ronda 22, 16 nov) =====================
+   W3 «Trazo y tinta»: al cargar, se dibuja en Bruma el contorno de cada letra de «acompaña», de izquierda a derecha, y después se llena de blanco.
+   El contorno es un <text> de svg con la misma Larken, que arma sitio.js. Parte cuando la Larken ya cargó (<html class="fuentes">);
+   si algo falla, la palabra aparece igual a los 2,9 s.
+   H2 «Luz que acompaña»: con mouse, las letras toman el Bruma donde está el puntero. Empieza cuando terminó la entrada (h1.escrito).
+   Con «reducir movimiento» no hay ni entrada ni luz. «acompaña» lleva un relleno horizontal compensado (no mueve nada) para que la luz alcance la cursiva. */
+@property --rl { syntax: "<length>"; inherits: true; initial-value: 0px; }
+.inicio h1 { position: relative; }
+.inicio h1 .acento { position: relative; padding: 0.1em 0.14em 0.16em; margin: 0 -0.14em; }
+@media (prefers-reduced-motion: no-preference) {
+  html.js .inicio h1 .acento { color: transparent; animation: tinta-real 0.01s 2.9s both; }
+  html.fuentes .inicio h1 .acento { animation: tinta-real 0.5s var(--ease-calma) 2.3s both; }
+  .inicio h1 .trazo { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+  .inicio h1 .trazo tspan { fill: var(--blanco); fill-opacity: 0; stroke: var(--bruma); stroke-width: 1.4px; stroke-linejoin: round; stroke-dasharray: 520; stroke-dashoffset: 520; }
+  html.fuentes .inicio h1 .trazo tspan { animation: trazo-dibuja 1.15s cubic-bezier(0.45, 0, 0.25, 1) calc(0.5s + var(--i) * 0.09s) both, trazo-llena 0.7s var(--ease-calma) calc(1.35s + var(--i) * 0.07s) both; }
+  html.fuentes .inicio h1 .trazo { animation: trazo-se-va 0.5s var(--ease-calma) 2.3s both; }
+}
+@keyframes trazo-dibuja { to { stroke-dashoffset: 0; } }
+@keyframes trazo-llena { to { fill-opacity: 1; stroke-opacity: 0; } }
+@keyframes trazo-se-va { to { opacity: 0; } }
+@keyframes tinta-real { to { color: var(--blanco); } }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .inicio h1.escrito { transition: --rl 0.9s var(--sp); }
+  .inicio h1.escrito:hover { --rl: 2.4em; }
+  .inicio h1.escrito, .inicio h1.escrito .acento {
+    background: radial-gradient(circle var(--rl) at var(--mx, 50%) var(--my, 50%), var(--bruma) 0%, var(--bruma) 25%, var(--blanco) 100%) no-repeat;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+}

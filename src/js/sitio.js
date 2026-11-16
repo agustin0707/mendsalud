@@ -289,3 +289,45 @@ if (isos.length && !quieto.matches) {
   addEventListener('scroll', () => { if (!espera) { espera = true; requestAnimationFrame(girar) } }, { passive: true })
   girar()
 }
+
+// Titular del inicio: entrada W3 «Trazo y tinta» y hover H2 «Luz que acompaña» (ronda 22). Los estilos y el porqué están en inicio.css.
+const titular = document.querySelector('.inicio h1#titular')
+const acento = titular?.querySelector('.acento')
+if (titular && acento && !sinMovimiento.matches) {
+  const NS = 'http://www.w3.org/2000/svg'
+  // La Larken llega desde Adobe Fonts sin bloquear (media=print): se espera la hoja y después la cursiva misma, como mucho 1,6 s
+  const hoja = document.querySelector('link[rel="stylesheet"][href*="typekit"]')
+  const conHoja = !hoja || hoja.sheet ? Promise.resolve() : new Promise((r) => hoja.addEventListener('load', r, { once: true }))
+  const larken = conHoja.then(() => document.fonts?.load(`italic 300 40px ${getComputedStyle(acento).fontFamily}`))
+  const listo = () => requestAnimationFrame(() => document.documentElement.classList.add('fuentes'))
+  Promise.race([larken, new Promise((r) => setTimeout(r, 1600))]).then(listo, listo)
+  // El contorno: un <text> de svg con la misma letra encima de «acompaña», una letra por tspan para escalonar.
+  // Va al principio de «acompaña»: al final, Chrome rehace el equilibrio de líneas (text-wrap: balance) y el titular suma una línea falsa.
+  const texto = [...acento.childNodes].find((n) => n.nodeType === 3)
+  const svg = document.createElementNS(NS, 'svg'), tx = document.createElementNS(NS, 'text')
+  svg.setAttribute('class', 'trazo'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false')
+  ;[...texto.nodeValue].forEach((c, i) => { const s = document.createElementNS(NS, 'tspan'); s.textContent = c; s.style.setProperty('--i', i); tx.append(s) })
+  svg.append(tx); acento.prepend(svg)
+  // La línea de base sale de las medidas de la letra (agregar una marca al texto cambiaría el equilibrio de líneas)
+  const lienzo = document.createElement('canvas').getContext('2d')
+  const medir = () => {
+    const cs = getComputedStyle(acento), ra = acento.getBoundingClientRect()
+    lienzo.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+    tx.setAttribute('x', parseFloat(cs.paddingLeft)); tx.setAttribute('y', parseFloat(cs.paddingTop) + lienzo.measureText(texto.nodeValue).fontBoundingBoxAscent)
+    tx.style.font = lienzo.font; tx.style.letterSpacing = cs.letterSpacing
+    svg.setAttribute('width', ra.width); svg.setAttribute('height', ra.height)
+  }
+  medir(); larken.then(medir, () => {}); addEventListener('resize', medir)
+  // Terminada la tinta, el svg se va y empieza la luz del hover
+  const escrito = () => { titular.classList.add('escrito'); svg.remove() }
+  acento.addEventListener('animationend', (e) => { if (e.target === acento && e.animationName === 'tinta-real') escrito() })
+  setTimeout(escrito, 6000)
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const luz = (e) => {
+      const r = titular.getBoundingClientRect(), a = acento.getBoundingClientRect()
+      titular.style.setProperty('--mx', `${e.clientX - r.left}px`); titular.style.setProperty('--my', `${e.clientY - r.top}px`)
+      acento.style.setProperty('--mx', `${e.clientX - a.left}px`); acento.style.setProperty('--my', `${e.clientY - a.top}px`)
+    }
+    titular.addEventListener('pointerenter', luz); titular.addEventListener('pointermove', luz)
+  }
+}
