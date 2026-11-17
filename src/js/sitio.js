@@ -91,7 +91,7 @@ function tono() {
   const ini = document.querySelector('.inicio')
   if (ini) {
     const r = ini.getBoundingClientRect()
-    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || ini.style.getPropertyValue('--pr') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro') }
+    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || ini.style.getPropertyValue('--pr') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro'); if (Number(ini.style.getPropertyValue('--sx') || 0) > 0.42) t = 'claro' }
   }
   if (cab) {
     cab.dataset.sobre = t
@@ -102,6 +102,8 @@ function tono() {
 // Paso del inicio: --p de 0 a 1 mientras la foto queda fija.
 const inicio = document.querySelector('.inicio')
 const quieto = matchMedia('(prefers-reduced-motion: reduce)')
+// Ronda 31 · R4: seis capas de desenfoque y un velo hacia el crema, que suben desde abajo en la salida
+document.querySelector('.inicio-pin')?.insertAdjacentHTML('beforeend', '<div class="salida-velo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><b></b></div>')
 function paso() {
   // Ronda 25 · R1: con «reducir movimiento» la escena se ve igual, pero de golpe (--pr vale 0 o 1, sin pasos intermedios)
   const porPasos = quieto.matches && document.body.dataset.r25r === 'r1'
@@ -110,7 +112,34 @@ function paso() {
     const recorrido = inicio.offsetHeight - innerHeight
     // Ronda 23: con relato, el paso del inicio se alarga en --alto-relato (svh); --p cubre el tramo de siempre y --q el del relato
     const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
-    const base = recorrido - extra
+    // Ronda 29 · P2/P3: al final, el inicio sigue fijo --alto-salida (svh) mientras la hoja sube encima; --s va de 0 a 1 con la hoja
+    const salida = (Number(getComputedStyle(inicio).getPropertyValue('--alto-salida')) || 0) * innerHeight / 100
+    const base = recorrido - extra - salida
+    // Ronda 30 · Q1/Q2: la salida sin hoja; --sx va de 0 a 1 por el tramo fijo del final (la escena se disuelve en el color de la sección siguiente)
+    if (salida > 0 && /^q[12]$/.test(document.body.dataset.r30p ?? '')) {
+      const sx = Math.min(1, Math.max(0, (-r.top - (recorrido - salida)) / salida))
+      inicio.style.setProperty('--sx', sx.toFixed(4))
+      const esc = inicio.querySelector('.escena-app'), ven = inicio.querySelector('.ventana-kine')
+      if (document.body.dataset.r30p === 'q2' && esc && ven) {
+        // Q2: la cámara entra al panel del kine. El origen del zoom es el centro del panel, medido antes de que empiece
+        if (sx < 0.001 || !esc.dataset.origen) { const E = esc.getBoundingClientRect(), K = ven.getBoundingClientRect(); if (E.width) esc.dataset.origen = `${(((K.left + K.width / 2) - E.left) / E.width * 100).toFixed(2)}% ${(((K.top + K.height / 2) - E.top) / E.height * 100).toFixed(2)}%` }
+        const k = Math.min(1, sx / 0.5), z = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2
+        esc.style.transformOrigin = esc.dataset.origen ?? '50% 50%'
+        inicio.style.setProperty('--zk', z.toFixed(4))
+      }
+      // Ronda 31 · R1 a R6: seis salidas sobre la base de Q1; --ke es el avance con easing (de --sx 0,04 a 0,6)
+      const r31 = document.body.dataset.r31s ?? ''
+      if (r31) {
+        const k = Math.min(1, Math.max(0, (sx - 0.04) / 0.56)), ke = k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2
+        inicio.style.setProperty('--ke', ke.toFixed(4))
+        // R2: el círculo nace del centro del panel del kine, medido antes de empezar
+        if (r31 === 'r2' && ven && (sx < 0.001 || !inicio.dataset.iris)) { const K = ven.getBoundingClientRect(); if (K.width) inicio.dataset.iris = `${Math.round(K.left + K.width / 2)}px ${Math.round(K.top + K.height / 2)}px` }
+        if (inicio.dataset.iris) inicio.style.setProperty('--iris', inicio.dataset.iris)
+        // R6: el isotipo crece de 0 a 12 veces el lado mayor de la ventana, en curva cúbica (cubre todo hacia k 0,69)
+        if (r31 === 'r6') inicio.style.setProperty('--iso', `${Math.round(k * k * k * 12 * Math.max(innerWidth, innerHeight))}px`)
+      }
+    }
+    if (salida > 0) { const h = document.querySelector('.seccion.hoja'); if (h) document.documentElement.style.setProperty('--s', Math.min(1, Math.max(0, 1 - h.getBoundingClientRect().top / innerHeight)).toFixed(4)) }
     const p = base > 0 ? Math.min(1, Math.max(0, -r.top / base)) : 0
     if (porPasos) inicio.style.setProperty('--pr', p > 0.3 ? '1' : '0')
     else inicio.style.setProperty('--p', p.toFixed(4))
@@ -118,7 +147,10 @@ function paso() {
     if (escena) {
       const q = extra > 0 ? Math.min(1, Math.max(0, (-r.top - base) / extra)) : 0
       inicio.style.setProperty('--q', q.toFixed(4))
-      escena.dataset.paso = String(q < 0.34 ? 0 : q < 0.67 ? 1 : 2)
+      // Ronda 29 · S1/S2: el paso 3 tiene más recorrido (43 % del relato en vez de 33 %)
+      // Ronda 30: S1 con más tiempo, el paso 3 se queda con la mitad del relato
+      const [u1, u2] = /^s[12]$/.test(document.body.dataset.r29s ?? '') ? [0.25, 0.5] : [0.34, 0.67]
+      escena.dataset.paso = String(q < u1 ? 0 : q < u2 ? 1 : 2)
       escena.classList.toggle('en-uso', porPasos ? p > 0.3 : p > 0.84)
       if (porPasos && /^e[4-8]$/.test(document.body.dataset.r26e ?? '')) escena.classList.toggle('cambio', escena.dataset.paso === '2')
     }
@@ -359,11 +391,24 @@ if (dispositivos && matchMedia('(hover: hover) and (pointer: fine)').matches && 
   document.addEventListener('pointerleave', () => { dispositivos.style.setProperty('--tx', '0deg'); dispositivos.style.setProperty('--ty', '0deg') })
 }
 
+// Ronda 29 · S2: imán suave al comienzo de cada paso del relato (scroll-snap de proximidad, solo con movimiento)
+if (inicio && document.body.dataset.r29s === 's2' && !quieto.matches) {
+  const imanes = [0, 1, 2].map(() => { const m = document.createElement('span'); m.className = 'iman'; m.setAttribute('aria-hidden', 'true'); inicio.append(m); return m })
+  const ubicar = () => {
+    const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
+    const salida = (Number(getComputedStyle(inicio).getPropertyValue('--alto-salida')) || 0) * innerHeight / 100
+    const base = inicio.offsetHeight - innerHeight - extra - salida
+    ;[0.03, 0.28, 0.53].forEach((u, i) => { imanes[i].style.top = Math.round(base + extra * u) + 'px' })
+  }
+  ubicar(); addEventListener('resize', ubicar)
+  document.documentElement.classList.add('con-iman')
+}
 // Ronda 25: si se llega al botón de pausa con Tab antes de que la escena esté armada, la página baja hasta ella para que el foco se vea (WCAG 2.4.11)
 document.querySelector('.telefono .pausa')?.addEventListener('focus', () => {
   if (!inicio || quieto.matches || Number(inicio.style.getPropertyValue('--p') || 0) > 0.9) return
   const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
-  scrollTo({ top: inicio.offsetTop + inicio.offsetHeight - innerHeight - extra, behavior: 'instant' })
+  const salida = (Number(getComputedStyle(inicio).getPropertyValue('--alto-salida')) || 0) * innerHeight / 100
+  scrollTo({ top: inicio.offsetTop + inicio.offsetHeight - innerHeight - extra - salida, behavior: 'instant' })
 })
 // Ronda 25 · C2: la ficha del panel es la de Carmen, con la semana de hoy; el check-in llega a su fila «hoy»
 if (document.body.dataset.r25c === 'c2') { const f = document.querySelector('.ventana-cuerpo-kine img'); if (f) { f.srcset = f.srcset.replaceAll('kine-ficha-', 'kine-ficha-carmen-'); f.src = f.src.replace('kine-ficha.jpg', 'kine-ficha-carmen.jpg') } }
@@ -399,6 +444,28 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
   }
   video.addEventListener('loadeddata', () => { lista = true; video.classList.add('lista'); escenaApp.classList.add('con-video') }, { once: true })
   const tramo = (k) => [datos.tramos.A, datos.tramos.B, datos.tramos.C][k]
+  // Ronda 29 · S1/S2: el tramo del calendario corre a 1,4x para que el paso 3 termine antes
+  const rapido = () => /^s[12]$/.test(cuerpo.r29s ?? '')
+  const velocidad = (k) => (k === 2 && rapido() ? 1.4 : 1)
+  // Ronda 29 · C1/C2: del ejercicio al inicio sin corte. Se congela el último cuadro en un canvas encima del video,
+  // el video salta al tramo siguiente debajo y el cuadro congelado se va: C1 baja como una hoja que se cierra (iOS), C2 se funde.
+  let foto = null
+  function transicion(desde, hasta) {
+    meta = hasta
+    if (!foto) { foto = document.createElement('canvas'); foto.className = 'pant-foto'; foto.setAttribute('aria-hidden', 'true'); video.after(foto) }
+    try { foto.width = video.videoWidth; foto.height = video.videoHeight; foto.getContext('2d').drawImage(video, 0, 0) } catch { reproducir(desde, hasta, true); return }
+    foto.getAnimations().forEach((x) => x.cancel()); foto.style.opacity = '1'; video.pause()
+    const seguir = () => {
+      if (pasoVideo !== 2) { foto.style.opacity = '0'; return }
+      video.playbackRate = velocidad(2)
+      if (!escenaApp.classList.contains('pausado')) video.play().catch(() => {})
+      const c1 = cuerpo.r29c === 'c1', dur = c1 ? 950 : 750
+      const sale = foto.animate(c1 ? [{ translate: '0 0', scale: '1', borderRadius: '0px' }, { translate: '0 106%', scale: '0.94', borderRadius: '26px' }] : [{ opacity: 1, scale: '1', filter: 'blur(0px)' }, { opacity: 0, scale: '1.05', filter: 'blur(8px)' }], { duration: dur, easing: c1 ? 'cubic-bezier(0.6, 0, 0.25, 1)' : 'cubic-bezier(0.45, 0, 0.3, 1)', fill: 'forwards' })
+      video.animate(c1 ? [{ scale: '0.93', filter: 'brightness(0.62)' }, { scale: '1', filter: 'brightness(1)' }] : [{ scale: '0.975' }, { scale: '1' }], { duration: dur, easing: 'cubic-bezier(0.45, 0, 0.25, 1)' })
+      sale.onfinish = () => { foto.style.opacity = '0'; sale.cancel() }
+    }
+    video.addEventListener('seeked', seguir, { once: true }); video.currentTime = desde
+  }
   function reproducir(desde, hasta, corte) {
     meta = hasta
     const ir = () => { if (desde !== null) video.currentTime = desde; if (!escenaApp.classList.contains('pausado')) video.play().catch(() => {}) }
@@ -424,6 +491,8 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
       const [a, b] = tramo(k)
       // Si viene del final del paso anterior, sigue sin saltar; si no, parte desde el comienzo de su tramo
       const seguido = k === pasoVideo + 1 && Math.abs(video.currentTime - a) < 0.25
+      video.playbackRate = velocidad(k)
+      if (k === 2 && /^c[12]$/.test(cuerpo.r29c ?? '') && video.readyState >= 2) { pasoVideo = k; transicion(a, b); return }
       reproducir(seguido ? null : a, b, k === 2)
     } else { const [, b] = tramo(k); video.pause(); meta = null; video.classList.add('corte'); setTimeout(() => { video.currentTime = b - 0.04; video.classList.remove('corte') }, 130) }
     pasoVideo = k
@@ -537,7 +606,10 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
     const cambia = /^e[4-8]$/.test(cuerpo.r26e ?? '')
     clearTimeout(viaje.t); if (cambia && paso !== 2) { escenaApp.classList.remove('cambio'); deshacerCambio() }
     if (paso !== 2) return
-    if (cambia) viaje.t = setTimeout(() => { if (pasoViaje === 2) cambiar() }, 3300)
+    // Ronda 29: el cambio parte cuando termina el tramo del calendario (más corto con S1/S2) y el check-in, cuando termina el cambio
+    const tC = datos ? (datos.tramos.C[1] - datos.tramos.C[0]) * 1000 / velocidad(2) + 100 : 3300
+    const dCambio = { e6: 2000, e7: 2200, e8: 2200 }[cuerpo.r26e] ?? 1150
+    if (cambia) viaje.t = setTimeout(() => { if (pasoViaje === 2) cambiar() }, tC)
     setTimeout(() => {
       if (pasoViaje !== 2) return
       const D = dispo.getBoundingClientRect(), S = pantallas.getBoundingClientRect(), E = escenaApp.querySelector('.llega').getBoundingClientRect()
@@ -548,7 +620,7 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
       escenaApp.classList.add('viajando')
       anim = viajero.animate([{ offsetDistance: '0%', opacity: 0, scale: 0.7 }, { offset: 0.12, opacity: 1, scale: 1 }, { offset: 0.85, opacity: 1, scale: 1 }, { offsetDistance: '100%', opacity: 0, scale: 0.55 }], { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' })
       anim.onfinish = () => { escenaApp.classList.remove('viajando'); escenaApp.classList.add('llego') }
-    }, /^e[78]$/.test(cuerpo.r26e ?? '') ? 5650 : cuerpo.r26e === 'e6' ? 5350 : cambia ? 4450 : 1000)
+    }, cambia ? tC + dCambio + 150 : 1000)
   }
 
   const cuadro = () => {

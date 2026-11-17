@@ -735,3 +735,99 @@ html { background-color: #6f7a76; }
   /* El video ya terminó cuando el teléfono pasa atrás: el botón de pausa se va con él */
   :is([data-r26e="e4"], [data-r26e="e5"], [data-r26e="e6"], [data-r26e="e7"], [data-r26e="e8"]) .escena-app.cambio .telefono .pausa { opacity: 0 !important; visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s; }
 }
+
+/* ═════════ Ronda 29 · tres transiciones: del ejercicio al calendario (data-r29c), el largo del paso 3 (data-r29s) y la salida a la sección siguiente (data-r29p) */
+/* C1/C2: el cuadro congelado del ejercicio va encima del video mientras este salta al tramo siguiente */
+.pant-foto { display: block; position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none; transform-origin: 50% 100%; }
+.pant-video { transform-origin: 50% 50%; }
+/* S1/S2: el relato se alarga 60 svh; el paso 3 se queda con la mayor parte */
+[data-v="3"][data-r23p="p2"]:is([data-r29s="s1"], [data-r29s="s2"]) .inicio { --alto-relato: 330; }
+@media (max-width: 760px) { [data-v="3"][data-r23p="p2"]:is([data-r29s="s1"], [data-r29s="s2"]) .inicio { --alto-relato: 300; } }
+/* S2: los imanes del relato (scroll-snap de proximidad) */
+.iman { position: absolute; left: 0; width: 1px; height: 1px; pointer-events: none; scroll-snap-align: start; }
+html.con-iman { scroll-snap-type: y proximity; }
+/* P2/P3: el inicio sigue fijo 120 svh más; la hoja sube encima los últimos 100 y la escena se aleja debajo */
+@media (prefers-reduced-motion: no-preference) {
+  [data-v="3"][data-r23p="p2"]:is([data-r29p="p2"], [data-r29p="p3"]) .inicio { --alto-salida: 120; height: calc((260 + var(--alto-relato) + var(--alto-salida)) * 1svh); }
+  :is([data-r29p="p2"], [data-r29p="p3"]) .seccion.hoja { position: relative; z-index: 3; margin-top: calc(-100svh - var(--panel-r)); }
+  :is([data-r29p="p2"], [data-r29p="p3"]) .inicio-pin { background: #0c1d21; }
+  :is([data-r29p="p2"], [data-r29p="p3"]) .inicio-marco { scale: calc(1 - var(--s, 0) * 0.07); border-radius: calc(var(--s, 0) * 30px); transform-origin: 50% 30%; }
+  :is([data-r29p="p2"], [data-r29p="p3"]) .inicio-pin::after { content: ""; position: absolute; inset: 0; z-index: 9; background: #061215; opacity: calc(var(--s, 0) * 0.6); pointer-events: none; }
+  /* P3: además la hoja nace como una tarjeta más angosta y se abre hasta el borde mientras sube */
+  [data-r29p="p3"] .seccion.hoja { clip-path: inset(0 calc((1 - var(--s, 0)) * 7vw) 0 round calc(var(--panel-r) + (1 - var(--s, 0)) * 20px) calc(var(--panel-r) + (1 - var(--s, 0)) * 20px) 0 0); }
+  [data-r29p="p3"] .seccion.hoja > .envoltura { translate: 0 calc((1 - var(--s, 0)) * 60px); opacity: clamp(0, calc(var(--s, 0) * 1.6 - 0.2), 1); }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
+  [data-v="3"][data-r23p="p2"]:is([data-r29p="p2"], [data-r29p="p3"]) .inicio { height: calc((240 + var(--alto-relato) + var(--alto-salida)) * 1svh); }
+}
+
+/* ═════════ Ronda 30 · la salida sin hoja (data-r30p). El inicio sigue fijo 130 svh; la escena se disuelve en el color de la sección siguiente
+   (#fbf9f4) y esa sección sube después sin borde ni sombra, así que no se nota dónde empieza. Q1: la escena sube y se disuelve. Q2: la cámara entra al panel. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-v="3"][data-r23p="p2"]:is([data-r30p="q1"], [data-r30p="q2"]) .inicio { --alto-salida: 130; height: calc((260 + var(--alto-relato) + var(--alto-salida)) * 1svh); }
+  :is([data-r30p="q1"], [data-r30p="q2"]) .seccion.hoja { position: relative; z-index: 3; margin-top: -60svh; border-radius: 0; box-shadow: none; background: #fbf9f4; }
+  :is([data-r30p="q1"], [data-r30p="q2"]) .inicio-pin::after { content: ""; position: absolute; inset: 0; z-index: 9; background: #fbf9f4; pointer-events: none; }
+  [data-r30p="q1"] .inicio-pin::after { opacity: clamp(0, calc((var(--sx, 0) - 0.08) * 2.5), 1); }
+  [data-r30p="q1"] .escena-app { translate: 0 calc(var(--sx, 0) * -9svh); scale: calc(1 - var(--sx, 0) * 0.08); opacity: clamp(0, calc(1 - var(--sx, 0) * 1.6), 1); }
+  [data-r30p="q2"] .inicio-pin::after { opacity: clamp(0, calc((var(--sx, 0) - 0.3) * 5.6), 1); }
+  [data-r30p="q2"] .escena-app { scale: calc(1 + var(--zk, 0) * 2.4); }
+  [data-r30p="q2"] .escena-app .relato { opacity: clamp(0, calc(1 - var(--sx, 0) * 5), 1); }
+  [data-r30p="q2"] .escena-app .telefono .pausa { opacity: clamp(0, calc(1 - var(--sx, 0) * 5), 1); }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
+  /* En el celular el teléfono queda encima del panel: se va antes del zoom para que la cámara entre limpia */
+  [data-r30p="q2"] .escena-app :is(.telefono, .flota-escena) { filter: opacity(clamp(0, calc(1 - var(--sx, 0) * 6), 1)); }
+  [data-v="3"][data-r23p="p2"]:is([data-r30p="q1"], [data-r30p="q2"]) .inicio { height: calc((240 + var(--alto-relato) + var(--alto-salida)) * 1svh); }
+}
+/* Ronda 30 · T2: el relato aún más largo (390 svh; el paso 3 se queda con 195) */
+[data-v="3"][data-r23p="p2"][data-r29s="s1"][data-r30t="t2"] .inicio { --alto-relato: 390; }
+@media (max-width: 760px) { [data-v="3"][data-r23p="p2"][data-r29s="s1"][data-r30t="t2"] .inicio { --alto-relato: 360; } }
+
+/* ═════════ Ronda 31 · seis salidas sobre la base de Q1 (data-r31s). Todas usan el mismo tramo fijo y --ke (avance con easing, de 0 a 1). */
+.salida-velo { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Base: se apaga lo propio de Q1 y cada variante pone lo suyo */
+  [data-r30p="q1"][data-r31s] .escena-app { translate: none; scale: none; opacity: 1; }
+  [data-r30p="q1"][data-r31s] .inicio-pin::after { opacity: 0; }
+
+  /* R1 · Degradado de marca: una banda petróleo → mar → bruma → hueso sube desde abajo y deja todo en hueso; la escena sube un poco más lento (paralaje) */
+  [data-r30p="q1"][data-r31s="r1"] .inicio-pin::after { opacity: 1; inset: 0 0 auto 0; height: 250svh; translate: 0 calc(100svh - var(--ke, 0) * 200svh);
+    background: linear-gradient(to bottom, rgb(36 74 83 / 0) 0%, rgb(77 153 153 / 0.5) 12%, rgb(201 233 232 / 0.92) 25%, var(--hueso) 38%); }
+  [data-r30p="q1"][data-r31s="r1"] .escena-app { translate: 0 calc(var(--ke, 0) * -16svh); }
+
+  /* R2 · Círculo desde el panel: el hueso se abre en círculo de borde suave desde el centro del panel del kine; la escena se achica un poco */
+  [data-r30p="q1"][data-r31s="r2"] .inicio-pin::after { opacity: 1; --rr: calc(var(--ke, 0) * 150vmax);
+    -webkit-mask-image: radial-gradient(circle at var(--iris, 50% 50%), #000 calc(var(--rr) - 60px), transparent var(--rr));
+    mask-image: radial-gradient(circle at var(--iris, 50% 50%), #000 calc(var(--rr) - 60px), transparent var(--rr)); }
+  [data-r30p="q1"][data-r31s="r2"] .escena-app { scale: calc(1 - var(--ke, 0) * 0.06); }
+
+  /* R3 · Vidrio: toda la escena se empaña como vidrio esmerilado y se aclara hasta el hueso */
+  [data-r30p="q1"][data-r31s="r3"] .inicio-marco { filter: blur(calc(var(--ke, 0) * 26px)) saturate(calc(1 - var(--ke, 0) * 0.4)); }
+  [data-r30p="q1"][data-r31s="r3"] .escena-app { scale: calc(1 + var(--ke, 0) * 0.05); }
+  [data-r30p="q1"][data-r31s="r3"] .inicio-pin::after { opacity: clamp(0, calc((var(--ke, 0) - 0.2) * 1.4), 1); }
+
+  /* R4 · Desenfoque progresivo: la receta de la tarjeta de rutina (seis capas y un velo), ahora hacia el hueso, sube desde abajo y cubre la escena */
+  [data-r30p="q1"][data-r31s="r4"] .salida-velo { display: block; position: absolute; left: 0; right: 0; top: 0; height: 200svh; z-index: 8; pointer-events: none; translate: 0 calc(100svh - var(--ke, 0) * 200svh); }
+  .salida-velo i, .salida-velo b { position: absolute; inset: 0; }
+  .salida-velo i:nth-child(1) { backdrop-filter: blur(1px); -webkit-mask-image: linear-gradient(transparent 0%, #000 12%); mask-image: linear-gradient(transparent 0%, #000 12%); }
+  .salida-velo i:nth-child(2) { backdrop-filter: blur(2px); -webkit-mask-image: linear-gradient(transparent 6%, #000 18%); mask-image: linear-gradient(transparent 6%, #000 18%); }
+  .salida-velo i:nth-child(3) { backdrop-filter: blur(4px); -webkit-mask-image: linear-gradient(transparent 12%, #000 24%); mask-image: linear-gradient(transparent 12%, #000 24%); }
+  .salida-velo i:nth-child(4) { backdrop-filter: blur(8px); -webkit-mask-image: linear-gradient(transparent 18%, #000 32%); mask-image: linear-gradient(transparent 18%, #000 32%); }
+  .salida-velo i:nth-child(5) { backdrop-filter: blur(16px); -webkit-mask-image: linear-gradient(transparent 26%, #000 40%); mask-image: linear-gradient(transparent 26%, #000 40%); }
+  .salida-velo i:nth-child(6) { backdrop-filter: blur(28px); -webkit-mask-image: linear-gradient(transparent 34%, #000 48%); mask-image: linear-gradient(transparent 34%, #000 48%); }
+  .salida-velo b { background: linear-gradient(transparent 8%, rgb(251 249 244 / 0.35) 24%, rgb(251 249 244 / 0.8) 38%, var(--hueso) 50%); }
+
+  /* R5 · Primero el fondo: la foto y el petróleo pasan a hueso detrás de los equipos; luego el teléfono y el panel suben, se achican y se van */
+  [data-r30p="q1"][data-r31s="r5"] .inicio-marco { --kf: clamp(0, calc(var(--ke, 0) * 2.2), 1); --ko: clamp(0, calc((var(--ke, 0) - 0.4) / 0.6), 1);
+    background: color-mix(in srgb, var(--hueso) calc(var(--kf) * 100%), var(--petroleo)); }
+  [data-r30p="q1"][data-r31s="r5"] .inicio-marco > :is(.inicio-foto, .inicio-velo, .inicio-campo) { filter: opacity(calc(1 - var(--kf))); }
+  [data-r30p="q1"][data-r31s="r5"] .escena-app { translate: 0 calc(var(--ko) * -12svh); scale: calc(1 - var(--ko) * 0.14); opacity: calc(1 - var(--ko)); }
+  [data-r30p="q1"][data-r31s="r5"] .escena-app :is(.relato, .flota-escena) { filter: opacity(clamp(0, calc(1 - var(--ke, 0) * 4), 1)); }
+
+  /* R6 · Isotipo: el asterisco de Mend crece desde el centro, girando, hasta que su centro llena la pantalla de hueso */
+  [data-r30p="q1"][data-r31s="r6"] .inicio-pin::after { opacity: 1; inset: auto; left: 50%; top: 50%; width: 250vmax; height: 250vmax; margin: -125vmax 0 0 -125vmax; rotate: calc(var(--ke, 0) * 70deg);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 67.14 67.14'%3E%3Cpolygon points='67.14 25.03 64.65 15.16 35.07 22.71 40.41 2.64 30.63 0 25.71 18.49 12.84 5.53 5.68 12.74 27.86 35.05 0 42.16 2.49 52.04 31.96 44.51 26.64 64.5 36.41 67.14 41.35 48.62 54.3 61.66 61.46 54.46 39.28 32.14 67.14 25.03'/%3E%3C/svg%3E") center / var(--iso, 0px) no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 67.14 67.14'%3E%3Cpolygon points='67.14 25.03 64.65 15.16 35.07 22.71 40.41 2.64 30.63 0 25.71 18.49 12.84 5.53 5.68 12.74 27.86 35.05 0 42.16 2.49 52.04 31.96 44.51 26.64 64.5 36.41 67.14 41.35 48.62 54.3 61.66 61.46 54.46 39.28 32.14 67.14 25.03'/%3E%3C/svg%3E") center / var(--iso, 0px) no-repeat; }
+  [data-r30p="q1"][data-r31s="r6"] .escena-app { scale: calc(1 - var(--ke, 0) * 0.05); }
+  /* La sección siguiente entra un poco después (a --sx 0,63) para que la salida tenga su tiempo */
+  [data-r30p="q1"][data-r31s] .seccion.hoja { margin-top: -48svh; }
+}
