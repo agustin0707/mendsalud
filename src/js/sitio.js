@@ -80,22 +80,24 @@ menu?.addEventListener('click', () => {
 
 // Tono de la cabecera: mira qué sección pasa bajo la barra (data-tono="claro" u "oscuro").
 const tonos = [...document.querySelectorAll('[data-tono]')]
-function tono() {
+// Fluidez (16 nov): tono() recibe las medidas leídas al comienzo del cuadro, antes de escribir nada, para no forzar otro cálculo de estilos
+let sxActual = 0
+function tono(medidas = tonos.map((s) => s.getBoundingClientRect()), rIni = document.querySelector('.inicio')?.getBoundingClientRect()) {
   const y = 40
   let t = 'oscuro'
-  for (const s of tonos) {
-    const r = s.getBoundingClientRect()
+  tonos.forEach((s, i) => {
+    const r = medidas[i]
     if (r.top <= y && r.bottom > y) t = s.dataset.tonoCab ?? s.dataset.tono
-  }
+  })
   // En el inicio, el tono puede cambiar a mitad del paso (la versión 1 parte clara y termina en el degradado).
   const ini = document.querySelector('.inicio')
-  if (ini) {
-    const r = ini.getBoundingClientRect()
-    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || ini.style.getPropertyValue('--pr') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro'); if (Number(ini.style.getPropertyValue('--sx') || 0) > 0.42) t = 'claro' }
+  if (ini && rIni) {
+    const r = rIni
+    if (r.top <= y && r.bottom > y) { const pp = Number(ini.style.getPropertyValue('--p') || ini.style.getPropertyValue('--pr') || 0); t = document.body.dataset.r23f === 'f3' && pp > 0.5 ? 'claro' : pp > 0.3 ? 'oscuro' : (ini.dataset.tono ?? 'oscuro'); if (sxActual > 0.42) t = 'claro' }
   }
   if (cab) {
-    cab.dataset.sobre = t
-    cab.dataset.compacta = String(scrollY > 24) // la barra se achica (y en N3 aparece el vidrio) al empezar a bajar
+    if (cab.dataset.sobre !== t) cab.dataset.sobre = t
+    const c = String(scrollY > 24); if (cab.dataset.compacta !== c) cab.dataset.compacta = c // la barra se achica (y en N3 aparece el vidrio) al empezar a bajar
   }
 }
 
@@ -104,58 +106,78 @@ const inicio = document.querySelector('.inicio')
 const quieto = matchMedia('(prefers-reduced-motion: reduce)')
 // Ronda 31 · R4: seis capas de desenfoque y un velo hacia el crema, que suben desde abajo en la salida
 document.querySelector('.inicio-pin')?.insertAdjacentHTML('beforeend', '<div class="salida-velo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><b></b></div>')
+// Fluidez (16 nov): en cada cuadro se lee todo primero y se escribe después, y solo lo que cambió.
+// Las alturas en svh del inicio se leen una vez (cambian solo al cambiar el tamaño o una variante).
+const escritos = new WeakMap()
+function pon(el, k, v) { let m = escritos.get(el); if (!m) escritos.set(el, (m = {})); if (m[k] === v) return; m[k] = v; el.style.setProperty(k, v) }
+let altos = null
+const leerAltos = () => { const cs = getComputedStyle(inicio); altos = { relato: Number(cs.getPropertyValue('--alto-relato')) || 0, salida: Number(cs.getPropertyValue('--alto-salida')) || 0 } }
+addEventListener('resize', () => { altos = null })
+new MutationObserver(() => { altos = null }).observe(document.body, { attributes: true })
+const velo = document.querySelector('.salida-velo')
 function paso() {
   // Ronda 25 · R1: con «reducir movimiento» la escena se ve igual, pero de golpe (--pr vale 0 o 1, sin pasos intermedios)
   const porPasos = quieto.matches && document.body.dataset.r25r === 'r1'
-  if (inicio && (!quieto.matches || porPasos)) {
-    const r = inicio.getBoundingClientRect()
-    const recorrido = inicio.offsetHeight - innerHeight
-    // Ronda 23: con relato, el paso del inicio se alarga en --alto-relato (svh); --p cubre el tramo de siempre y --q el del relato
-    const extra = (Number(getComputedStyle(inicio).getPropertyValue('--alto-relato')) || 0) * innerHeight / 100
-    // Ronda 29 · P2/P3: al final, el inicio sigue fijo --alto-salida (svh) mientras la hoja sube encima; --s va de 0 a 1 con la hoja
-    const salida = (Number(getComputedStyle(inicio).getPropertyValue('--alto-salida')) || 0) * innerHeight / 100
-    const base = recorrido - extra - salida
-    // Ronda 30 · Q1/Q2: la salida sin hoja; --sx va de 0 a 1 por el tramo fijo del final (la escena se disuelve en el color de la sección siguiente)
-    if (salida > 0 && /^q[12]$/.test(document.body.dataset.r30p ?? '')) {
-      const sx = Math.min(1, Math.max(0, (-r.top - (recorrido - salida)) / salida))
-      inicio.style.setProperty('--sx', sx.toFixed(4))
-      const esc = inicio.querySelector('.escena-app'), ven = inicio.querySelector('.ventana-kine')
-      if (document.body.dataset.r30p === 'q2' && esc && ven) {
-        // Q2: la cámara entra al panel del kine. El origen del zoom es el centro del panel, medido antes de que empiece
-        if (sx < 0.001 || !esc.dataset.origen) { const E = esc.getBoundingClientRect(), K = ven.getBoundingClientRect(); if (E.width) esc.dataset.origen = `${(((K.left + K.width / 2) - E.left) / E.width * 100).toFixed(2)}% ${(((K.top + K.height / 2) - E.top) / E.height * 100).toFixed(2)}%` }
+  const cuerpo = document.body.dataset
+  // 1 · Lecturas
+  const medidas = tonos.map((s) => s.getBoundingClientRect())
+  if (!inicio || (quieto.matches && !porPasos)) { tono(medidas); return }
+  const r = inicio.getBoundingClientRect()
+  const recorrido = inicio.offsetHeight - innerHeight
+  if (!altos) leerAltos()
+  // Ronda 23: con relato, el paso del inicio se alarga en --alto-relato (svh); --p cubre el tramo de siempre y --q el del relato
+  const extra = altos.relato * innerHeight / 100
+  // Ronda 29: al final, el inicio sigue fijo --alto-salida (svh)
+  const salida = altos.salida * innerHeight / 100
+  const base = recorrido - extra - salida
+  const conHoja = salida > 0 && /^p[23]$/.test(cuerpo.r29p ?? '')
+  const rHoja = conHoja ? document.querySelector('.seccion.hoja')?.getBoundingClientRect() : null
+  const esc = inicio.querySelector('.escena-app'), ven = inicio.querySelector('.ventana-kine')
+  const q2 = cuerpo.r30p === 'q2', r31 = cuerpo.r31s ?? ''
+  const sx = salida > 0 ? Math.min(1, Math.max(0, (-r.top - (recorrido - salida)) / salida)) : 0
+  // Q2 y R2 miden su origen antes de que empiece la salida
+  const medirOrigen = sx < 0.001 && ven && ((q2 && esc) || r31 === 'r2')
+  const E = medirOrigen && q2 ? esc.getBoundingClientRect() : null, K = medirOrigen ? ven.getBoundingClientRect() : null
+
+  // 2 · Escrituras
+  sxActual = salida > 0 && /^q[12]$/.test(cuerpo.r30p ?? '') ? sx : 0
+  if (salida > 0) {
+    if (/^q[12]$/.test(cuerpo.r30p ?? '')) {
+      // Ronda 30 · Q1/Q2: --sx va de 0 a 1 por el tramo fijo del final. Con R4 nadie lo usa en el CSS y no se escribe (se ahorra recalcular la escena entera)
+      if (r31 !== 'r4') pon(inicio, '--sx', sx.toFixed(4))
+      if (q2 && esc && ven) {
+        // Q2: la cámara entra al panel del kine
+        if (E && E.width) esc.dataset.origen = `${(((K.left + K.width / 2) - E.left) / E.width * 100).toFixed(2)}% ${(((K.top + K.height / 2) - E.top) / E.height * 100).toFixed(2)}%`
         const k = Math.min(1, sx / 0.5), z = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2
-        esc.style.transformOrigin = esc.dataset.origen ?? '50% 50%'
-        inicio.style.setProperty('--zk', z.toFixed(4))
+        if (esc.style.transformOrigin !== (esc.dataset.origen ?? '50% 50%')) esc.style.transformOrigin = esc.dataset.origen ?? '50% 50%'
+        pon(inicio, '--zk', z.toFixed(4))
       }
-      // Ronda 31 · R1 a R6: seis salidas sobre la base de Q1; --ke es el avance con easing (de --sx 0,04 a 0,6)
-      const r31 = document.body.dataset.r31s ?? ''
+      // Ronda 31 · R1 a R6 sobre Q1; --ke es el avance con easing (de --sx 0,04 a 0,6). R4 lo escribe solo en sus capas
       if (r31) {
         const k = Math.min(1, Math.max(0, (sx - 0.04) / 0.56)), ke = k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2
-        inicio.style.setProperty('--ke', ke.toFixed(4))
-        // R2: el círculo nace del centro del panel del kine, medido antes de empezar
-        if (r31 === 'r2' && ven && (sx < 0.001 || !inicio.dataset.iris)) { const K = ven.getBoundingClientRect(); if (K.width) inicio.dataset.iris = `${Math.round(K.left + K.width / 2)}px ${Math.round(K.top + K.height / 2)}px` }
-        if (inicio.dataset.iris) inicio.style.setProperty('--iris', inicio.dataset.iris)
-        // R6: el isotipo crece de 0 a 12 veces el lado mayor de la ventana, en curva cúbica (cubre todo hacia k 0,69)
-        if (r31 === 'r6') inicio.style.setProperty('--iso', `${Math.round(k * k * k * 12 * Math.max(innerWidth, innerHeight))}px`)
+        pon(r31 === 'r4' && velo ? velo : inicio, '--ke', ke.toFixed(4))
+        if (r31 === 'r2' && K && K.width) inicio.dataset.iris = `${Math.round(K.left + K.width / 2)}px ${Math.round(K.top + K.height / 2)}px`
+        if (inicio.dataset.iris) pon(inicio, '--iris', inicio.dataset.iris)
+        if (r31 === 'r6') pon(inicio, '--iso', `${Math.round(k * k * k * 12 * Math.max(innerWidth, innerHeight))}px`)
       }
     }
-    if (salida > 0) { const h = document.querySelector('.seccion.hoja'); if (h) document.documentElement.style.setProperty('--s', Math.min(1, Math.max(0, 1 - h.getBoundingClientRect().top / innerHeight)).toFixed(4)) }
-    const p = base > 0 ? Math.min(1, Math.max(0, -r.top / base)) : 0
-    if (porPasos) inicio.style.setProperty('--pr', p > 0.3 ? '1' : '0')
-    else inicio.style.setProperty('--p', p.toFixed(4))
-    const escena = inicio.querySelector('.escena-app')
-    if (escena) {
-      const q = extra > 0 ? Math.min(1, Math.max(0, (-r.top - base) / extra)) : 0
-      inicio.style.setProperty('--q', q.toFixed(4))
-      // Ronda 29 · S1/S2: el paso 3 tiene más recorrido (43 % del relato en vez de 33 %)
-      // Ronda 30: S1 con más tiempo, el paso 3 se queda con la mitad del relato
-      const [u1, u2] = /^s[12]$/.test(document.body.dataset.r29s ?? '') ? [0.25, 0.5] : [0.34, 0.67]
-      escena.dataset.paso = String(q < u1 ? 0 : q < u2 ? 1 : 2)
-      escena.classList.toggle('en-uso', porPasos ? p > 0.3 : p > 0.84)
-      if (porPasos && /^e[4-8]$/.test(document.body.dataset.r26e ?? '')) escena.classList.toggle('cambio', escena.dataset.paso === '2')
-    }
+    // Ronda 29 · P2/P3: --s va de 0 a 1 con la hoja (solo con esas variantes: escribirla en la raíz recalcula toda la página)
+    if (rHoja) pon(document.documentElement, '--s', Math.min(1, Math.max(0, 1 - rHoja.top / innerHeight)).toFixed(4))
   }
-  tono()
+  const p = base > 0 ? Math.min(1, Math.max(0, -r.top / base)) : 0
+  if (porPasos) pon(inicio, '--pr', p > 0.3 ? '1' : '0')
+  else pon(inicio, '--p', p.toFixed(4))
+  if (esc) {
+    const q = extra > 0 ? Math.min(1, Math.max(0, (-r.top - base) / extra)) : 0
+    pon(inicio, '--q', q.toFixed(4))
+    // Ronda 30: S1 con más tiempo, el paso 3 se queda con la mitad del relato
+    const [u1, u2] = /^s[12]$/.test(cuerpo.r29s ?? '') ? [0.25, 0.5] : [0.34, 0.67]
+    const n = String(q < u1 ? 0 : q < u2 ? 1 : 2)
+    if (esc.dataset.paso !== n) esc.dataset.paso = n
+    esc.classList.toggle('en-uso', porPasos ? p > 0.3 : p > 0.84)
+    if (porPasos && /^e[4-8]$/.test(cuerpo.r26e ?? '')) esc.classList.toggle('cambio', esc.dataset.paso === '2')
+  }
+  tono(medidas, r)
 }
 let pendiente = false
 addEventListener('scroll', () => {
@@ -525,7 +547,7 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
     const st = toques.style
     st.setProperty('--x', `${(x * 100).toFixed(2)}%`); st.setProperty('--y', `${(y * 100).toFixed(2)}%`)
     st.setProperty('--ap', cl(ap).toFixed(3)); st.setProperty('--pr', cl(pr).toFixed(3)); st.setProperty('--on', on.toFixed(3)); st.setProperty('--onv', String(onv)); st.setProperty('--ra', ra.toFixed(3))
-    const r = toques.querySelector('.toque-rotulo'); if (r.textContent !== rot && rot) r.textContent = rot; r.dataset.lado = x > 0.6 ? 'izq' : x < 0.4 ? 'der' : ''
+    const r = toques.querySelector('.toque-rotulo'); if (r.textContent !== rot && rot) r.textContent = rot; const lado = x > 0.6 ? 'izq' : x < 0.4 ? 'der' : ''; if (r.dataset.lado !== lado) r.dataset.lado = lado
   }
 
   // Líneas de las tarjetas (B2): de la tarjeta del paso activo a lo que señala en la pantalla
@@ -623,9 +645,12 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
     }, cambia ? tC + dCambio + 150 : 1000)
   }
 
+  // Fluidez (16 nov): si el inicio está a la vista lo dice un IntersectionObserver (leer su posición en cada cuadro forzaba un cálculo de estilos),
+  // y cuando la salida ya tapó la escena (--sx > 0,65) no se dibuja nada
+  let aLaVista = true
+  new IntersectionObserver(([e]) => { aLaVista = e.isIntersecting }).observe(inicio)
   const cuadro = () => {
-    const r = inicio.getBoundingClientRect()
-    if (r.bottom > 0 && r.top < innerHeight) { sincronizar(); if (lista) dibujarToques(); dibujarLineas(); viaje() }
+    if (aLaVista && sxActual < 0.65) { sincronizar(); if (lista) dibujarToques(); dibujarLineas(); viaje() }
     requestAnimationFrame(cuadro)
   }
   requestAnimationFrame(cuadro)

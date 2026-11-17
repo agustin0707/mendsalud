@@ -807,7 +807,7 @@ html.con-iman { scroll-snap-type: y proximity; }
   [data-r30p="q1"][data-r31s="r3"] .inicio-pin::after { opacity: clamp(0, calc((var(--ke, 0) - 0.2) * 1.4), 1); }
 
   /* R4 · Desenfoque progresivo: la receta de la tarjeta de rutina (seis capas y un velo), ahora hacia el hueso, sube desde abajo y cubre la escena */
-  [data-r30p="q1"][data-r31s="r4"] .salida-velo { display: block; position: absolute; left: 0; right: 0; top: 0; height: 200svh; z-index: 8; pointer-events: none; translate: 0 calc(100svh - var(--ke, 0) * 200svh); }
+  [data-r30p="q1"][data-r31s="r4"] .salida-velo { display: block; position: absolute; left: 0; right: 0; top: 0; height: 200svh; z-index: 8; pointer-events: none; will-change: translate; translate: 0 calc(100svh - var(--ke, 0) * 200svh); }
   .salida-velo i, .salida-velo b { position: absolute; inset: 0; }
   .salida-velo i:nth-child(1) { backdrop-filter: blur(1px); -webkit-mask-image: linear-gradient(transparent 0%, #000 12%); mask-image: linear-gradient(transparent 0%, #000 12%); }
   .salida-velo i:nth-child(2) { backdrop-filter: blur(2px); -webkit-mask-image: linear-gradient(transparent 6%, #000 18%); mask-image: linear-gradient(transparent 6%, #000 18%); }
