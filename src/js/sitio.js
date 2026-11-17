@@ -638,11 +638,95 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
       const sx = S.left + S.width * 0.62 - D.left, sy = S.top + S.height * 0.3 - D.top, ex = E.left + E.width / 2 - D.left, ey = E.top + E.height / 2 - D.top
       const d = `M${sx.toFixed(1)} ${sy.toFixed(1)} Q${((sx + ex) / 2).toFixed(1)} ${(Math.min(sy, ey) - 110).toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`
       svg.querySelector('.ruta').setAttribute('d', d)
-      viajero.style.offsetPath = `path('${d}')`
       escenaApp.classList.add('viajando')
+      // Ronda 33 (V1 y V2): la escala animada con offset-path también escalaba la posición (la pill aceleraba y frenaba a saltos y no llegaba a la etiqueta).
+      // Ahora la curva se recorre en JS por largo de arco y se anima solo con transform y opacity, que corren en el compositor.
+      if (/^v[12]$/.test(cuerpo.r33v ?? '')) {
+        viajero.style.offsetPath = 'none'
+        const cx = (sx + ex) / 2, cy = Math.min(sy, ey) - 110, w = viajero.offsetWidth, h = viajero.offsetHeight
+        const P = (t) => [(1 - t) ** 2 * sx + 2 * (1 - t) * t * cx + t * t * ex, (1 - t) ** 2 * sy + 2 * (1 - t) * t * cy + t * t * ey]
+        const N = 120, tabla = [[0, 0]]; let L = 0, ant = P(0)
+        for (let i = 1; i <= N; i++) { const q = P(i / N); L += Math.hypot(q[0] - ant[0], q[1] - ant[1]); tabla.push([i / N, L]); ant = q }
+        const enArco = (f) => { const obj = f * L; let i = tabla.findIndex((x) => x[1] >= obj); if (i <= 0) return 0; const [t0, l0] = tabla[i - 1], [t1, l1] = tabla[i]; return t0 + (t1 - t0) * (obj - l0) / (l1 - l0 || 1) }
+        const tramo = (f, pts) => { for (let i = 1; i < pts.length; i++) if (f <= pts[i][0]) { const [a0, v0] = pts[i - 1], [a1, v1] = pts[i]; return v0 + (v1 - v0) * (f - a0) / (a1 - a0) } return pts.at(-1)[1] }
+        const v2 = cuerpo.r33v === 'v2', fin = v2 ? 0.45 : 0.55
+        const K = 40, cuadros = []
+        for (let k = 0; k <= K; k++) {
+          const f = k / K, [x, y] = P(enArco(f)), sc = tramo(f, [[0, 0.7], [0.12, 1], [0.85, 1], [1, fin]]), op = tramo(f, [[0, 0], [0.12, 1], [0.85, 1], [1, 0]])
+          cuadros.push({ offset: f, transform: `translate(${(x - w / 2).toFixed(2)}px, ${(y - h / 2).toFixed(2)}px) scale(${sc.toFixed(3)})`, opacity: +op.toFixed(3) })
+        }
+        anim = viajero.animate(cuadros, { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' })
+        // V2: la etiqueta del panel aparece debajo de la pill en el último tramo, como si la pill se convirtiera en ella
+        if (v2) setTimeout(() => { if (pasoViaje === 2) escenaApp.classList.add('llego') }, 1500 * 0.78)
+        anim.onfinish = () => { escenaApp.classList.remove('viajando'); escenaApp.classList.add('llego') }
+        return
+      }
+      viajero.style.offsetPath = `path('${d}')`
       anim = viajero.animate([{ offsetDistance: '0%', opacity: 0, scale: 0.7 }, { offset: 0.12, opacity: 1, scale: 1 }, { offset: 0.85, opacity: 1, scale: 1 }, { offsetDistance: '100%', opacity: 0, scale: 0.55 }], { duration: 1500, easing: 'cubic-bezier(0.45, 0, 0.25, 1)', fill: 'both' })
       anim.onfinish = () => { escenaApp.classList.remove('viajando'); escenaApp.classList.add('llego') }
     }, cambia ? tC + dCambio + 150 : 1000)
+  }
+
+  // Ronda 32 · P1: cada tarjeta queda anclada a lo que explica y lo sigue cuadro a cuadro (también durante el cambio de equipo).
+  // En escritorio, al costado del teléfono a la altura de la fila que explica (o sobre el panel, el aviso); en el celular y la tableta, como notificación arriba del teléfono.
+  // Solo se mueve con translate y transform (sin top ni left), y nunca se sale de la ventana ni pisa el relato.
+  const tel = escenaApp.querySelector('.telefono'), panel = escenaApp.querySelector('.ventana-kine'), relato = escenaApp.querySelector('.relato'), barra = document.querySelector('.cab-sitio')
+  const ANCLA = [{ en: 'tel', y: 0.39 }, { en: 'tel', y: 0.27 }, { en: 'panel' }] // Rutina de hoy (paso 2), Tu rutina se ajusta (paso 1), Aviso (paso 3)
+  let tamanos = null
+  addEventListener('resize', () => { tamanos = null })
+  function anclar() {
+    if (!/^p1$/.test(cuerpo.r32p ?? '')) { if (tarjetas[0]?.classList.contains('anclada')) tarjetas.forEach((c) => c.classList.remove('anclada', 'activa', 'izq', 'arriba')); return }
+    // Tamaño normal y compacto (solo el título), medidos una vez por tamaño de ventana
+    if (!tamanos) tamanos = tarjetas.map((c) => { c.classList.add('anclada'); const t = c.classList.contains('compacta'); c.classList.remove('compacta'); const n = [c.offsetWidth, c.offsetHeight]; c.classList.add('compacta'); const k = [c.offsetWidth, c.offsetHeight]; c.classList.toggle('compacta', t); return { n, k } })
+    const pasoAct = num('--p') > 0.84 ? Number(escenaApp.dataset.paso || 0) : -1
+    const banner = apilado(), M = 10, borde = 22
+    const D = dispo.getBoundingClientRect(), T = tel.getBoundingClientRect()
+    const techo = (barra?.getBoundingClientRect().bottom ?? 60) + 10
+    tarjetas.forEach((c, i) => {
+      const activa = PASO_DE_TARJETA[i] === pasoAct
+      if (!c.classList.contains('anclada')) c.classList.add('anclada')
+      if (c.classList.contains('activa') !== activa) c.classList.toggle('activa', activa)
+      if (!activa && !c.dataset.puesta) return // la que no está a la vista solo se ubica una vez; después se queda donde se fue
+      let [w, h] = tamanos[i].n, compacta = false
+      const A = ANCLA[i]
+      let x, y, lado = ''
+      if (banner) {
+        // Notificación: centrada sobre el borde de arriba del teléfono, sin tapar su contenido
+        x = T.left + T.width / 2 - w / 2; y = T.top - h * 0.42; lado = 'arriba'
+        // Si así pisa el relato (la tableta en el paso 3, con el teléfono arriba), el aviso se apoya sobre el panel; si no, baja hasta debajo del relato
+        const R = relato?.getBoundingClientRect()
+        if (R && R.width && y < R.bottom + 8) {
+          const K = A.en === 'panel' && panel && getComputedStyle(panel).display !== 'none' ? panel.getBoundingClientRect() : null
+          if (K && K.width) { x = K.left + K.width / 2 - w / 2; y = K.top - h + 12 } else y = R.bottom + 8
+        }
+      } else if (A.en === 'panel' && panel && getComputedStyle(panel).display !== 'none') {
+        // El aviso llega al panel: se apoya sobre su borde de arriba (12 px encima) y no se mete en el teléfono
+        const K = panel.getBoundingClientRect()
+        x = K.left + K.width / 2 - w / 2; y = K.top - h + 12; lado = 'arriba'
+        x = Math.max(x, T.right - borde) // continuo: antes y después del cambio vale la misma regla, así no salta
+      } else {
+        y = T.top + T.height * A.y - h / 2
+        x = T.right - borde; lado = ''
+        // Si le faltan pocos píxeles, se mete un poco más sobre el borde del teléfono (hasta 44 px) antes de cambiar de lado
+        if (x + w > innerWidth - M && T.right - (innerWidth - M - w) <= 44) x = innerWidth - M - w
+        else if (x + w > innerWidth - M) { x = T.left + borde - w; lado = 'izq' }
+        const R = relato?.getBoundingClientRect()
+        if (lado === 'izq' && R && R.width && x < R.right + 12) {
+          // No cabe a ningún lado: pasa a compacta (solo el título) a la derecha, para no tapar el teléfono
+          compacta = true; [w, h] = tamanos[i].k; y = T.top + T.height * A.y - h / 2; x = T.right - borde; lado = ''
+        }
+      }
+      x = Math.min(Math.max(x, M), innerWidth - M - w)
+      // El aviso sobre el panel: si al no salirse de la ventana termina sobre el teléfono, también pasa a compacta
+      if (!banner && A.en === 'panel' && !compacta && x < T.right - borde - 1) { compacta = true; [w, h] = tamanos[i].k; x = Math.min(Math.max(x + (tamanos[i].n[0] - w) / 2, T.right - borde), innerWidth - M - w) }
+      y = Math.min(Math.max(y, techo), innerHeight - M - h)
+      const tx = `${(x - D.left).toFixed(1)}px`, ty = `${(y - D.top).toFixed(1)}px`
+      if (c.style.getPropertyValue('--ax') !== tx) c.style.setProperty('--ax', tx)
+      if (c.style.getPropertyValue('--ay') !== ty) c.style.setProperty('--ay', ty)
+      for (const k of ['izq', 'arriba']) if (c.classList.contains(k) !== (lado === k)) c.classList.toggle(k, lado === k)
+      if (c.classList.contains('compacta') !== compacta) c.classList.toggle('compacta', compacta)
+      if (activa) c.dataset.puesta = '1'
+    })
   }
 
   // Fluidez (16 nov): si el inicio está a la vista lo dice un IntersectionObserver (leer su posición en cada cuadro forzaba un cálculo de estilos),
@@ -650,7 +734,7 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
   let aLaVista = true
   new IntersectionObserver(([e]) => { aLaVista = e.isIntersecting }).observe(inicio)
   const cuadro = () => {
-    if (aLaVista && sxActual < 0.65) { sincronizar(); if (lista) dibujarToques(); dibujarLineas(); viaje() }
+    if (aLaVista && sxActual < 0.65) { anclar(); sincronizar(); if (lista) dibujarToques(); dibujarLineas(); viaje() }
     requestAnimationFrame(cuadro)
   }
   requestAnimationFrame(cuadro)

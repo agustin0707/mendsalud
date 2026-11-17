@@ -831,3 +831,29 @@ html.con-iman { scroll-snap-type: y proximity; }
   /* La sección siguiente entra un poco después (a --sx 0,63) para que la salida tenga su tiempo */
   [data-r30p="q1"][data-r31s] .seccion.hoja { margin-top: -48svh; }
 }
+
+/* ═════════ Ronda 32 · tarjetas de la escena (data-r32p, data-r32m). P1: ancladas por JS con --ax/--ay (solo translate); M1/M2: cómo entran y salen */
+@media (prefers-reduced-motion: no-preference) {
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada { left: 0 !important; top: 0 !important; right: auto !important; bottom: auto !important; translate: var(--ax, 0px) var(--ay, 0px) !important;
+    opacity: 0 !important; filter: none !important; scale: none !important; z-index: 9 !important; will-change: transform, opacity;
+    transform: translateX(-14px) scale(0.96); transform-origin: 0 50%;
+    transition: opacity 0.22s var(--ease-calma), transform 0.3s var(--ease-calma) !important; }
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.izq { transform: translateX(14px) scale(0.96); transform-origin: 100% 50%; }
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.arriba { transform: translateY(12px) scale(0.96); transform-origin: 50% 100%; }
+  /* Cada tarjeta entra cuando su pantalla ya está: «Rutina de hoy» espera a que el video abra la rutina (0,9 s) */
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada { --entra: 0.32s; }
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada:nth-of-type(1) { --entra: 0.9s; }
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.activa { opacity: 1 !important; transform: none;
+    transition: opacity 0.4s var(--ease-calma) var(--entra), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--entra) !important; }
+  /* M2 · Brota del equipo: nace pequeña desde el borde que toca el equipo y se asienta con un leve rebote */
+  [data-r32p="p1"][data-r32m="m2"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada { transform: scale(0.55); }
+  [data-r32p="p1"][data-r32m="m2"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.activa { transform: none;
+    transition: opacity 0.3s var(--ease-calma) var(--entra), transform 0.85s linear(0, 0.21 6%, 0.61 14.5%, 0.92 23%, 1.06 31%, 1.09 37%, 1.07 44%, 1.01 57%, 0.99 67%, 1 85%) var(--entra) !important; }
+  /* Compacta: cuando no cabe al costado (1024 a 1280 px), solo el título */
+  [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.compacta small { display: none; }
+  /* El celular: la notificación llega desde arriba del teléfono */
+  @media (max-width: 760px) { [data-r32p="p1"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.arriba { transform: translateY(-12px) scale(0.96); transform-origin: 50% 0; } [data-r32p="p1"][data-r32m="m2"] .inicio .escena-app .dispositivos .flota-escena.flota.anclada.arriba { transform: scale(0.55); } }
+}
+
+/* Ronda 33 · el viaje del check-in: solo transform y opacity (compositor), sin offset-path */
+[data-r33v="v1"][data-r24e="e2"] .viajero, [data-r33v="v2"][data-r24e="e2"] .viajero { offset-path: none; will-change: transform, opacity; transform-origin: 50% 50%; backface-visibility: hidden; }
