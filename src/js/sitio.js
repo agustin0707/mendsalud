@@ -1974,7 +1974,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { rut.classList.add('r62-llego'); setTimeout(() => rut.classList.add('r62-listo'), 1800); io.disconnect() } }, { threshold: 0.18 })
     io.observe(rut)
   } else rut?.classList.add('r62-llego', 'r62-listo')
-  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2' && !(d.r63r && d.r63r !== 'hoy'), '#aprender'], [d.r62p === 'p2' && !(d.r63p && d.r63p !== 'hoy'), '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
+  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2' && (!(d.r63r && d.r63r !== 'hoy') || d.r63r === 'r7'), '#aprender'], [d.r62p === 'p2' && (!(d.r63p && d.r63p !== 'hoy') || d.r63p === 'p7'), '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
     .map((b) => { let a = b.previousElementSibling; while (a && (a.tagName !== 'SECTION' || getComputedStyle(a).display === 'none')) a = a.previousElementSibling; return a && [a, b] }).filter(Boolean)
   if (pares.length && !reducir) {
     pares.forEach(([a, b]) => { a.classList.add('r62-telon-a'); b.classList.add('r62-telon-b') })
@@ -2005,15 +2005,25 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const el = document.createElement('div'); el.className = `r63-puente r63-${clase}`; el.style.setProperty('--alto', alto)
     el.innerHTML = `<div class="r63-esc">${html}</div>`
     if (etiqueta) { el.setAttribute('role', 'group'); el.setAttribute('aria-label', etiqueta) } else el.setAttribute('aria-hidden', 'true')
-    el.dataset.k = { r4: 0.72, r5: 0.8, r6: 0.74, p4: 0.95, p5: 0.9, p6: 1 }[clase] ?? 1 // reparte cada escena en todo su tramo
+    // reparte cada escena en todo su tramo
+    el.dataset.k = { r4: 0.72, r5: 0.8, r6: 0.74, p4: 0.95, p5: 0.9, p6: 1 }[clase] ?? 1
     antesDe.before(el); puentes.push(el); return el
   }
+  // Ronda 64 (R7, P7): el mismo puente, corto. La escena es una franja al final de la sección de arriba (Rutinas o
+  // Aprender) que se arma mientras entra; al llegar abajo, la siguiente sección la tapa con el telón de la ronda 62
+  const enHoja = (clase, sec, alto, html, etiqueta) => {
+    const el = crea(clase, sec, alto, html, etiqueta); el.classList.add('r64-hoja'); el.dataset.hoja = '1'
+    el.dataset.k = { r5: 0.62, p5: 0.56 }[clase] ?? 1; sec.append(el); return el
+  }
+  // Avance de una franja: 0 cuando su borde de arriba pasa el 80 % de la pantalla, 1 cuando ya se ve entera
+  // (se mide con la caja sin transformar: el telón achica la sección tapada y movería la franja hacia atrás)
+  const hojaP = (el, r, h) => { const t = el.offsetParent ? el.offsetParent.getBoundingClientRect().top + el.offsetTop : r.top; return Math.min(1, Math.max(0, (0.8 * h - t) / Math.max(1, el.offsetHeight - 0.17 * h))) }
   // Palabras con su orden (--i) para que se enciendan una tras otra; *x* va en Larken
   const palabras = (lineas) => { let i = 0; return lineas.map((l) => `<span class="r63-l">${l.split(' ').map((w) => { const ac = /^\*.*\*[.,]?$/.test(w); const t = esc(w.replace(/\*/g, '')); return `<span style="--i:${i++}"${ac ? ' class="acento"' : ''}>${t}</span>` }).join(' ')}</span>`).join('') }
   if (!reducir) {
     if (R && rut && apr) {
       if (R === 'r4') crea('r4', apr, 265, `<p class="r63-frase">${palabras(['Moverse es parte del tratamiento.', 'Entender la artrosis, *también.*'])}</p><p class="r63-cita">Ejercicio y educación: el tratamiento central según OARSI 2019, ACR 2020 y NICE 2022.</p>`, 'Moverse es parte del tratamiento. Entender la artrosis, también.')
-      if (R === 'r5') {
+      if (R === 'r5' || R === 'r7') {
         const LD = JSON.parse(document.querySelector('[data-r59] .f9-datos')?.textContent || '[]')
         const centro = rut.querySelector('.u2-p .u2-img')?.getAttribute('src') || `${BASE}/fotos/rutinas/despertar-articular-960.webp`
         const otras = [...LD.map((x) => `${BASE}/fotos/aprender/${x.id}-cuadrada.webp`), `${BASE}/medios/aprender/el-ejercicio-es-tratamiento.webp`, `${BASE}/fotos/rutinas/elongacion-piernas-ficha-720.webp`, `${BASE}/fotos/rutinas/equilibrio-con-apoyo-480.webp`, `${BASE}/fotos/rutinas/despertar-articular-ficha-720.webp`]
@@ -2023,7 +2033,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
           const src = n === C ? centro : otras[k++ % otras.length]
           return `<i class="${n === C ? 'r63-centro' : ''}" style="--dist:${dist.toFixed(2)}"><img src="${src}" alt="" loading="lazy" decoding="async"></i>`
         }).join('')
-        crea('r5', apr, 285, `<div class="r63-mos">${tiles}</div><p class="r63-pie">Y para entender lo que haces: lecturas, videos, charlas y <span class="acento">podcasts.</span></p>`, 'Y para entender lo que haces: lecturas, videos, charlas y podcasts.')
+        ;(R === 'r7' ? (...a) => enHoja('r5', rut, 50, ...a.slice(3)) : crea)('r5', apr, 285, `<div class="r63-mos">${tiles}</div><p class="r63-pie">Y para entender lo que haces: lecturas, videos, charlas y <span class="acento">podcasts.</span></p>`, 'Y para entender lo que haces: lecturas, videos, charlas y podcasts.')
       }
       if (R === 'r6') crea('r6', apr, 265, `<div class="r63-iso"><img src="${BASE}/fotos/aprender/salir-del-circulo-del-miedo-1290.webp" alt="" loading="lazy" decoding="async"></div><p class="r63-ceja"><b>Aprender</b>Entender también es parte del tratamiento</p>`)
     }
@@ -2034,7 +2044,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
         crea('p4', pcu, 285, `<div class="r63-tel"><div class="r63-tel-p"><img src="${BASE}/fotos/aprender/${x?.id}-640.webp" alt="" loading="lazy" decoding="async"><div class="tx"><small>${esc(x?.m ?? '')}</small><h4>${tit}</h4><p>${esc(x?.s ?? '')}</p><p class="idea"><b>La idea</b>${esc(x?.i ?? '')}</p></div></div></div>
           <ol class="r63-tres"><li style="--k:0"><span class="r63-av">RD</span><span><b>Rosa lee en su teléfono.</b><span>Y anota cada día cómo amaneció.</span></span></li><li style="--k:1"><span class="r63-av k">JV</span><span><b>Javiera, su kine, ve cómo va.</b><span>En su panel, con un aviso si algo molesta mucho.</span></span></li><li style="--k:2"><span class="r63-av m">TB</span><span><b>Tomás, su médico, lo conversa.</b><span>Con el resumen de sus semanas en el control.</span></span></li></ol>`, 'Rosa lee en su teléfono y anota cada día cómo amaneció. Javiera, su kine, ve cómo va. Tomás, su médico, lo conversa en el control.')
       }
-      if (P === 'p5') crea('p5', pcu, 265, `<svg class="r63-hilo" aria-hidden="true"><path pathLength="1"/><path pathLength="1"/><path pathLength="1"/></svg>
+      if (P === 'p5' || P === 'p7') (P === 'p7' ? (...a) => enHoja('p5', apr, 56, ...a.slice(3)) : crea)('p5', pcu, 265, `<svg class="r63-hilo" aria-hidden="true"><path pathLength="1"/><path pathLength="1"/><path pathLength="1"/></svg>
           <p class="r63-ti">Lo que Rosa anota no se queda en su <span class="acento">teléfono.</span></p>
           <div class="r63-nodos"><div style="--k:0"><span class="r63-av">RD</span><span><b>Rosa</b><small>La persona, en su casa</small></span></div><div style="--k:1"><span class="r63-av k">JV</span><span><b>Javiera</b><small>Su kinesióloga</small></span></div><div style="--k:2"><span class="r63-av m">TB</span><span><b>Tomás</b><small>Su médico</small></span></div></div>`, 'Lo que Rosa anota no se queda en su teléfono: lo ven Javiera, su kinesióloga, y Tomás, su médico.')
       if (P === 'p6') crea('p6', pcu, 270, `
@@ -2062,7 +2072,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
         // --p va de 0 (la sección anterior ya se fue a medias) a 1 (la siguiente asoma abajo)
         puentes.forEach((el) => {
           const r = el.getBoundingClientRect(); if (r.bottom < -h || r.top > 2 * h) return
-          const p = Math.min(1, Math.max(0, (-r.top - 0.5 * h) / Math.max(1, r.height - 1.95 * h))); el.style.setProperty('--p', Math.min(1, p * (+el.dataset.k || 1)).toFixed(4))
+          const p = el.dataset.hoja ? hojaP(el, r, h) : Math.min(1, Math.max(0, (-r.top - 0.5 * h) / Math.max(1, r.height - 1.95 * h))); el.style.setProperty('--p', Math.min(1, p * (+el.dataset.k || 1)).toFixed(4))
           if (el.classList.contains('r63-r6')) { const z = Math.min(1, Math.max(0, (p * 0.74 - 0.08) / 0.62)); el.style.setProperty('--z6', z.toFixed(4)); el.style.setProperty('--s6', (0.6 * Math.pow(70, z)).toFixed(3)) }
         })
       }

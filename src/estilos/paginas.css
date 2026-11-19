@@ -4794,3 +4794,25 @@ html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #para-cada-un
 [data-r63f="f1"] .r6-pa2 .pa-rail button { justify-content: center; padding-top: 14px; padding-bottom: 16px; }
 [data-r63f="f1"] .r6-pa2 .pa-caps { font-size: 0.9em; margin: 18px 0 24px; }
 /* ===== fin ronda 63 ===== */
+/* ===== ronda 64 · puentes cortos en la hoja (19 nov) =====
+   data-r63r: r7 (R5 en la hoja) · data-r63p: p7 (P5 en la hoja). La escena es una franja al final de la sección de
+   arriba, sin sticky; se arma mientras entra (--p de 0 a 0,62) y después la tapa el telón de la ronda 62. */
+.r63-puente.r64-hoja { height: auto; margin-top: 0; z-index: auto; }
+.r64-hoja .r63-esc { position: relative; height: calc(var(--alto, 60) * 1svh); background: none !important; }
+
+/* R7 · Del ejercicio a las piezas, en el Petróleo de Rutinas */
+.r64-hoja.r63-r5 { margin-top: clamp(16px, 2vw, 40px); }
+.r64-hoja.r63-r5 .r63-mos { --tw: min(9.5vw, 11svh); translate: 0 calc(var(--tw) * -0.3); opacity: 1; }
+.r64-hoja.r63-r5 .r63-mos > i { background: rgb(253 253 253 / 0.1); }
+.r64-hoja.r63-r5 .r63-pie { bottom: clamp(8px, 2svh, 24px); color: var(--blanco); opacity: clamp(0, calc((var(--p, 0) - 0.5) / 0.08), 1); }
+@media (max-width: 760px) {
+  .r64-hoja.r63-r5 .r63-esc { height: calc(var(--alto, 60) * 0.8svh); }
+  .r64-hoja.r63-r5 .r63-mos { --tw: min(16vw, 10svh); grid-template-columns: repeat(5, var(--tw)); translate: 0 calc(var(--tw) * -0.6); }
+}
+
+/* P7 · El hilo a tres, en el hueso de Aprender: la hoja arena de «Para cada uno» sube justo después */
+.r64-hoja.r63-p5 { margin-top: clamp(8px, 1vw, 24px); }
+.r64-hoja.r63-p5 .r63-ti { top: 2svh; opacity: clamp(0, calc((var(--p, 0) - 0.02) / 0.1), 1); }
+.r64-hoja.r63-p5 .r63-nodos { top: auto; bottom: 2svh; }
+.r64-hoja.r63-p5 :is(.r63-nodos, .r63-hilo) { translate: none; }
+/* ===== fin ronda 64 ===== */
