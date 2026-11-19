@@ -1607,8 +1607,9 @@ html body[data-r48="p6"] #como-funciona { --tono-fondo: radial-gradient(50% 45% 
 .r49-esq.e2 { right: 0; top: 0; border-left: 0; border-bottom: 0; border-radius: 0 10px 0 0; }
 .r49-esq.e3 { left: 0; bottom: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 10px; }
 .r49-esq.e4 { right: 0; bottom: 0; border-left: 0; border-top: 0; border-radius: 0 0 10px 0; }
-.q1-marca { display: flex; align-items: center; gap: 0.4em; font: 500 1em/1 var(--display); color: var(--petroleo); letter-spacing: -0.02em; }
-.q1-marca svg { width: 1.1em; height: 1.1em; color: var(--mar); fill: currentColor; stroke: none !important; }
+/* q1-marca también es el estado «la app lo marca» del nodo (ronda 44): la etiqueta no debe tocar el nodo */
+.q1-marca:not(.q1-nodo) { display: flex; align-items: center; gap: 0.4em; font: 500 1em/1 var(--display); color: var(--petroleo); letter-spacing: -0.02em; }
+.q1-marca:not(.q1-nodo) svg { width: 1.1em; height: 1.1em; color: var(--mar); fill: currentColor; stroke: none !important; }
 
 /* Q1 · Visor: tarjeta grande que sale desde abajo, con las esquinas de una cámara en vez de la raya */
 [data-r49q="q1"] .p4-a { padding-bottom: 0; }
