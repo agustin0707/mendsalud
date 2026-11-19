@@ -4878,3 +4878,59 @@ html body[data-r65p="p9"] #para-cada-uno { z-index: 7 !important; padding-top: c
   html body[data-r65p="p8"] #para-cada-uno :is(.r6-cab .ceja-sec, .pa-arriba, .pa-caps, .pa-esc) { opacity: clamp(0, calc((var(--e65, 1) - 0.82) / 0.18), 1); }
 }
 /* ===== fin ronda 65 ===== */
+/* ===== ronda 66 · R9 y P8 auditados y mejorados (19 nov) =====
+   Valores nuevos en los mismos atributos: data-r65r: r11 | r12 · data-r65p: p11 | p12. */
+
+/* Base de R11 y R12 (igual que R9): Rutinas termina en Petróleo entero y Aprender empieza recto */
+html body:is([data-r65r="r11"], [data-r65r="r12"]) #rutinas { --tono-fondo: radial-gradient(90% 60% at 15% 0%, #3a6670, var(--petroleo) 50%, var(--petroleo)) !important; padding-bottom: calc(clamp(88px, 9vw, 150px) + clamp(104px, 9.6vw, 150px)) !important; }
+html body:is([data-r65r="r11"], [data-r65r="r12"]) #aprender { border-radius: 0 !important; margin-top: 0 !important; box-shadow: none !important; position: relative; z-index: 7 !important; padding-top: calc(clamp(64px, 7vw, 106px) + clamp(104px, 9.6vw, 150px)) !important; }
+html body[data-r65r="r12"] #rutinas { padding-bottom: calc(clamp(88px, 9vw, 150px) + clamp(128px, 12vw, 190px)) !important; }
+html body[data-r65r="r12"] #aprender { padding-top: calc(clamp(64px, 7vw, 106px) + clamp(128px, 12vw, 190px)) !important; }
+
+/* R11 y R12 · Los formatos reales de Aprender cosen el borde: foto o portada, su ícono, su nombre y su duración */
+.r66-costura { position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 4; pointer-events: none; --W: clamp(150px, 14.5vw, 228px); --gap: clamp(14px, 1.6vw, 24px); --k: 1; }
+.r66-costura > i { position: absolute; left: 50%; top: 0; width: calc(var(--W) * var(--s, 1)); aspect-ratio: 4 / 5; border-radius: clamp(16px, 1.6vw, 24px); overflow: hidden; background: #d9e2df;
+  box-shadow: 0 26px 50px -24px rgb(16 33 37 / 0.6), 0 0 0 1px rgb(253 253 253 / 0.5);
+  translate: calc(var(--x) * var(--u, 1) * (var(--W) + var(--gap)) - 50%) calc(-50% + var(--y, 0px) * var(--k) * var(--u, 1) + (1 - var(--u, 1)) * 40px);
+  rotate: calc(var(--x) * (1 - var(--u, 1)) * -6deg); scale: calc(0.88 + 0.12 * var(--u, 1)); }
+.r66-costura > i > img { width: 100%; height: 100%; object-fit: cover; object-position: var(--op, 50% 50%); display: block; }
+.r66-et { position: absolute; left: 10px; bottom: 10px; display: flex; align-items: center; gap: 6px; padding: 6px 11px 6px 8px; border-radius: 999px; background: rgb(22 52 58 / 0.9);
+  color: var(--blanco); font: 500 13px/1 var(--texto); letter-spacing: 0; white-space: nowrap; box-shadow: 0 0 0 1px rgb(253 253 253 / 0.18); }
+.r66-et svg { width: 15px; height: 15px; flex: none; }
+.r66-et em { font-style: normal; font-weight: 400; color: rgb(253 253 253 / 0.88); }
+.r66-solo .r66-et { padding: 7px; }
+.r66-solo .r66-et :is(b, em) { display: none; }
+.r66-play { position: absolute; left: 50%; top: 46%; translate: -50% -50%; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%;
+  background: rgb(253 253 253 / 0.94); color: var(--petroleo); box-shadow: 0 10px 24px -10px rgb(16 33 37 / 0.6); }
+.r66-play svg { width: 20px; height: 20px; translate: 2px 0; }
+@media (max-width: 900px) { .r66-r12 > .r66-fuera { display: none; } }
+@media (max-width: 760px) {
+  .r66-costura { --W: 21vw; --gap: 8px; --k: 0.5; }
+  .r66-r12 { --W: 25vw; }
+  .r66-costura > i { border-radius: 14px; }
+  .r66-et { left: 6px; bottom: 6px; padding: 5px 8px 5px 6px; gap: 4px; font-size: 11px; }
+  .r66-et svg { width: 12px; height: 12px; }
+  .r66-et em { display: none; }
+  .r66-play { width: 34px; height: 34px; }
+  .r66-play svg { width: 14px; height: 14px; translate: 1px 0; }
+  html body:is([data-r65r="r11"], [data-r65r="r12"]) #rutinas { padding-bottom: calc(clamp(88px, 9vw, 150px) + 60px) !important; }
+  html body:is([data-r65r="r11"], [data-r65r="r12"]) #aprender { padding-top: calc(clamp(64px, 7vw, 106px) + 60px) !important; }
+  html body[data-r65r="r12"] #rutinas { padding-bottom: calc(clamp(88px, 9vw, 150px) + 76px) !important; }
+  html body[data-r65r="r12"] #aprender { padding-top: calc(clamp(64px, 7vw, 106px) + 76px) !important; }
+}
+
+/* Base de P11 y P12 (igual que P8): «Para cada uno» a todo el ancho en arena, sin el recorte */
+html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno { clip-path: none !important; border-radius: 0 !important; margin-top: 0 !important; box-shadow: none !important; background-color: #f4efe6 !important; }
+html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::before,
+html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::after { inset: 0 !important; border-radius: 0 !important; }
+/* P11 y P12 · El titular se adelanta, sin fantasma ni vacío: Aprender no se apaga (solo su fondo pasa a arena) y lo demás
+   de «Para cada uno» sube mientras el titular se acomoda */
+@media (prefers-reduced-motion: no-preference) {
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #aprender { background-color: color-mix(in oklab, #f4efe6 calc(var(--q66, 0) * 100%), var(--hueso)) !important; }
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno { background-color: color-mix(in oklab, #f4efe6 calc(var(--q66, 0) * 100%), var(--hueso)) !important; }
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::before,
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::after { opacity: var(--q66, 0); }
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno .r6-cab.revela { opacity: 1 !important; transform: none !important; transition: none !important; }
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno .r6-cab .titulo-sec { position: relative; z-index: 5; }
+}
+/* ===== fin ronda 66 ===== */

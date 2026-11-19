@@ -2180,3 +2180,85 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
   }
 }
 // ===== fin ronda 65 =====
+// ===== ronda 66 · R9 y P8 auditados y mejorados (19 nov) =====
+// R11: los cuatro formatos reales de Aprender, más grandes, cosen el borde con su ícono, nombre y duración.
+// R12: lo mismo con jerarquía: el video al centro y cinco piezas de tamaños distintos. P11 y P12: el titular de
+// «Para cada uno» se adelanta sin apagar Aprender y sin dejar un momento vacío (P11 crece desde su lugar; P12 llega al centro).
+{
+  const d = document.body.dataset, reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const BASE = document.querySelector('[data-r59]')?.dataset.base || '.'
+  const apr = document.querySelector('#aprender'), pcu = document.querySelector('#para-cada-uno')
+  const R = d.r65r, P = d.r65p
+  const cl = (x) => Math.min(1, Math.max(0, x)), suave = (t) => t * t * (3 - 2 * t), mezcla = (a, b, t) => a + (b - a) * t
+  const tareas = []
+  if ((R === 'r11' || R === 'r12') && apr) {
+    const listas = [...document.querySelectorAll('[data-r59] .f9-datos')].map((x) => { try { return JSON.parse(x.textContent) } catch (e) { return [] } })
+    const todas = listas.flat(), dato = (id) => todas.find((x) => x.id === id) || {}
+    const min = (txt) => (String(txt || '').match(/(\d+) min/) || [])[1]
+    const tabs = [...document.querySelectorAll('[data-r59] .f9-tabs [role="tab"]')], ic = (n) => tabs[n]?.querySelector('.f9-ic')?.innerHTML || ''
+    const charla = min((document.querySelector('#f9-p-charla')?.textContent.match(/Charla de \d+ min/) || [])[0])
+    const foto = (id) => `${BASE}/fotos/aprender/${id}-4x3-800.webp`
+    const pz = {
+      lectura: { src: foto('para-que-sirve-cada-ejercicio'), ic: ic(0), n: 'Lectura', m: min(dato('para-que-sirve-cada-ejercicio').m), op: '50% 40%' },
+      video: { src: `${BASE}/medios/aprender/el-ejercicio-es-tratamiento.webp`, ic: ic(1), n: 'Video', m: min(dato('el-ejercicio-es-tratamiento').m), op: '50% 34%', play: 1 },
+      charla: { src: foto('lo-que-sientes-cuenta'), ic: ic(2), n: 'Charla', m: charla, op: '38% 50%' },
+      podcast: { src: foto('caminar-paso-a-paso'), ic: ic(3), n: 'Podcast', m: min(dato('caminar-paso-a-paso').m), op: '50% 50%' },
+      lectura2: { src: foto('dormir-mejor'), ic: ic(0), n: 'Lectura', m: min(dato('dormir-mejor').m), op: '58% 50%' }
+    }
+    const lista = R === 'r11'
+      ? [['lectura', -1.5], ['video', -0.5], ['charla', 0.5], ['podcast', 1.5]].map(([k, x]) => ({ k, x }))
+      : [{ k: 'charla', x: -2, s: 0.72, y: 34, cls: 'r66-fuera r66-solo' }, { k: 'lectura', x: -1.13, y: -16 }, { k: 'video', x: 0, s: 1.3 }, { k: 'podcast', x: 1.13, y: -16 }, { k: 'lectura2', x: 2, s: 0.72, y: 34, cls: 'r66-fuera r66-solo' }]
+    const play = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>'
+    const c = document.createElement('div'); c.className = 'r66-costura r66-' + R; c.setAttribute('aria-hidden', 'true')
+    c.innerHTML = lista.map(({ k, x, s = 1, y = 0, cls = '' }) => {
+      const p = pz[k]
+      return `<i class="${cls}" style="--x:${x};--s:${s};--y:${y}px;--op:${p.op};z-index:${10 - Math.round(Math.abs(x) * 2)}"><img src="${p.src}" alt="" loading="lazy" decoding="async">` +
+        (p.play ? `<span class="r66-play">${play}</span>` : '') +
+        `<span class="r66-et">${p.ic}<b>${p.n}</b>${p.m ? `<em>· ${p.m} min</em>` : ''}</span></i>`
+    }).join('')
+    apr.querySelector(':scope > .r65-costura')?.remove()
+    apr.prepend(c)
+    if (!reducir) tareas.push((h) => { const t = apr.getBoundingClientRect().top; c.style.setProperty('--u', suave(cl((h * 0.98 - t) / (h * 0.62))).toFixed(4)) })
+    else c.style.setProperty('--u', 1)
+  }
+  if ((P === 'p11' || P === 'p12') && pcu && apr && !reducir) {
+    const vis = (sel) => [...pcu.querySelectorAll(sel)].find((x) => x.getClientRects().length)
+    const partes = [['.r6-cab .ceja-sec', 0.5], ['.pa-arriba', 0.28], ['.pa-caps', 0.36], ['.pa-esc', 0.44]]
+    let ti = null
+    tareas.push((h) => {
+      const st = pcu.getBoundingClientRect().top
+      const q = cl((h * 0.95 - st) / (h * 0.5)).toFixed(4), e = suave(cl((h * 0.95 - st) / (h * 0.72)))
+      apr.style.setProperty('--q66', q); pcu.style.setProperty('--q66', q)
+      partes.forEach(([sel, a]) => {
+        const el = vis(sel); if (!el) return
+        if (e >= 1) { el.style.opacity = ''; el.style.translate = ''; return }
+        const p = suave(cl((e - a) / 0.42)); el.style.opacity = p.toFixed(3); el.style.translate = `0 ${((1 - p) * 44).toFixed(1)}px`
+      })
+      ti = ti?.getClientRects().length ? ti : vis('.r6-cab .titulo-sec')
+      if (!ti) return
+      if (st < h) ti.closest('.revela')?.classList.add('visible')
+      ti.style.translate = ''; ti.style.scale = ''; ti.style.transformOrigin = ''
+      if (e >= 1 || st > h) return
+      const rg = document.createRange(); rg.selectNodeContents(ti)
+      const r = rg.getBoundingClientRect(), b = ti.getBoundingClientRect(), W = innerWidth
+      if (P === 'p11') {
+        const s = Math.max(1, Math.min(1.55, (W - r.left - Math.max(16, r.left)) / Math.max(1, r.width)))
+        ti.style.transformOrigin = `${(r.left - b.left).toFixed(1)}px ${(r.bottom - b.top).toFixed(1)}px`
+        ti.style.translate = `0 ${((1 - e) * h * 0.05).toFixed(1)}px`; ti.style.scale = mezcla(s, 1, e).toFixed(4)
+      } else {
+        const s = Math.max(1, Math.min(1.6, (W * 0.84) / Math.max(1, r.width)))
+        ti.style.transformOrigin = `${(r.left + r.width / 2 - b.left).toFixed(1)}px ${(r.top + r.height / 2 - b.top).toFixed(1)}px`
+        const dx = W / 2 - (r.left + r.width / 2)
+        ti.style.translate = `${(dx * (1 - e)).toFixed(1)}px ${((1 - e) * h * 0.15).toFixed(1)}px`; ti.style.scale = mezcla(s, 1, e).toFixed(4)
+      }
+    })
+  }
+  if (tareas.length) {
+    let raf = 0
+    const paso = () => { raf = 0; const h = innerHeight; tareas.forEach((f) => f(h)) }
+    paso()
+    addEventListener('resize', paso)
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paso) }, { passive: true })
+  }
+}
+// ===== fin ronda 66 =====
