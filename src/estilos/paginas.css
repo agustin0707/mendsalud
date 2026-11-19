@@ -4562,3 +4562,79 @@ body[data-r60p="pa2"] .r6-pa2 { display: block; }
 /* las listas que siguen hacia abajo se desvanecen bajo la barra de inicio, como el scroll de iOS */
 .r6-pa2 .t7-s:is(.t7-avisos, .t7-preguntas) { -webkit-mask-image: linear-gradient(#000 calc(100% - 46px), transparent calc(100% - 10px)); mask-image: linear-gradient(#000 calc(100% - 46px), transparent calc(100% - 10px)); }
 /* ===== fin ronda 61 ===== */
+/* ===== ronda 62 · largo del inicio y pasos entre secciones (18 nov) =====
+   data-r62l: hoy | l1 | l2 | l3 · data-r62e: hoy | e1 | e2 · data-r62r: hoy | r1 | r2 | r3 · data-r62p: hoy | p1 | p2 | p3 */
+
+/* ---------- Largo ---------- */
+/* L1 · Más ágil: las mismas secciones con menos aire, la escena del teléfono más corta y el cierre más bajo */
+:is([data-r62l="l1"], [data-r62l="l2"], [data-r62l="l3"]) :is(#como-funciona, #rutinas, #aprender, #para-cada-uno, #evidencia, #preguntas) { padding-top: clamp(64px, 7.4vw, 112px) !important; padding-bottom: clamp(64px, 7.4vw, 112px) !important; }
+:is([data-r62l="l1"], [data-r62l="l2"], [data-r62l="l3"]) #que-es { padding-bottom: clamp(64px, 7.4vw, 112px) !important; }
+:is([data-r62l="l1"], [data-r62l="l2"], [data-r62l="l3"]) .cierre { padding-top: clamp(64px, 7.4vw, 120px) !important; padding-bottom: clamp(64px, 7.4vw, 112px) !important; }
+:is([data-r62l="l1"], [data-r62l="l2"], [data-r62l="l3"]) .cierre .camino-foto { aspect-ratio: 16 / 9; max-height: 340px; width: 100%; object-fit: cover; }
+:is([data-r62l="l1"], [data-r62l="l2"], [data-r62l="l3"]) .cierre .camino { min-height: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  [data-r62l="l1"] .inicio { --alto-relato: 300 !important; height: calc((220 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+  [data-r62l="l2"] .inicio { --alto-relato: 260 !important; height: calc((200 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+  [data-r62l="l3"] .inicio { --alto-relato: 220 !important; height: calc((170 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
+  [data-r62l="l1"] .inicio { --alto-relato: 280 !important; height: calc((200 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+  [data-r62l="l2"] .inicio { --alto-relato: 240 !important; height: calc((180 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+  [data-r62l="l3"] .inicio { --alto-relato: 200 !important; height: calc((160 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+}
+/* L2 · Sin repetir: además salen «Propuesta» (lo cuentan la escena y «Para cada uno») y «Evidencia» (sus fuentes ya están
+   bajo cada cifra de «Problema» y en /evidencia, que está en el menú) */
+:is([data-r62l="l2"], [data-r62l="l3"]) :is(#que-es, #evidencia) { display: none !important; }
+/* L3 · Lo esencial: además sale «Pasos» (cómo se empieza y «sin instalar nada» ya están en Preguntas) y «Problema» deja la
+   tira de cien personas: quedan las dos cifras, 62 % y 37 % */
+[data-r62l="l3"] #como-funciona { display: none !important; }
+[data-r62l="l3"] #problema .r38-tira { display: none !important; }
+
+/* ---------- Entrada a Rutinas ---------- */
+/* E1 · El contenido llega: el título sube línea por línea, el panel grande se asienta (la foto pasa de 1,08 a 1) y los
+   tres angostos entran uno tras otro. Una sola vez, al verse; con «reducir movimiento» no se mueve */
+@media (prefers-reduced-motion: no-preference) {
+  [data-r62e="e1"] #rutinas .riel-cabeza > * { opacity: 0; translate: 0 28px; transition: opacity 0.7s var(--ease-salida), translate 0.9s var(--ease-salida); }
+  [data-r62e="e1"] #rutinas .riel-cabeza > :nth-child(2) { transition-delay: 0.08s; } [data-r62e="e1"] #rutinas .riel-cabeza > :nth-child(3) { transition-delay: 0.16s; }
+  [data-r62e="e1"] #rutinas .u2-p { opacity: 0; translate: 0 56px; transition: opacity 0.8s var(--ease-salida), translate 1s var(--ease-salida), flex-grow 0.9s var(--ease-salida); }
+  [data-r62e="e1"] #rutinas .u2-p .u2-img { scale: 1.08; transition: transform 1.8s var(--ease-salida), scale 1.6s var(--ease-salida); }
+  [data-r62e="e1"] #rutinas.r62-llego .riel-cabeza > * { opacity: 1; translate: 0 0; }
+  [data-r62e="e1"] #rutinas.r62-llego .u2-p { opacity: 1; translate: 0 0; }
+  [data-r62e="e1"] #rutinas.r62-llego .u2-p .u2-img { scale: 1; }
+  [data-r62e="e1"] #rutinas.r62-llego .u2-p:nth-child(1) { transition-delay: 0.25s; }
+  [data-r62e="e1"] #rutinas.r62-llego .u2-p:nth-child(2) { transition-delay: 0.4s; }
+  [data-r62e="e1"] #rutinas.r62-llego .u2-p:nth-child(3) { transition-delay: 0.5s; }
+  [data-r62e="e1"] #rutinas.r62-llego .u2-p:nth-child(4) { transition-delay: 0.6s; }
+  [data-r62e="e1"] #rutinas.r62-listo .u2-p { transition-delay: 0s; }
+}
+
+/* ---------- Telón (E2, R2 y P2): la sección de arriba se queda quieta y la siguiente sube encima; la de abajo se aleja un poco
+   y se apaga hacia el fondo. --cubre lo escribe el JS (0 a 1) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .r62-telon-a { position: sticky !important; top: min(0px, calc(100svh - var(--alto-a, 100svh))); }
+  .r62-telon-a > * { scale: calc(1 - var(--cubre, 0) * 0.06); opacity: calc(1 - var(--cubre, 0) * 0.55); transform-origin: 50% 100%; will-change: scale, opacity; }
+  .r62-telon-b { position: relative; z-index: 6 !important; box-shadow: 0 -30px 60px -28px rgb(16 33 37 / 0.35); }
+}
+/* E2: «Rutinas» ya sube como hoja; solo «Pasos» se queda y se aleja */
+/* R2: «Aprender» sube como hoja hueso con las esquinas de arriba redondeadas */
+html body[data-r62r="r2"] #aprender, [data-r62r="r3"] #aprender { border-radius: var(--panel-r) var(--panel-r) 0 0; margin-top: calc(-1 * var(--panel-r)); background: var(--hueso); }
+/* R1, R2 y R3: «Rutinas» queda Petróleo entero, sin el degradado a bruma del final */
+html body:is([data-r62r="r1"], [data-r62r="r2"], [data-r62r="r3"]) #rutinas { --tono-fondo: radial-gradient(90% 60% at 15% 0%, #3a6670, var(--petroleo) 50%, #1f4048) !important; padding-bottom: clamp(88px, 9vw, 150px) !important; }
+/* R1 · El panel se cierra: «Rutinas» termina con sus esquinas redondeadas sobre el hueso, como empezó */
+html body[data-r62r="r1"] #rutinas { border-radius: var(--panel-r) !important; margin-bottom: clamp(24px, 3vw, 48px); }
+html body[data-r62r="r1"] #rutinas::before { border-radius: var(--panel-r) !important; }
+/* R3 · Hoja hueso: «Aprender» sube encima de «Rutinas» como una hoja (lo mismo que hace «Rutinas» al entrar), sin telón */
+html body[data-r62r="r3"] #aprender { position: relative; z-index: 5; box-shadow: 0 -24px 50px -26px rgb(16 33 37 / 0.4); }
+
+/* ---------- Aprender → Perfiles ---------- */
+/* P1 · Un solo fondo: «Para cada uno» sigue en el hueso de «Aprender»; la arena queda solo como un halo detrás de las pantallas */
+html body[data-r62p="p1"] #para-cada-uno { clip-path: none !important; }
+html body[data-r62p="p1"] #para-cada-uno::before { inset: 0 !important; border-radius: 0 !important; background: radial-gradient(50% 42% at 50% 62%, rgb(239 231 215 / 0.95), rgb(239 231 215 / 0) 100%), var(--hueso) !important; }
+html body[data-r62p="p1"] #para-cada-uno::after { display: none !important; }
+/* P3 · Hoja arena: «Para cada uno» sube a todo el ancho como hoja arena con las esquinas de arriba redondeadas */
+html body[data-r62p="p3"] #para-cada-uno { background-color: #f4efe6 !important; clip-path: none !important; border-radius: var(--panel-r) var(--panel-r) 0 0; margin-top: calc(-1 * var(--panel-r)); z-index: 5 !important; box-shadow: 0 -24px 50px -26px rgb(16 33 37 / 0.28); }
+html body[data-r62p="p3"] #para-cada-uno::before { inset: 0 !important; border-radius: var(--panel-r) var(--panel-r) 0 0 !important; }
+html body[data-r62p="p3"] #para-cada-uno::after { inset: 0 !important; border-radius: var(--panel-r) var(--panel-r) 0 0 !important; }
+html body[data-r62p="p2"] #para-cada-uno { clip-path: none !important; border-radius: var(--panel-r) var(--panel-r) 0 0; overflow: clip; background-color: #f4efe6 !important; }
+html body[data-r62p="p2"] #para-cada-uno::before, [data-r62p="p2"] #para-cada-uno::after { inset: 0 !important; border-radius: var(--panel-r) var(--panel-r) 0 0 !important; }
+/* ===== fin ronda 62 ===== */

@@ -1951,3 +1951,26 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
   }
 }
 // fin ronda 60
+
+// Ronda 62 · pasos entre secciones. E1: el contenido de «Rutinas» llega una vez al verse. Telón (E2, R2, P2): la sección de
+// arriba se queda quieta (sticky, alineada abajo) y la siguiente sube encima; --cubre (0 a 1) aleja y apaga la de abajo.
+{
+  const d = document.body.dataset, reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const rut = document.querySelector('#rutinas')
+  if (d.r62e === 'e1' && rut && !reducir && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { rut.classList.add('r62-llego'); setTimeout(() => rut.classList.add('r62-listo'), 1800); io.disconnect() } }, { threshold: 0.18 })
+    io.observe(rut)
+  } else rut?.classList.add('r62-llego', 'r62-listo')
+  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2', '#aprender'], [d.r62p === 'p2', '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
+    .map((b) => { let a = b.previousElementSibling; while (a && (a.tagName !== 'SECTION' || getComputedStyle(a).display === 'none')) a = a.previousElementSibling; return a && [a, b] }).filter(Boolean)
+  if (pares.length && !reducir) {
+    pares.forEach(([a, b]) => { a.classList.add('r62-telon-a'); b.classList.add('r62-telon-b') })
+    const mide = () => pares.forEach(([a]) => a.style.setProperty('--alto-a', a.offsetHeight + 'px'))
+    let raf = 0
+    const paso = () => { raf = 0; const h = innerHeight; pares.forEach(([a, b]) => { const t = b.getBoundingClientRect().top; const c = Math.min(1, Math.max(0, (h - t) / h)); a.style.setProperty('--cubre', c.toFixed(3)) }) }
+    mide(); paso()
+    addEventListener('resize', () => { mide(); paso() })
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paso) }, { passive: true })
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(mide); pares.forEach(([a]) => ro.observe(a)) }
+  }
+}
