@@ -4816,3 +4816,65 @@ html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #para-cada-un
 .r64-hoja.r63-p5 .r63-nodos { top: auto; bottom: 2svh; }
 .r64-hoja.r63-p5 :is(.r63-nodos, .r63-hilo) { translate: none; }
 /* ===== fin ronda 64 ===== */
+/* ===== ronda 65 · pasos nuevos desde referentes (19 nov) =====
+   data-r65r: hoy | r8 | r9 | r10 (Rutinas → Aprender) · data-r65p: hoy | p8 | p9 | p10 (Aprender → Para cada uno).
+   Ninguno suma escena: el paso pasa mientras la sección siguiente entra. */
+
+/* Base de los R: Rutinas termina en Petróleo entero y Aprender empieza recto, sin hoja ni telón */
+html body:is([data-r65r="r8"], [data-r65r="r9"], [data-r65r="r10"]) #rutinas { --tono-fondo: radial-gradient(90% 60% at 15% 0%, #3a6670, var(--petroleo) 50%, var(--petroleo)) !important; }
+html body:is([data-r65r="r8"], [data-r65r="r9"], [data-r65r="r10"]) #aprender { border-radius: 0 !important; margin-top: 0 !important; box-shadow: none !important; }
+/* Base de los P: «Para cada uno» a todo el ancho en arena, sin el recorte */
+html body:is([data-r65p="p8"], [data-r65p="p9"], [data-r65p="p10"]) #para-cada-uno { clip-path: none !important; border-radius: 0 !important; margin-top: 0 !important; box-shadow: none !important; background-color: #f4efe6 !important; }
+html body:is([data-r65p="p8"], [data-r65p="p9"], [data-r65p="p10"]) #para-cada-uno::before,
+html body:is([data-r65p="p8"], [data-r65p="p9"], [data-r65p="p10"]) #para-cada-uno::after { inset: 0 !important; border-radius: 0 !important; }
+
+/* R8 · Un solo color: el fondo de las dos secciones pasa de Petróleo a hueso mientras el contenido de Rutinas se va
+   y el de Aprender llega (como el paso a «Technology» en Apple Vision Pro) */
+@media (prefers-reduced-motion: no-preference) {
+  html body[data-r65r="r8"] #rutinas::after { background: var(--hueso) !important; opacity: var(--q65, 0); border-radius: inherit; }
+  html body[data-r65r="r8"] #rutinas > * { opacity: calc(1 - var(--q65, 0) * 2); }
+  html body[data-r65r="r8"] #aprender { background-color: color-mix(in oklab, var(--hueso) calc(var(--q65, 0) * 100%), var(--petroleo)) !important; }
+  html body[data-r65r="r8"] #aprender > .envoltura { opacity: calc((var(--q65, 0) - 0.55) / 0.45); }
+}
+
+/* R9 y P9 · La costura: piezas que quedan mitad en una sección y mitad en la otra (Headspace) */
+.r65-costura { position: absolute; left: 0; right: 0; top: 0; z-index: 4; height: 0; display: flex; justify-content: center; pointer-events: none; }
+.r65-costura > i { position: absolute; top: 0; width: clamp(96px, 10vw, 156px); aspect-ratio: 1; border-radius: clamp(14px, 1.4vw, 22px); overflow: hidden; background: #d9e2df;
+  box-shadow: 0 22px 44px -22px rgb(16 33 37 / 0.55), 0 0 0 1px rgb(253 253 253 / 0.5);
+  translate: calc(var(--n) * var(--u, 1) * clamp(108px, 11.4vw, 176px) - 50%) calc(-50% + (1 - var(--u, 1)) * 36px);
+  rotate: calc(var(--n) * (1 - var(--u, 1)) * -7deg + var(--n) * 1.5deg); scale: calc(0.86 + 0.14 * var(--u, 1)); z-index: calc(10 - var(--n) * var(--n)); }
+.r65-costura > i img { width: 100%; height: 100%; object-fit: cover; display: block; }
+html body[data-r65r="r9"] #rutinas { padding-bottom: calc(clamp(88px, 9vw, 150px) + clamp(48px, 5vw, 78px)) !important; }
+html body[data-r65r="r9"] #aprender { position: relative; z-index: 7 !important; padding-top: calc(clamp(64px, 7vw, 106px) + clamp(48px, 5vw, 78px)) !important; }
+@media (max-width: 760px) { .r65-costura > i { width: 72px; } .r65-costura > i { translate: calc(var(--n) * var(--u, 1) * 66px - 50%) calc(-50% + (1 - var(--u, 1)) * 30px); } }
+
+/* P9: Rosa, Javiera y Tomás sobre una línea en el borde entre Aprender y «Para cada uno» */
+.r65-tres { align-items: flex-start; }
+.r65-tres .r65-linea { position: absolute; top: 0; left: 50%; height: 2px; width: min(var(--ancho, 1200px), 100% - 2 * var(--margen, 24px)); translate: -50% -50%; background: var(--petroleo); transform-origin: 50% 50%; scale: var(--u, 1) 1; opacity: 0.5; }
+.r65-tres > span { position: absolute; top: 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  translate: calc(var(--n) * min(30vw, 420px) - 50%) calc(-26px + (1 - var(--u, 1)) * 18px); opacity: clamp(0, calc((var(--u, 1) - 0.25 - (var(--n) + 1) * 0.12) / 0.2), 1); }
+.r65-tres .r63-av { width: 52px; height: 52px; font-size: 15px; box-shadow: 0 0 0 6px #f4efe6, 0 14px 30px -14px rgb(16 33 37 / 0.5); }
+.r65-tres small { font: 400 clamp(1.05rem, 1.3vw, 1.3rem)/1 var(--display); letter-spacing: -0.02em; color: var(--petroleo); }
+html body[data-r65p="p9"] #para-cada-uno { z-index: 7 !important; padding-top: calc(clamp(64px, 7vw, 106px) + 64px) !important; }
+@media (max-width: 760px) { .r65-tres > span { translate: calc(var(--n) * 30vw - 50%) calc(-26px + (1 - var(--u, 1)) * 18px); } }
+
+/* R10 · La foto entra a su lugar: una copia fija de la foto de la lectura sube a pantalla completa con el borde de
+   Aprender y se achica hasta su cuadro (Apple) */
+.r65-viaje { position: fixed; z-index: 40; overflow: hidden; pointer-events: none; box-shadow: 0 30px 60px -30px rgb(16 33 37 / 0.45); }
+.r65-viaje img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* P10 · El teléfono de Rosa llega grande al centro y se acomoda en su columna */
+.r65-viajando { position: relative; z-index: 30; transform-origin: 50% 50%; will-change: transform; }
+
+/* P8 · El titular se adelanta: «Un aviso, tres pantallas.» llega grande al centro sobre un fondo que pasa de hueso a
+   arena, y se acomoda en su lugar; lo demás aparece cuando llega (Hinge, Apple) */
+@media (prefers-reduced-motion: no-preference) {
+  html body[data-r65p="p8"] #aprender { background-color: color-mix(in oklab, #f4efe6 calc(var(--q65, 0) * 100%), var(--hueso)) !important; }
+  html body[data-r65p="p8"] #aprender > .envoltura { opacity: calc(1 - var(--q65, 0) * 1.3); }
+  html body[data-r65p="p8"] #para-cada-uno::before, html body[data-r65p="p8"] #para-cada-uno::after { opacity: var(--q65, 0); }
+  html body[data-r65p="p8"] #para-cada-uno { background-color: color-mix(in oklab, #f4efe6 calc(var(--q65, 0) * 100%), var(--hueso)) !important; }
+  html body[data-r65p="p8"] #para-cada-uno .r6-cab.revela { opacity: 1 !important; transform: none !important; transition: none !important; }
+  html body[data-r65p="p8"] #para-cada-uno .r6-cab .titulo-sec { transform-origin: 50% 50%; position: relative; z-index: 5; }
+  html body[data-r65p="p8"] #para-cada-uno :is(.r6-cab .ceja-sec, .pa-arriba, .pa-caps, .pa-esc) { opacity: clamp(0, calc((var(--e65, 1) - 0.82) / 0.18), 1); }
+}
+/* ===== fin ronda 65 ===== */

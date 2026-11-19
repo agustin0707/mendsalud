@@ -1974,7 +1974,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { rut.classList.add('r62-llego'); setTimeout(() => rut.classList.add('r62-listo'), 1800); io.disconnect() } }, { threshold: 0.18 })
     io.observe(rut)
   } else rut?.classList.add('r62-llego', 'r62-listo')
-  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2' && (!(d.r63r && d.r63r !== 'hoy') || d.r63r === 'r7'), '#aprender'], [d.r62p === 'p2' && (!(d.r63p && d.r63p !== 'hoy') || d.r63p === 'p7'), '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
+  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2' && !(d.r65r && d.r65r !== 'hoy') && (!(d.r63r && d.r63r !== 'hoy') || d.r63r === 'r7'), '#aprender'], [d.r62p === 'p2' && !(d.r65p && d.r65p !== 'hoy') && (!(d.r63p && d.r63p !== 'hoy') || d.r63p === 'p7'), '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
     .map((b) => { let a = b.previousElementSibling; while (a && (a.tagName !== 'SECTION' || getComputedStyle(a).display === 'none')) a = a.previousElementSibling; return a && [a, b] }).filter(Boolean)
   if (pares.length && !reducir) {
     pares.forEach(([a, b]) => { a.classList.add('r62-telon-a'); b.classList.add('r62-telon-b') })
@@ -1996,7 +1996,8 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
   const d = document.body.dataset, reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
   const BASE = document.querySelector('[data-r59]')?.dataset.base || '.'
   const rut = document.querySelector('#rutinas'), apr = document.querySelector('#aprender'), pcu = document.querySelector('#para-cada-uno')
-  const R = d.r63r && d.r63r !== 'hoy' ? d.r63r : '', P = d.r63p && d.r63p !== 'hoy' ? d.r63p : ''
+  // ronda 65: si hay un paso nuevo (r65r, r65p), ese paso no lleva puente
+  const R = d.r63r && d.r63r !== 'hoy' && !(d.r65r && d.r65r !== 'hoy') ? d.r63r : '', P = d.r63p && d.r63p !== 'hoy' && !(d.r65p && d.r65p !== 'hoy') ? d.r63p : ''
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
   const CHECK = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>'
   const AVISO = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg>'
@@ -2085,3 +2086,97 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
   if (d.r63l === 'c2') { const c = document.querySelector('.cierre .dos-caminos'), q = document.querySelector('#preguntas .envoltura'); if (c && q) { const w = document.createElement('div'); w.className = 'envoltura'; c.classList.add('r63-caminos'); w.append(c); q.after(w) } }
   if (d.r63l === 'c3') { const t = document.querySelector('#evidencia .titulo-sec'); if (t && !t.nextElementSibling?.classList.contains('r63-guias')) t.insertAdjacentHTML('afterend', '<p class="r63-guias">Ejercicio y educación, tratamiento central de la artrosis de rodilla y de cadera: OARSI 2019 · ACR 2020 · NICE 2022.</p>') }
 }
+// ===== ronda 65 · pasos nuevos desde referentes (19 nov) =====
+// r65r (Rutinas → Aprender): R8 un solo color que cambia (Apple Vision Pro, Stripe); R9 piezas que cosen el borde
+// (Headspace); R10 la foto entra a su lugar (Apple, AirPods). r65p (Aprender → Para cada uno): P8 el titular se adelanta
+// (Hinge, Apple); P9 Rosa, Javiera y Tomás cosen el borde (Headspace); P10 el teléfono de Rosa entra a su lugar (Apple).
+{
+  const d = document.body.dataset, reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const BASE = document.querySelector('[data-r59]')?.dataset.base || '.'
+  const rut = document.querySelector('#rutinas'), apr = document.querySelector('#aprender'), pcu = document.querySelector('#para-cada-uno')
+  const R = d.r65r && d.r65r !== 'hoy' ? d.r65r : '', P = d.r65p && d.r65p !== 'hoy' ? d.r65p : ''
+  const cl = (x) => Math.min(1, Math.max(0, x)), suave = (t) => t * t * (3 - 2 * t), mezcla = (a, b, t) => a + (b - a) * t
+  const tareas = []
+  // R9 y P9 se ven también con «reducir movimiento» (quedan quietas, ya abiertas)
+  if (R === 'r9' && apr) {
+    const LD = JSON.parse(document.querySelector('[data-r59] .f9-datos')?.textContent || '[]')
+    const fotos = [...LD.slice(0, 2).map((x) => `${BASE}/fotos/aprender/${x.id}-cuadrada.webp`), `${BASE}/medios/aprender/el-ejercicio-es-tratamiento.webp`, ...LD.slice(2, 4).map((x) => `${BASE}/fotos/aprender/${x.id}-cuadrada.webp`)]
+    const c = document.createElement('div'); c.className = 'r65-costura'; c.setAttribute('aria-hidden', 'true')
+    c.innerHTML = fotos.map((f, n) => `<i style="--n:${n - 2}"><img src="${f}" alt="" loading="lazy" decoding="async"></i>`).join('')
+    apr.prepend(c)
+    if (!reducir) tareas.push((h) => { const t = apr.getBoundingClientRect().top; c.style.setProperty('--u', suave(cl((h * 0.98 - t) / (h * 0.62))).toFixed(4)) })
+    else c.style.setProperty('--u', 1)
+  }
+  if (P === 'p9' && pcu) {
+    const c = document.createElement('div'); c.className = 'r65-costura r65-tres'; c.setAttribute('aria-hidden', 'true')
+    c.innerHTML = '<b class="r65-linea"></b>' + [['RD', 'Rosa', ''], ['JV', 'Javiera', 'k'], ['TB', 'Tomás', 'm']].map(([a, n, k], i) => `<span style="--n:${i - 1}"><span class="r63-av ${k}">${a}</span><small>${n}</small></span>`).join('')
+    pcu.prepend(c)
+    if (!reducir) tareas.push((h) => { const t = pcu.getBoundingClientRect().top; c.style.setProperty('--u', suave(cl((h * 0.95 - t) / (h * 0.55))).toFixed(4)) })
+    else c.style.setProperty('--u', 1)
+  }
+  if (!reducir) {
+    // R8: Rutinas y Aprender comparten un solo fondo que pasa de Petróleo a hueso mientras Aprender sube
+    if (R === 'r8' && rut && apr) tareas.push((h) => { const q = cl((h * 0.72 - apr.getBoundingClientRect().top) / (h * 0.36)).toFixed(4); rut.style.setProperty('--q65', q); apr.style.setProperty('--q65', q) })
+    // R10 y P10: una copia fija viaja desde la pantalla completa (o el centro) hasta el lugar del original
+    const viaje = (sec, buscar, armar, inicio) => {
+      let copia = null
+      tareas.push((h) => {
+        const og = buscar(); if (!og) return
+        const st = sec.getBoundingClientRect().top, t = cl((h * 0.92 - st) / (h * 0.86)), r = og.getBoundingClientRect()
+        const activo = st < h && t < 1 && r.width > 0
+        og.style.visibility = activo ? 'hidden' : ''
+        if (!activo) { if (copia) copia.style.display = 'none'; return }
+        if (!copia) { copia = armar(og); document.body.append(copia) }
+        copia.style.display = ''
+        inicio(copia, og, r, st, h, suave(t))
+      })
+    }
+    if (R === 'r10' && apr) viaje(apr, () => apr.querySelector('#f9-p-lectura.activo .f9-lec-foto img'),
+      (og) => { const c = document.createElement('div'); c.className = 'r65-viaje'; c.setAttribute('aria-hidden', 'true'); c.innerHTML = '<img alt="">'; return c },
+      (c, og, r, st, h, e) => {
+        const im = c.firstChild; if (im.getAttribute('src') !== (og.currentSrc || og.src)) im.src = og.currentSrc || og.src
+        const W = innerWidth, top = mezcla(st, r.top, e), left = mezcla(0, r.left, e), w = mezcla(W, r.width, e), ht = mezcla(h, r.height, e)
+        Object.assign(c.style, { top: top + 'px', left: left + 'px', width: w + 'px', height: ht + 'px', borderRadius: mezcla(0, parseFloat(getComputedStyle(og.parentElement).borderTopLeftRadius) || 14, e) + 'px' })
+      })
+    // P10: el teléfono real de Rosa (no una copia, para que conserve sus estilos) sube grande con la sección y se acomoda
+    if (P === 'p10' && pcu) {
+      const vis = (sel) => [...pcu.querySelectorAll(sel)].find((x) => x.getClientRects().length)
+      let tel = null
+      tareas.push((h) => {
+        tel = tel?.getClientRects().length ? tel : vis('.pa-col.foco .pa-dev') || vis('.pa-col .pa-dev')
+        if (!tel) return
+        const st = pcu.getBoundingClientRect().top, e = suave(cl((h * 0.92 - st) / (h * 0.86)))
+        tel.style.translate = ''; tel.style.scale = ''
+        if (e >= 1 || st > h) { tel.classList.remove('r65-viajando'); return }
+        const r = tel.getBoundingClientRect(), s0 = Math.min(1.35, (h * 0.8) / r.height)
+        const cx = innerWidth / 2 - (r.left + r.width / 2), cy = st + h * 0.56 - (r.top + r.height / 2)
+        tel.classList.add('r65-viajando')
+        tel.style.translate = `${(cx * (1 - e)).toFixed(1)}px ${(cy * (1 - e)).toFixed(1)}px`; tel.style.scale = mezcla(s0, 1, e).toFixed(4)
+      })
+    }
+    // P8: el titular de «Para cada uno» llega grande al centro y se acomoda en su lugar; el fondo pasa de hueso a arena
+    if (P === 'p8' && pcu && apr) {
+      let ti = null
+      tareas.push((h) => {
+        const st = pcu.getBoundingClientRect().top, q = cl((h * 0.95 - st) / (h * 0.55)).toFixed(4), e = suave(cl((h * 0.9 - st) / (h * 0.82)))
+        apr.style.setProperty('--q65', q); pcu.style.setProperty('--q65', q); pcu.style.setProperty('--e65', e.toFixed(4))
+        ti = ti?.getClientRects().length ? ti : [...pcu.querySelectorAll('.r6-cab .titulo-sec')].find((x) => x.getClientRects().length)
+        if (!ti) return
+        if (st < h) ti.closest('.revela')?.classList.add('visible')
+        ti.style.translate = ''; ti.style.scale = ''
+        const rg = document.createRange(); rg.selectNodeContents(ti)
+        const r = rg.getBoundingClientRect(), s = Math.min(1.9, (innerWidth * 0.86) / Math.max(1, r.width))
+        const dx = innerWidth / 2 - (r.left + r.width / 2), dy = h * 0.42 - (r.top + r.height / 2)
+        if (e < 1) { ti.style.translate = `${(dx * (1 - e)).toFixed(1)}px ${(dy * (1 - e)).toFixed(1)}px`; ti.style.scale = mezcla(s, 1, e).toFixed(4) }
+      })
+    }
+  }
+  if (tareas.length) {
+    let raf = 0
+    const paso = () => { raf = 0; const h = innerHeight; tareas.forEach((f) => f(h)) }
+    paso()
+    addEventListener('resize', paso)
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paso) }, { passive: true })
+  }
+}
+// ===== fin ronda 65 =====
