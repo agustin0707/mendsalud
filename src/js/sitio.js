@@ -1617,9 +1617,21 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     // Ronda 62 · A1 (data-r62a="a1"): el recorrido también cambia de pieza dentro de cada formato (3 lecturas, los 2 videos,
     // 2 episodios); tocar una pestaña o una pieza deja fijo lo elegido, y «Seguir el recorrido» lo retoma
     const A1 = document.body.dataset.r62a === 'a1'
-    const PIEZAS = A1 ? [3, 2, 1, 2] : [1, 1, 1, 1]
-    const DUR = A1 ? [18000, 18000, 13000, 16000] : [8000, 11000, 13000, 11000]
-    let vista = false, i = 0, t0 = performance.now(), quieto = reducir, raf = 0, auto = false, pieza = 0
+    // 19 nov (ronda 63): A1 a un ritmo que se alcance a leer. Cada lectura dura lo que toma leer su título, la bajada y
+    // «La idea» a 218 palabras por minuto (lectura en voz baja en español, Trauzettel-Klosinski y cols., 2012) más 4 s para
+    // mirar la foto, entre 10 y 16 s; cada video 16 s (dos o tres frases con subtítulos), la charla 24 s (tres o cuatro
+    // láminas) y cada episodio 16 s. Con el mouse encima de Aprender el recorrido espera.
+    const LD = JSON.parse(ps[0].querySelector('.f9-datos')?.textContent || '[]')
+    const palabras = (x) => [x.t, x.s, x.i].join(' ').replace(/<[^>]+>|\*/g, ' ').split(/\s+/).filter(Boolean).length
+    const lect = (n) => (LD.length ? Math.min(16000, Math.max(10000, (palabras(LD[n % LD.length]) / 218) * 60000 + 4000)) : 12000)
+    let PD = A1 ? [[12000, 12000, 12000], [16000, 16000], [24000], [16000, 16000]] : [[8000], [11000], [13000], [11000]]
+    const planLect = () => { if (!A1) return; const k0 = +(ps[0].querySelector('.f9-riel [aria-current]')?.dataset.i ?? 0); PD[0] = [0, 1, 2].map((j) => lect(k0 + j)) }
+    planLect()
+    let vista = false, i = 0, t0 = performance.now(), quieto = reducir, raf = 0, auto = false, pieza = 0, sobre = false, tSobre = 0
+    if (A1 && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      raiz.addEventListener('pointerenter', () => { if (!sobre) { sobre = true; tSobre = performance.now() } })
+      raiz.addEventListener('pointerleave', () => { if (sobre) { sobre = false; t0 += performance.now() - tSobre } })
+    }
     const siguientePieza = (k) => {
       const panel = ps[k]; const bs = [...panel.querySelectorAll(k === 0 ? '.f9-riel button' : k === 1 ? '.f9-lista button' : '.f9-eps button')]
       if (!bs.length) return
@@ -1631,7 +1643,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const marcaRec = () => { rec.setAttribute('aria-pressed', quieto ? 'true' : 'false'); recTx.textContent = quieto ? 'Seguir el recorrido' : 'Pausar el recorrido' }
     const detiene = () => { if (auto) return; if (!quieto) { quieto = true; marcaRec() } }
     const muestra = (k) => {
-      i = k; t0 = performance.now(); pieza = 0
+      i = k; t0 = sobre ? (tSobre = performance.now()) : performance.now(); pieza = 0; if (k === 0) planLect()
       tabs.forEach((t, n) => { t.setAttribute('aria-selected', n === k ? 'true' : 'false'); t.tabIndex = n === k ? 0 : -1; barra(t.querySelector('.f9-t'), 0) })
       ps.forEach((p, n) => { p.classList.toggle('activo', n === k); p.inert = n !== k })
       todos.forEach((m) => (m.panel === ps[k] ? m.ve(vista) : m.fuera()))
@@ -1639,9 +1651,10 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const bucle = (t) => {
       if (!vista) return (raf = 0)
       if (todos.some((m) => m.conSonido())) detiene()
-      const p = quieto ? 0 : (t - t0) / DUR[i]
+      const dur = PD[i].reduce((a, b) => a + b, 0), pasado = (sobre ? tSobre : t) - t0
+      const p = quieto ? 0 : pasado / dur
       barra(tabs[i].querySelector('.f9-t'), p)
-      if (!quieto && PIEZAS[i] > 1) { const n = Math.min(PIEZAS[i] - 1, Math.floor(p * PIEZAS[i])); if (n > pieza) { pieza = n; siguientePieza(i) } }
+      if (!quieto && PD[i].length > 1) { let n = 0, acc = PD[i][0]; while (n < PD[i].length - 1 && pasado >= acc) acc += PD[i][++n]; if (n > pieza) { pieza = n; siguientePieza(i) } }
       if (!quieto && p >= 1) muestra((i + 1) % tabs.length)
       raf = requestAnimationFrame(bucle)
     }
@@ -1961,16 +1974,104 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { rut.classList.add('r62-llego'); setTimeout(() => rut.classList.add('r62-listo'), 1800); io.disconnect() } }, { threshold: 0.18 })
     io.observe(rut)
   } else rut?.classList.add('r62-llego', 'r62-listo')
-  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2', '#aprender'], [d.r62p === 'p2', '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
+  const pares = [[d.r62e === 'e2', '#rutinas'], [d.r62r === 'r2' && !(d.r63r && d.r63r !== 'hoy'), '#aprender'], [d.r62p === 'p2' && !(d.r63p && d.r63p !== 'hoy'), '#para-cada-uno']].filter(([si]) => si).map(([, b]) => document.querySelector(b)).filter(Boolean)
     .map((b) => { let a = b.previousElementSibling; while (a && (a.tagName !== 'SECTION' || getComputedStyle(a).display === 'none')) a = a.previousElementSibling; return a && [a, b] }).filter(Boolean)
   if (pares.length && !reducir) {
     pares.forEach(([a, b]) => { a.classList.add('r62-telon-a'); b.classList.add('r62-telon-b') })
     const mide = () => pares.forEach(([a]) => a.style.setProperty('--alto-a', a.offsetHeight + 'px'))
     let raf = 0
-    const paso = () => { raf = 0; const h = innerHeight; pares.forEach(([a, b]) => { const t = b.getBoundingClientRect().top; const c = Math.min(1, Math.max(0, (h - t) / h)); a.style.setProperty('--cubre', c.toFixed(3)) }) }
+    // 19 nov: la de abajo, tapada del todo, se esconde; si no, la sticky seguía visible detrás de las secciones siguientes
+    const paso = () => { raf = 0; const h = innerHeight; pares.forEach(([a, b]) => { const t = b.getBoundingClientRect().top; const c = Math.min(1, Math.max(0, (h - t) / h)); a.style.setProperty('--cubre', c.toFixed(3)); a.classList.toggle('r62-tapada', t <= 0) }) }
     mide(); paso()
     addEventListener('resize', () => { mide(); paso() })
     addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paso) }, { passive: true })
     if ('ResizeObserver' in window) { const ro = new ResizeObserver(mide); pares.forEach(([a]) => ro.observe(a)) }
   }
+}
+
+// Ronda 63 · puentes entre secciones (r63r: R4 la frase, R5 del ejercicio a las piezas, R6 el isotipo; r63p: P4 en el
+// teléfono de Rosa, P5 el hilo, P6 tres frases) y el final más corto (r63l: C2 mueve los dos caminos a Preguntas; C3 suma
+// la línea de las guías). Cada puente es un tramo con escena fija; --p va de 0 a 1 mientras se baja por él.
+{
+  const d = document.body.dataset, reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const BASE = document.querySelector('[data-r59]')?.dataset.base || '.'
+  const rut = document.querySelector('#rutinas'), apr = document.querySelector('#aprender'), pcu = document.querySelector('#para-cada-uno')
+  const R = d.r63r && d.r63r !== 'hoy' ? d.r63r : '', P = d.r63p && d.r63p !== 'hoy' ? d.r63p : ''
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  const CHECK = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>'
+  const AVISO = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"/></svg>'
+  const puentes = []
+  const crea = (clase, antesDe, alto, html, etiqueta) => {
+    const el = document.createElement('div'); el.className = `r63-puente r63-${clase}`; el.style.setProperty('--alto', alto)
+    el.innerHTML = `<div class="r63-esc">${html}</div>`
+    if (etiqueta) { el.setAttribute('role', 'group'); el.setAttribute('aria-label', etiqueta) } else el.setAttribute('aria-hidden', 'true')
+    el.dataset.k = { r4: 0.72, r5: 0.8, r6: 0.74, p4: 0.95, p5: 0.9, p6: 1 }[clase] ?? 1 // reparte cada escena en todo su tramo
+    antesDe.before(el); puentes.push(el); return el
+  }
+  // Palabras con su orden (--i) para que se enciendan una tras otra; *x* va en Larken
+  const palabras = (lineas) => { let i = 0; return lineas.map((l) => `<span class="r63-l">${l.split(' ').map((w) => { const ac = /^\*.*\*[.,]?$/.test(w); const t = esc(w.replace(/\*/g, '')); return `<span style="--i:${i++}"${ac ? ' class="acento"' : ''}>${t}</span>` }).join(' ')}</span>`).join('') }
+  if (!reducir) {
+    if (R && rut && apr) {
+      if (R === 'r4') crea('r4', apr, 265, `<p class="r63-frase">${palabras(['Moverse es parte del tratamiento.', 'Entender la artrosis, *también.*'])}</p><p class="r63-cita">Ejercicio y educación: el tratamiento central según OARSI 2019, ACR 2020 y NICE 2022.</p>`, 'Moverse es parte del tratamiento. Entender la artrosis, también.')
+      if (R === 'r5') {
+        const LD = JSON.parse(document.querySelector('[data-r59] .f9-datos')?.textContent || '[]')
+        const centro = rut.querySelector('.u2-p .u2-img')?.getAttribute('src') || `${BASE}/fotos/rutinas/despertar-articular-960.webp`
+        const otras = [...LD.map((x) => `${BASE}/fotos/aprender/${x.id}-cuadrada.webp`), `${BASE}/medios/aprender/el-ejercicio-es-tratamiento.webp`, `${BASE}/fotos/rutinas/elongacion-piernas-ficha-720.webp`, `${BASE}/fotos/rutinas/equilibrio-con-apoyo-480.webp`, `${BASE}/fotos/rutinas/despertar-articular-ficha-720.webp`]
+        const C = 7, cols = 5; let k = 0
+        const tiles = Array.from({ length: 15 }, (_, n) => {
+          const dist = Math.hypot((n % cols) - (C % cols), Math.floor(n / cols) - Math.floor(C / cols))
+          const src = n === C ? centro : otras[k++ % otras.length]
+          return `<i class="${n === C ? 'r63-centro' : ''}" style="--dist:${dist.toFixed(2)}"><img src="${src}" alt="" loading="lazy" decoding="async"></i>`
+        }).join('')
+        crea('r5', apr, 285, `<div class="r63-mos">${tiles}</div><p class="r63-pie">Y para entender lo que haces: lecturas, videos, charlas y <span class="acento">podcasts.</span></p>`, 'Y para entender lo que haces: lecturas, videos, charlas y podcasts.')
+      }
+      if (R === 'r6') crea('r6', apr, 265, `<div class="r63-iso"><img src="${BASE}/fotos/aprender/salir-del-circulo-del-miedo-1290.webp" alt="" loading="lazy" decoding="async"></div><p class="r63-ceja"><b>Aprender</b>Entender también es parte del tratamiento</p>`)
+    }
+    if (P && apr && pcu) {
+      if (P === 'p4') {
+        const LD = JSON.parse(document.querySelector('[data-r59] .f9-datos')?.textContent || '[]'), x = LD.find((l) => l.id === 'salir-del-circulo-del-miedo') || LD[0]
+        const tit = x ? String(x.t).replace(/\*(.+?)\*/g, '<span class="acento">$1</span>') : ''
+        crea('p4', pcu, 285, `<div class="r63-tel"><div class="r63-tel-p"><img src="${BASE}/fotos/aprender/${x?.id}-640.webp" alt="" loading="lazy" decoding="async"><div class="tx"><small>${esc(x?.m ?? '')}</small><h4>${tit}</h4><p>${esc(x?.s ?? '')}</p><p class="idea"><b>La idea</b>${esc(x?.i ?? '')}</p></div></div></div>
+          <ol class="r63-tres"><li style="--k:0"><span class="r63-av">RD</span><span><b>Rosa lee en su teléfono.</b><span>Y anota cada día cómo amaneció.</span></span></li><li style="--k:1"><span class="r63-av k">JV</span><span><b>Javiera, su kine, ve cómo va.</b><span>En su panel, con un aviso si algo molesta mucho.</span></span></li><li style="--k:2"><span class="r63-av m">TB</span><span><b>Tomás, su médico, lo conversa.</b><span>Con el resumen de sus semanas en el control.</span></span></li></ol>`, 'Rosa lee en su teléfono y anota cada día cómo amaneció. Javiera, su kine, ve cómo va. Tomás, su médico, lo conversa en el control.')
+      }
+      if (P === 'p5') crea('p5', pcu, 265, `<svg class="r63-hilo" aria-hidden="true"><path pathLength="1"/><path pathLength="1"/><path pathLength="1"/></svg>
+          <p class="r63-ti">Lo que Rosa anota no se queda en su <span class="acento">teléfono.</span></p>
+          <div class="r63-nodos"><div style="--k:0"><span class="r63-av">RD</span><span><b>Rosa</b><small>La persona, en su casa</small></span></div><div style="--k:1"><span class="r63-av k">JV</span><span><b>Javiera</b><small>Su kinesióloga</small></span></div><div style="--k:2"><span class="r63-av m">TB</span><span><b>Tomás</b><small>Su médico</small></span></div></div>`, 'Lo que Rosa anota no se queda en su teléfono: lo ven Javiera, su kinesióloga, y Tomás, su médico.')
+      if (P === 'p6') crea('p6', pcu, 270, `
+          <div class="r63-dicho" style="--k:0"><span class="r63-quien"><span class="r63-av">RD</span>Rosa, en su casa</span><p>Rosa anota <span class="acento">Muy sensible.</span></p><span class="r63-chip"><span class="n">7</span>de 10 · rodilla derecha</span></div>
+          <div class="r63-dicho" style="--k:1"><span class="r63-quien"><span class="r63-av k">JV</span>Javiera, su kinesióloga</span><p>Javiera recibe <span class="acento">un aviso.</span></p><span class="r63-chip alarma">${AVISO}Señal de alarma · Rosa Díaz</span></div>
+          <div class="r63-dicho" style="--k:2"><span class="r63-quien"><span class="r63-av m">TB</span>Tomás, su médico</span><p>Tomás lo conversa en el <span class="acento">control.</span></p><span class="r63-chip ok">${CHECK}Conversada</span></div>`, 'Rosa anota Muy sensible, 7 de 10. Javiera recibe un aviso. Tomás lo conversa en el control.')
+    }
+    // Avance de cada puente; R5 calcula cuánto agrandar la foto del centro y R6 el giro y el tamaño del isotipo
+    if (puentes.length) {
+      let raf = 0
+      const ajusta = () => puentes.forEach((el) => {
+        const m = el.querySelector('.r63-mos'); if (m) { const t = m.querySelector('.r63-centro'); const w = t?.offsetWidth || 1; el.style.setProperty('--s0', Math.max(2, Math.max(innerWidth / w, innerHeight / w) * 1.02).toFixed(3)) }
+        // P5: la línea sale bajo la frase y llega justo sobre cada avatar
+        const hilo = el.querySelector('.r63-hilo'); if (hilo) {
+          const e = el.querySelector('.r63-esc').getBoundingClientRect(), ti = el.querySelector('.r63-ti').getBoundingClientRect()
+          const W = e.width, H = e.height, cx = W / 2, y0 = ti.bottom - e.top + 18
+          hilo.setAttribute('viewBox', `0 0 ${W} ${H}`)
+          const avs = [...el.querySelectorAll('.r63-nodos .r63-av')].map((a) => { const r = a.getBoundingClientRect(); return [r.left + r.width / 2 - e.left, r.top - e.top - 8] })
+          hilo.querySelectorAll('path').forEach((pa, n) => { const [x, y] = avs[n] || [cx, H * 0.6]; const ym = y0 + (y - y0) * 0.42; pa.setAttribute('d', `M${cx},${y0} L${cx},${ym} C${cx},${ym + (y - ym) * 0.62} ${x},${ym + (y - ym) * 0.3} ${x},${y}`) })
+        }
+        const tel = el.querySelector('.r63-tel'); if (tel) el.style.setProperty('--s4', Math.max(1.6, Math.min(innerWidth * 0.92 / tel.offsetWidth, innerHeight * 1.9 / tel.offsetHeight)).toFixed(3))
+      })
+      const paso = () => {
+        raf = 0; const h = innerHeight
+        // --p va de 0 (la sección anterior ya se fue a medias) a 1 (la siguiente asoma abajo)
+        puentes.forEach((el) => {
+          const r = el.getBoundingClientRect(); if (r.bottom < -h || r.top > 2 * h) return
+          const p = Math.min(1, Math.max(0, (-r.top - 0.5 * h) / Math.max(1, r.height - 1.95 * h))); el.style.setProperty('--p', Math.min(1, p * (+el.dataset.k || 1)).toFixed(4))
+          if (el.classList.contains('r63-r6')) { const z = Math.min(1, Math.max(0, (p * 0.74 - 0.08) / 0.62)); el.style.setProperty('--z6', z.toFixed(4)); el.style.setProperty('--s6', (0.6 * Math.pow(70, z)).toFixed(3)) }
+        })
+      }
+      ajusta(); paso()
+      addEventListener('resize', () => { ajusta(); paso() })
+      addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(paso) }, { passive: true })
+    }
+  }
+  // C2: los dos caminos del cierre pasan dentro de Preguntas. C3: la franja de Evidencia nombra las guías
+  if (d.r63l === 'c2') { const c = document.querySelector('.cierre .dos-caminos'), q = document.querySelector('#preguntas .envoltura'); if (c && q) { const w = document.createElement('div'); w.className = 'envoltura'; c.classList.add('r63-caminos'); w.append(c); q.after(w) } }
+  if (d.r63l === 'c3') { const t = document.querySelector('#evidencia .titulo-sec'); if (t && !t.nextElementSibling?.classList.contains('r63-guias')) t.insertAdjacentHTML('afterend', '<p class="r63-guias">Ejercicio y educación, tratamiento central de la artrosis de rodilla y de cadera: OARSI 2019 · ACR 2020 · NICE 2022.</p>') }
 }

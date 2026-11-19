@@ -4613,6 +4613,7 @@ body[data-r60p="pa2"] .r6-pa2 { display: block; }
 @media (prefers-reduced-motion: no-preference) {
   .r62-telon-a { position: sticky !important; top: min(0px, calc(100svh - var(--alto-a, 100svh))); }
   .r62-telon-a > * { scale: calc(1 - var(--cubre, 0) * 0.06); opacity: calc(1 - var(--cubre, 0) * 0.55); transform-origin: 50% 100%; will-change: scale, opacity; }
+  .r62-telon-a.r62-tapada { opacity: 0 !important; pointer-events: none; } /* 19 nov: algunos hijos fuerzan visibility: visible */
   .r62-telon-b { position: relative; z-index: 6 !important; box-shadow: 0 -30px 60px -28px rgb(16 33 37 / 0.35); }
 }
 /* E2: «Rutinas» ya sube como hoja; solo «Pasos» se queda y se aleja */
@@ -4638,3 +4639,158 @@ html body[data-r62p="p3"] #para-cada-uno::after { inset: 0 !important; border-ra
 html body[data-r62p="p2"] #para-cada-uno { clip-path: none !important; border-radius: var(--panel-r) var(--panel-r) 0 0; overflow: clip; background-color: #f4efe6 !important; }
 html body[data-r62p="p2"] #para-cada-uno::before, [data-r62p="p2"] #para-cada-uno::after { inset: 0 !important; border-radius: var(--panel-r) var(--panel-r) 0 0 !important; }
 /* ===== fin ronda 62 ===== */
+/* ===== ronda 63 · puentes entre secciones y final más corto (19 nov) =====
+   data-r63r: hoy | r4 | r5 | r6 (Rutinas → Aprender) · data-r63p: hoy | p4 | p5 | p6 (Aprender → Para cada uno)
+   data-r63l: hoy | c1 | c2 | c3 (desde Evidencia; con la escena de L3 y el aire de L1) · data-r63f: hoy | f1 (Para cada uno)
+   Un puente es un tramo con escena fija (sticky) que el JS mueve con --p (0 a 1) según cuánto se bajó. */
+
+/* ---------- Puentes: base ---------- */
+.r63-puente { position: relative; height: calc(var(--alto, 200) * 1svh); z-index: 2; margin-top: -100svh; } /* empieza detrás de la sección anterior, que se va encima */
+.r63-esc { position: sticky; top: 0; height: 100svh; overflow: clip; display: grid; place-items: center; isolation: isolate; }
+.r63-esc .acento { font-family: var(--acento); font-style: italic; font-weight: 400; letter-spacing: -0.02em; }
+/* Rutinas termina en Petróleo entero cuando sigue un puente (sin el degradado a bruma) */
+html body:is([data-r63r="r4"], [data-r63r="r5"], [data-r63r="r6"]) #rutinas { --tono-fondo: radial-gradient(90% 60% at 15% 0%, #3a6670, var(--petroleo) 50%, var(--petroleo)) !important; padding-bottom: clamp(72px, 7vw, 120px) !important; }
+html body:is([data-r63r="r4"], [data-r63r="r5"], [data-r63r="r6"]) #aprender { border-radius: 0 !important; }
+/* La sección siguiente sube sobre el último cuarto del puente, que ya quedó de su mismo color: sin tramo en blanco */
+@media (prefers-reduced-motion: no-preference) {
+  html body:is([data-r63r="r4"], [data-r63r="r5"], [data-r63r="r6"]) #aprender { position: relative; z-index: 3; margin-top: -45svh !important; background-color: var(--hueso); }
+  html body:is([data-r63r="r4"], [data-r63r="r5"], [data-r63r="r6"]) #rutinas { position: relative; z-index: 3; }
+  html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #aprender { position: relative; z-index: 3; background-color: var(--hueso); }
+  html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #para-cada-uno { position: relative; z-index: 3 !important; margin-top: -45svh !important; }
+}
+/* Para cada uno empieza en arena lisa cuando la precede un puente (sin el recorte) */
+html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #para-cada-uno { clip-path: none !important; border-radius: 0 !important; background-color: #f4efe6 !important; }
+html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #para-cada-uno::before, html body:is([data-r63p="p4"], [data-r63p="p5"], [data-r63p="p6"]) #para-cada-uno::after { inset: 0 !important; border-radius: 0 !important; }
+
+/* ---------- R4 · La frase: «Moverse es parte del tratamiento. Entender la artrosis, también.» se enciende palabra por palabra
+   sobre Petróleo; después el fondo pasa entero a hueso (sin franja de degradado) y entra Aprender ---------- */
+.r63-r4 .r63-esc { --q: clamp(0, calc((var(--p, 0) - 0.54) / 0.16), 1); background: color-mix(in oklab, var(--hueso) calc(var(--q) * 100%), var(--petroleo)); }
+.r63-frase { margin: 0; padding: 0 var(--margen); max-width: 16ch; box-sizing: content-box; font: 400 clamp(2.5rem, 6.4vw, 6.25rem)/1.02 var(--display); letter-spacing: -0.04em; color: var(--blanco); text-wrap: balance;
+  opacity: calc(1 - clamp(0, calc((var(--p, 0) - 0.5) / 0.08), 1)); translate: 0 calc(clamp(0, calc((var(--p, 0) - 0.44) / 0.14), 1) * -48px); }
+.r63-frase .r63-l { display: block; }
+.r63-frase [style*="--i"] { opacity: clamp(0.16, calc((var(--p, 0) - 0.04 - var(--i) * 0.042) / 0.05), 1); transition: opacity 0.12s linear; }
+.r63-cita { position: absolute; left: 0; right: 0; bottom: clamp(28px, 7svh, 72px); margin: 0 auto; padding: 0 var(--margen); text-align: center; font-size: clamp(0.875rem, 1vw, 1rem); color: rgb(253 253 253 / 0.78);
+  opacity: calc(clamp(0, calc((var(--p, 0) - 0.36) / 0.06), 1) - clamp(0, calc((var(--p, 0) - 0.5) / 0.06), 1)); }
+
+/* ---------- R5 · Del ejercicio a las piezas: la foto grande de Rutinas se aleja y queda como una pieza más en un mosaico
+   de lecturas, videos y rutinas; el fondo pasa a hueso y una línea dice qué hay en Aprender ---------- */
+.r63-r5 .r63-esc { --z: clamp(0, calc((var(--p, 0) - 0.03) / 0.4), 1); --q: clamp(0, calc((var(--p, 0) - 0.38) / 0.16), 1); background: color-mix(in oklab, var(--hueso) calc(var(--q) * 100%), var(--petroleo)); }
+.r63-mos { --tw: min(15vw, 22svh); display: grid; grid-template-columns: repeat(5, var(--tw)); gap: calc(var(--tw) * 0.09); translate: 0 calc(var(--tw) * -0.18);
+  opacity: calc(1 - clamp(0, calc((var(--p, 0) - 0.7) / 0.08), 1)); }
+.r63-mos > i { aspect-ratio: 1; border-radius: calc(var(--tw) * 0.11); overflow: hidden; background: rgb(253 253 253 / 0.08); opacity: clamp(0, calc(var(--z) * 1.6 - var(--dist) * 0.22), 1); scale: calc(0.82 + 0.18 * clamp(0, calc(var(--z) * 1.6 - var(--dist) * 0.22), 1)); }
+.r63-mos > i img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.r63-mos > i.r63-centro { opacity: 1; position: relative; z-index: 2; scale: calc(1 + (var(--s0, 5) - 1) * (1 - var(--z))); border-radius: calc(var(--tw) * 0.11 / (1 + (var(--s0, 5) - 1) * (1 - var(--z)))); box-shadow: 0 18px 50px -20px rgb(16 33 37 / calc(0.5 * var(--z))); }
+.r63-r5 .r63-pie { position: absolute; left: 0; right: 0; bottom: clamp(26px, 8svh, 84px); margin: 0 auto; padding: 0 var(--margen); text-align: center; font: 400 clamp(1.375rem, 2.4vw, 2.25rem)/1.15 var(--display); letter-spacing: -0.025em; color: var(--petroleo); text-wrap: balance;
+  opacity: calc(clamp(0, calc((var(--p, 0) - 0.5) / 0.08), 1) - clamp(0, calc((var(--p, 0) - 0.7) / 0.08), 1)); translate: 0 calc((1 - clamp(0, calc((var(--p, 0) - 0.5) / 0.1), 1)) * 18px); }
+@media (max-width: 760px) { .r63-mos { --tw: min(26vw, 15svh); grid-template-columns: repeat(3, var(--tw)); translate: 0 calc(var(--tw) * -0.5); } }
+
+/* ---------- R6 · El isotipo: el asterisco de Mend aparece sobre Petróleo, gira un cuarto y crece hasta que su centro
+   cubre la pantalla; dentro se ve una foto de Aprender que se aclara a hueso ---------- */
+.r63-r6 .r63-esc { background: var(--petroleo); }
+.r63-iso { position: absolute; left: 50%; top: 50%; width: 30vmin; height: 30vmin; margin: -15vmin 0 0 -15vmin; rotate: calc(var(--z6, 0) * 90deg); scale: var(--s6, 0.6); will-change: scale, rotate;
+  clip-path: polygon(100.00% 37.28%, 96.29% 22.58%, 52.23% 33.82%, 60.19% 3.93%, 45.62% 0.00%, 38.29% 27.54%, 19.12% 8.24%, 8.46% 18.98%, 41.50% 52.20%, 0.00% 62.79%, 3.71% 77.51%, 47.60% 66.29%, 39.68% 96.07%, 54.23% 100.00%, 61.59% 72.42%, 80.88% 91.84%, 91.54% 81.11%, 58.50% 47.87%); }
+.r63-iso img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.r63-iso::after { content: ""; position: absolute; inset: 0; background: var(--hueso); opacity: clamp(0, calc((var(--p, 0) - 0.38) / 0.18), 1); }
+.r63-r6 .r63-ceja { position: absolute; left: 0; right: 0; top: calc(50% + 21vmin); margin: 0; text-align: center; font: 500 clamp(0.9375rem, 1.2vw, 1.125rem)/1.3 var(--texto); color: rgb(253 253 253 / 0.86); opacity: calc(1 - clamp(0, calc(var(--p, 0) / 0.16), 1)); }
+.r63-r6 .r63-ceja b { display: block; font: 400 clamp(1.75rem, 3vw, 2.75rem)/1.1 var(--display); letter-spacing: -0.03em; color: var(--blanco); margin-bottom: 6px; }
+
+/* ---------- P4 · En el teléfono de Rosa: una lectura de Aprender a pantalla completa se aleja y resulta estar en el
+   teléfono de Rosa; el teléfono se corre y aparecen los tres que comparten los mismos datos ---------- */
+.r63-p4 .r63-esc, .r63-p5 .r63-esc, .r63-p6 .r63-esc { --q: clamp(0, calc((var(--p, 0) - 0.3) / 0.5), 1); background: color-mix(in oklab, #f4efe6 calc(var(--q) * 100%), var(--hueso)); }
+.r63-p4 .r63-esc { --z: clamp(0, calc((var(--p, 0) - 0.04) / 0.4), 1); --x: clamp(0, calc((var(--p, 0) - 0.48) / 0.16), 1); }
+.r63-tel { position: relative; width: 300px; height: 620px; border-radius: 48px; padding: 11px; background: #1d2a2d; box-shadow: 0 30px 70px -30px rgb(16 33 37 / 0.55), inset 0 0 0 2px #3a4a4e;
+  scale: calc(var(--s4, 3) - (var(--s4, 3) - 0.92) * var(--z)); translate: calc(var(--x) * var(--dx, -26vw)) 0; opacity: calc(1 - clamp(0, calc((var(--p, 0) - 0.88) / 0.1), 1)); }
+.r63-tel-p { position: relative; height: 100%; border-radius: 38px; overflow: hidden; background: var(--hueso); color: var(--petroleo); display: flex; flex-direction: column; }
+.r63-tel-p img { width: 100%; height: 44%; object-fit: cover; display: block; }
+.r63-tel-p .tx { padding: 16px 18px; display: grid; gap: 8px; }
+.r63-tel-p small { font-size: 11px; color: #4e5f63; }
+.r63-tel-p h4 { margin: 0; font: 400 24px/1.05 var(--display); letter-spacing: -0.03em; }
+.r63-tel-p p { margin: 0; font-size: 12.5px; line-height: 1.45; color: #34474b; }
+.r63-tel-p .idea { margin-top: 4px; padding: 10px 12px; border-radius: 12px; background: rgb(36 74 83 / 0.07); font-size: 12px; }
+.r63-tel-p .idea b { display: block; font-size: 10.5px; color: #4e5f63; font-weight: 500; margin-bottom: 2px; }
+.r63-tel::before { content: ""; position: absolute; z-index: 2; top: 20px; left: 50%; width: 86px; height: 24px; margin-left: -43px; border-radius: 14px; background: #10191b; }
+.r63-tres { position: absolute; left: calc(50% + 2vw); top: 50%; translate: 0 -50%; display: grid; gap: clamp(18px, 3svh, 30px); margin: 0; padding: 0; list-style: none; max-width: min(520px, 42vw); }
+.r63-tres li { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: center; opacity: clamp(0, calc((var(--p, 0) - 0.56 - var(--k) * 0.07) / 0.07), 1); translate: calc((1 - clamp(0, calc((var(--p, 0) - 0.56 - var(--k) * 0.07) / 0.1), 1)) * 28px) 0; }
+.r63-av { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; font: 500 15px/1 var(--texto); color: var(--blanco); background: var(--petroleo); }
+.r63-av.k { background: #3c6f78; } .r63-av.m { background: #5b8a93; color: var(--blanco); }
+.r63-tres b { display: block; font: 400 clamp(1.5rem, 2.4vw, 2.25rem)/1.08 var(--display); letter-spacing: -0.03em; color: var(--petroleo); }
+.r63-tres span { font-size: 15px; color: #42514f; }
+.r63-p4 .r63-tres { opacity: calc(1 - clamp(0, calc((var(--p, 0) - 0.88) / 0.1), 1)); }
+@media (max-width: 760px) {
+  .r63-tel { width: 230px; height: 476px; border-radius: 38px; --dx: 0px; translate: 0 calc(var(--x) * -17svh); }
+  .r63-tel-p { border-radius: 30px; } .r63-tel-p h4 { font-size: 19px; } .r63-tel-p p:not(.idea) { display: none; }
+  .r63-tres { left: var(--margen); right: var(--margen); top: auto; bottom: 5svh; translate: none; max-width: none; gap: 12px; }
+  .r63-tres li { grid-template-columns: 40px 1fr; gap: 12px; } .r63-av { width: 40px; height: 40px; font-size: 13px; }
+  .r63-tres b { font-size: 1.25rem; } .r63-tres span { font-size: 13.5px; }
+}
+
+/* ---------- P5 · El hilo: una línea Petróleo baja desde Aprender, se abre en tres y llega a Rosa, Javiera y Tomás, que
+   quedan donde empiezan sus pantallas en «Para cada uno» ---------- */
+.r63-p5 .r63-esc { --z: clamp(0, calc((var(--p, 0) - 0.06) / 0.5), 1); }
+.r63-hilo { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.r63-hilo path { fill: none; stroke: var(--petroleo); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: calc(1 - var(--z)); }
+.r63-p5 .r63-ti { position: absolute; left: 0; right: 0; top: 14svh; margin: 0 auto; padding: 0 var(--margen); text-align: center; font: 400 clamp(1.75rem, 3.6vw, 3.5rem)/1.06 var(--display); letter-spacing: -0.035em; color: var(--petroleo); text-wrap: balance; max-width: 18ch; box-sizing: content-box;
+  opacity: calc(clamp(0, calc((var(--p, 0) - 0.02) / 0.1), 1) - clamp(0, calc((var(--p, 0) - 0.66) / 0.08), 1)); }
+.r63-nodos { position: absolute; left: 0; right: 0; top: 66svh; display: grid; grid-template-columns: repeat(3, 1fr); width: min(var(--ancho), 100% - 2 * var(--margen)); margin: 0 auto; }
+.r63-nodos > div { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; opacity: clamp(0, calc((var(--z) - 0.78 - var(--k) * 0.05) / 0.08), 1); scale: calc(0.8 + 0.2 * clamp(0, calc((var(--z) - 0.78 - var(--k) * 0.05) / 0.1), 1)); }
+.r63-nodos b { font: 400 clamp(1.25rem, 1.8vw, 1.75rem)/1.1 var(--display); letter-spacing: -0.025em; color: var(--petroleo); }
+.r63-nodos small { display: block; font-size: 14.5px; color: #42514f; margin-top: 2px; }
+.r63-p5 :is(.r63-nodos, .r63-hilo) { translate: 0 calc(clamp(0, calc((var(--p, 0) - 0.66) / 0.2), 1) * -10svh); }
+
+/* ---------- P6 · Tres frases: «Rosa anota Muy sensible.», «Javiera recibe un aviso.», «Tomás lo conversa en el control.»,
+   una tras otra con la pieza real de la app que lo muestra; después entra «Para cada uno» ---------- */
+.r63-p6 .r63-esc { display: block; }
+.r63-dicho { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: clamp(18px, 3svh, 28px); padding: 0 var(--margen); text-align: center;
+  --a: calc(0.06 + var(--k) * 0.27); opacity: calc(clamp(0, calc((var(--p, 0) - var(--a)) / 0.06), 1) - clamp(0, calc((var(--p, 0) - var(--a) - 0.21) / 0.05), 1));
+  translate: 0 calc((clamp(0, calc((var(--p, 0) - var(--a)) / 0.1), 1) - clamp(0, calc((var(--p, 0) - var(--a) - 0.21) / 0.08), 1)) * -26px + 26px); }
+.r63-dicho:last-child { opacity: clamp(0, calc((var(--p, 0) - var(--a)) / 0.06), 1); translate: 0 calc((1 - clamp(0, calc((var(--p, 0) - var(--a)) / 0.1), 1)) * 26px - clamp(0, calc((var(--p, 0) - 0.9) / 0.1), 1) * 30px); }
+.r63-dicho p { margin: 0; font: 400 clamp(2.25rem, 5.6vw, 5.5rem)/1.02 var(--display); letter-spacing: -0.04em; color: var(--petroleo); text-wrap: balance; max-width: 14ch; }
+.r63-dicho .r63-quien { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; color: #42514f; }
+.r63-dicho .r63-quien .r63-av { width: 40px; height: 40px; font-size: 13px; }
+.r63-chip { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; background: var(--blanco); border: 1px solid rgb(36 74 83 / 0.14); box-shadow: 0 14px 30px -18px rgb(16 33 37 / 0.35); font: 500 15px/1.2 var(--texto); color: var(--petroleo); }
+.r63-chip svg { width: 18px; height: 18px; }
+.r63-chip .n { font: 400 26px/1 var(--display); letter-spacing: -0.03em; }
+.r63-chip.alarma { color: #8a3b12; background: #fff4ec; border-color: rgb(138 59 18 / 0.2); }
+.r63-chip.ok { background: #e7f2f1; }
+
+/* ---------- Largo desde Evidencia (C1, C2, C3): todas con la escena del teléfono de L3 y el aire entre secciones de L1;
+   Problema, Propuesta, Pasos, Rutinas, Aprender y Para cada uno quedan enteras ---------- */
+:is([data-r63l="c1"], [data-r63l="c2"], [data-r63l="c3"]) :is(#como-funciona, #rutinas, #aprender, #para-cada-uno, #evidencia, #preguntas) { padding-top: clamp(64px, 7.4vw, 112px) !important; padding-bottom: clamp(64px, 7.4vw, 112px) !important; }
+:is([data-r63l="c1"], [data-r63l="c2"], [data-r63l="c3"]) #que-es { padding-bottom: clamp(64px, 7.4vw, 112px) !important; }
+@media (prefers-reduced-motion: no-preference) {
+  :is([data-r63l="c1"], [data-r63l="c2"], [data-r63l="c3"]) .inicio { --alto-relato: 220 !important; height: calc((170 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+}
+@media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
+  :is([data-r63l="c1"], [data-r63l="c2"], [data-r63l="c3"]) .inicio { --alto-relato: 200 !important; height: calc((160 + var(--alto-relato) + var(--alto-salida, 0)) * 1svh) !important; }
+}
+/* Cierre compacto (C1 y C3): los dos caminos sin la foto grande, más bajos */
+:is([data-r63l="c1"], [data-r63l="c3"]) .cierre { padding-top: clamp(48px, 5vw, 80px) !important; padding-bottom: clamp(56px, 6vw, 96px) !important; }
+:is([data-r63l="c1"], [data-r63l="c3"]) .cierre .camino-foto { display: none; }
+:is([data-r63l="c1"], [data-r63l="c3"]) .cierre .camino { min-height: 0 !important; padding: clamp(28px, 3.4vw, 48px) !important; }
+/* C1 · Sin Evidencia: sus fuentes siguen bajo cada cifra de Problema y en /evidencia (menú y pie) */
+:is([data-r63l="c1"], [data-r63l="c2"]) #evidencia { display: none !important; }
+/* C2 · Un solo final: sin Evidencia y los dos caminos pasan dentro de Preguntas, bajo el acordeón (el JS los mueve) */
+[data-r63l="c2"] .cierre { display: none !important; }
+[data-r63l="c2"] #preguntas .r63-caminos { margin-top: clamp(40px, 5vw, 72px); display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+[data-r63l="c2"] #preguntas .r63-caminos .camino { min-height: 0 !important; padding: clamp(26px, 3vw, 40px) !important; }
+[data-r63l="c2"] #preguntas .r63-caminos .camino-foto { display: none; }
+[data-r63l="c2"] #preguntas .r63-caminos .camino h2 { font-size: clamp(1.5rem, 2.4vw, 2.25rem) !important; }
+@media (max-width: 760px) { [data-r63l="c2"] #preguntas .r63-caminos { grid-template-columns: 1fr; } }
+/* C3 · Evidencia en una franja: título corto, las tres guías y el botón en una fila */
+[data-r63l="c3"] #evidencia { padding-top: clamp(32px, 3vw, 48px) !important; padding-bottom: clamp(16px, 2vw, 32px) !important; }
+[data-r63l="c3"] #evidencia .tarjeta-campo { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 32px; padding: clamp(26px, 3vw, 40px) clamp(26px, 3.4vw, 48px) !important; min-height: 0 !important; }
+[data-r63l="c3"] #evidencia .evidencia-puntos, [data-r63l="c3"] #evidencia .iso-grande { display: none !important; }
+[data-r63l="c3"] #evidencia .ceja-sec { grid-column: 1 / -1; margin: 0 !important; }
+[data-r63l="c3"] #evidencia .titulo-sec { margin: 0 !important; font-size: clamp(1.5rem, 2.6vw, 2.5rem) !important; }
+[data-r63l="c3"] #evidencia .r63-guias { grid-column: 1; margin: 0; font-size: 15px; color: rgb(253 253 253 / 0.82); }
+[data-r63l="c3"] #evidencia .boton { grid-column: 2; grid-row: 2 / span 2; margin: 0 !important; }
+@media (max-width: 760px) { [data-r63l="c3"] #evidencia .tarjeta-campo { grid-template-columns: 1fr; } [data-r63l="c3"] #evidencia .boton { grid-column: 1; grid-row: auto; justify-self: start; } }
+
+/* ---------- F1 · Para cada uno más liviana: sin la bajada de la derecha (queda «Datos de ejemplo.» bajo el título),
+   los pasos sin hora y la leyenda más chica ---------- */
+[data-r63f="f1"] .r6-pa2 .r6-cab .entrada-sec { display: none; }
+[data-r63f="f1"] .r6-pa2 .r6-cab h2::after { content: "Datos de ejemplo."; display: block; margin-top: 14px; font: 400 15px/1.4 var(--texto); letter-spacing: 0; color: #42514f; }
+[data-r63f="f1"] .r6-pa2 .pa-rail small { display: none; }
+[data-r63f="f1"] .r6-pa2 .pa-rail button { justify-content: center; padding-top: 14px; padding-bottom: 16px; }
+[data-r63f="f1"] .r6-pa2 .pa-caps { font-size: 0.9em; margin: 18px 0 24px; }
+/* ===== fin ronda 63 ===== */

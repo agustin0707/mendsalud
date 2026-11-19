@@ -764,7 +764,7 @@ html.con-iman { scroll-snap-type: y proximity; }
 /* ═════════ Ronda 30 · la salida sin hoja (data-r30p). El inicio sigue fijo 130 svh; la escena se disuelve en el color de la sección siguiente
    (#fbf9f4) y esa sección sube después sin borde ni sombra, así que no se nota dónde empieza. Q1: la escena sube y se disuelve. Q2: la cámara entra al panel. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-v="3"][data-r23p="p2"]:is([data-r30p="q1"], [data-r30p="q2"]) .inicio { --alto-salida: 75; /* 18 nov: de 130 a 75, dejaba casi media pantalla en blanco antes de Problema */ height: calc((260 + var(--alto-relato) + var(--alto-salida)) * 1svh); }
+  [data-v="3"][data-r23p="p2"]:is([data-r30p="q1"], [data-r30p="q2"]) .inicio { --alto-salida: 55; /* 18 nov: de 130 a 75, dejaba casi media pantalla en blanco antes de Problema; 19 nov: a 55, pedido de Agustín */ height: calc((260 + var(--alto-relato) + var(--alto-salida)) * 1svh); }
   :is([data-r30p="q1"], [data-r30p="q2"]) .seccion.hoja { position: relative; z-index: 3; margin-top: -60svh; border-radius: 0; box-shadow: none; background: #fbf9f4; }
   :is([data-r30p="q1"], [data-r30p="q2"]) .inicio-pin::after { content: ""; position: absolute; inset: 0; z-index: 9; background: #fbf9f4; pointer-events: none; }
   [data-r30p="q1"] .inicio-pin::after { opacity: clamp(0, calc((var(--sx, 0) - 0.08) * 2.5), 1); }
