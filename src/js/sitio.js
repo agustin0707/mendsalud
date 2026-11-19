@@ -1405,7 +1405,19 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const ps = [...ut.querySelectorAll('.u2-p')]
     const c = ciclo(ut, ps.length, 5000, (i, vista) => ps.forEach((p, k) => { const on = k === i; p.classList.toggle('activo', on); p.querySelector('.u2-boton').setAttribute('aria-expanded', on ? 'true' : 'false'); tocar(p.querySelector('video'), on && vista) }),
       (i, p) => barra(ps[i].querySelector('.u2-prog'), p))
-    ps.forEach((p, k) => p.querySelector('.u2-boton').addEventListener('click', () => c.elige(k)))
+    // 18 nov: al pasar el mouse se abre ese panel (con un respiro de 140 ms para que no parpadee mientras los paneles se mueven);
+    // al salir vuelve al que se tocó, y si no se tocó ninguno sigue avanzando solo. El clic lo deja fijo.
+    let fijo = null, espera = 0
+    ps.forEach((p, k) => p.addEventListener('click', () => { fijo = k; c.elige(k) })) // todo el panel: con el hover ya está abierto cuando llega el clic
+    if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      ps.forEach((p, k) => {
+        p.addEventListener('pointerenter', () => { clearTimeout(espera); espera = setTimeout(() => { c.quieto = true; if (c.i !== k) c.ir(k) }, 140) })
+      })
+      ut.querySelector('.u2-p')?.parentElement.addEventListener('pointerleave', () => {
+        clearTimeout(espera)
+        if (fijo !== null) { if (c.i !== fijo) c.ir(fijo) } else c.quieto = reducir
+      })
+    }
   }
 
   // CI: el check-in real; recorre las cinco respuestas (4,5 s) y muestra lo que Mend sugiere para cada una
