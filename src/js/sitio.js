@@ -739,3 +739,1182 @@ if (escenaApp && video && inicio && !quieto.matches && document.body.dataset.r23
   }
   requestAnimationFrame(cuadro)
 }
+
+// Ronda 34 · G2: cien personas. Se encienden 62 (a los 3 meses) y después 25 quedan punteadas (37 al año). Sin movimiento, el estado final.
+const panelBr = document.querySelector('[data-br-panel]')
+if (panelBr) {
+  const pts = [...panelBr.querySelectorAll('.br-puntos i')], num = panelBr.querySelector('[data-br-num]'), cuando = panelBr.querySelector('[data-br-cuando]')
+  const estado = (on, perdidos) => pts.forEach((p, i) => { p.className = i < on ? 'on' : i < on + perdidos ? 'perdido' : '' })
+  estado(37, 25)
+  const correr = () => {
+    estado(0, 0); num.textContent = '0'; cuando.textContent = 'a los 3 meses'
+    let k = 0
+    const subir = () => { pts[k].className = 'on'; num.textContent = String(++k); if (k < 62) setTimeout(subir, 20); else setTimeout(bajar, 1500) }
+    const bajar = () => { cuando.textContent = 'a los 12 meses'; let m = 61; const paso = () => { pts[m].className = 'perdido'; num.textContent = String(m); m--; if (m >= 37) setTimeout(paso, 55) }; paso() }
+    setTimeout(subir, 350)
+  }
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window && document.body.dataset.r34g === 'g2' && !['a1', 'a3'].includes(document.body.dataset.r38p)) {
+    estado(0, 0); num.textContent = '0'; cuando.textContent = 'a los 3 meses'
+    const io = new IntersectionObserver((es) => { if (es[0].isIntersecting && document.body.dataset.r34g === 'g2') { io.disconnect(); correr() } }, { threshold: 0.5 })
+    io.observe(panelBr)
+  }
+}
+
+// Ronda 35 · P1, P2 y P3 del problema
+const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+const r35 = () => document.body.dataset.r35p
+// P1: escena pegada. Lee una sola medida por cuadro y solo escribe lo que cambia.
+const pr1 = document.querySelector('[data-pr1]')
+if (pr1) {
+  const ts = [...pr1.querySelectorAll('.pr1-t')], av = [...pr1.querySelectorAll('.pr1-avance i')], pts = [...pr1.querySelectorAll('.pr1-puntos i')], est = pts.map(() => '')
+  const poner = (on, per) => pts.forEach((p, i) => { const c = i < on - per ? 'on' : i < on ? 'perdido' : ''; if (est[i] !== c) { est[i] = c; p.className = c } })
+  let pasoAct = -1, pend = false
+  const cuadro = () => {
+    pend = false; if (r35() !== 'p1') return
+    const R = pr1.getBoundingClientRect(), p = Math.min(1, Math.max(0, -R.top / (R.height - innerHeight)))
+    const paso = p < 0.16 ? 0 : p < 0.5 ? 1 : p < 0.78 ? 2 : 3
+    const on = Math.round(62 * Math.min(1, Math.max(0, (p - 0.16) / 0.26))), per = Math.round(25 * Math.min(1, Math.max(0, (p - 0.52) / 0.2)))
+    poner(on, per)
+    if (paso !== pasoAct) { pasoAct = paso; ts.forEach((t, i) => t.classList.toggle('activo', i === paso)); av.forEach((a, i) => a.classList.toggle('activo', i <= paso)) }
+  }
+  if (reducir) poner(62, 25)
+  else { addEventListener('scroll', () => { if (!pend) { pend = true; requestAnimationFrame(cuadro) } }, { passive: true }); addEventListener('resize', cuadro); cuadro() }
+}
+// P2: la cifra rueda de 62 a 37 cuando pasa la mitad de la pantalla
+const pr2 = document.querySelector('[data-pr2]')
+if (pr2) {
+  if (reducir) pr2.classList.add('doce')
+  else { let pend = false; const f = () => { pend = false; if (r35() !== 'p2') return; const R = pr2.getBoundingClientRect(); pr2.classList.toggle('doce', R.top + R.height * 0.5 < innerHeight * 0.55) }; addEventListener('scroll', () => { if (!pend) { pend = true; requestAnimationFrame(f) } }, { passive: true }); f() }
+}
+// P3: líneas que fluyen de izquierda a derecha; 25 se apagan entre los 3 y los 12 meses. Solo corre a la vista.
+const lienzo = document.querySelector('[data-pr3-lienzo]')
+if (lienzo) {
+  const cx = lienzo.getContext('2d'); let W = 0, H = 0, dpr = 1, carriles = [], corre = false, t0 = performance.now()
+  const azar = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x) }
+  const medir = () => {
+    dpr = Math.min(2, devicePixelRatio || 1); W = lienzo.clientWidth; H = lienzo.clientHeight; lienzo.width = W * dpr; lienzo.height = H * dpr
+    const x3 = W * 0.1, x12 = W * 0.9, arriba = H * 0.3, abajo = H * (W < 760 ? 0.66 : 0.8) // en el celular, las líneas no pasan bajo el rótulo
+    // Los que se apagan quedan repartidos entre las 37 que siguen, para que se vea el raleo en toda la banda
+    const orden = [...Array(62).keys()].sort((a, b) => azar(a + 3) - azar(b + 3)), sigue = new Set(orden.slice(0, 37))
+    let k = 0
+    carriles = [...Array(62).keys()].map((i) => ({ y: arriba + (abajo - arriba) * (i + 0.5) / 62, fin: sigue.has(i) ? W + 40 : x3 + (x12 - x3) * (0.08 + 0.84 * (k++ + azar(i)) / 25), fase: azar(i + 9) * 1000, vel: 34 + azar(i + 21) * 34, onda: azar(i + 40) * 6.28 }))
+    return { x3, x12 }
+  }
+  let marcas = medir()
+  const dibujar = (ahora) => {
+    const t = (ahora - t0) / 1000
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H)
+    // Marcas de 3 y 12 meses
+    cx.strokeStyle = 'rgba(201,233,232,0.28)'; cx.lineWidth = 1; cx.setLineDash([3, 5])
+    for (const x of [marcas.x3, marcas.x12]) { cx.beginPath(); cx.moveTo(x, H * 0.28); cx.lineTo(x, H * 0.8); cx.stroke() }
+    cx.setLineDash([])
+    for (const c of carriles) {
+      const y = (x) => c.y + Math.sin(x / 140 + c.onda + t * 0.6) * 3
+      // El hilo: tenue y se desvanece donde se corta
+      const g = cx.createLinearGradient(0, 0, Math.min(c.fin, W), 0); g.addColorStop(0, 'rgba(201,233,232,0.05)'); g.addColorStop(0.15, 'rgba(201,233,232,0.2)'); g.addColorStop(c.fin > W ? 1 : 0.7, 'rgba(201,233,232,0.2)'); g.addColorStop(1, c.fin > W ? 'rgba(201,233,232,0.24)' : 'rgba(201,233,232,0)')
+      cx.strokeStyle = g; cx.lineWidth = 1; cx.beginPath()
+      for (let x = 0; x <= Math.min(c.fin, W); x += 12) x === 0 ? cx.moveTo(x, y(x)) : cx.lineTo(x, y(x))
+      cx.stroke()
+      // Las partículas que viajan por el hilo
+      for (let n = 0; n < 3; n++) {
+        const tramo = Math.min(c.fin, W + 30) + 30, x = ((c.fase + n * tramo / 3 + t * c.vel) % tramo) - 30
+        const a = c.fin > W ? 1 : Math.max(0, Math.min(1, (c.fin - x) / 90))
+        if (a <= 0) continue
+        const cola = cx.createLinearGradient(x - 26, 0, x, 0); cola.addColorStop(0, 'rgba(201,233,232,0)'); cola.addColorStop(1, `rgba(201,233,232,${0.55 * a})`)
+        cx.strokeStyle = cola; cx.lineWidth = 1.6; cx.beginPath(); cx.moveTo(x - 26, y(x - 26)); cx.lineTo(x, y(x)); cx.stroke()
+        cx.fillStyle = `rgba(222,244,243,${a})`; cx.beginPath(); cx.arc(x, y(x), 2.1, 0, 6.283); cx.fill()
+      }
+    }
+  }
+  const bucle = (ahora) => { if (!corre) return; dibujar(ahora); requestAnimationFrame(bucle) }
+  addEventListener('resize', () => { marcas = medir(); if (!corre) dibujar(performance.now()) })
+  if (reducir) dibujar(t0 + 4000)
+  else if ('IntersectionObserver' in window) new IntersectionObserver((es) => { const v = es[0].isIntersecting && r35() === 'p3'; if (v && !corre) { corre = true; marcas = medir(); requestAnimationFrame(bucle) } else if (!v) corre = false }).observe(lienzo)
+}
+
+// Ronda 38 · el problema con más nivel gráfico (A1 océano, A2 titular y dos cifras, A3 editorial con fotos)
+const r38 = () => document.body.dataset.r38p
+if (r38() === 'a1') document.querySelector('#problema')?.setAttribute('data-tono', 'oscuro')
+const r38f = (f) => { let pend = false; const g = () => { pend = false; f() }; addEventListener('scroll', () => { if (!pend) { pend = true; requestAnimationFrame(g) } }, { passive: true }); addEventListener('resize', g); g() }
+const lim = (v) => Math.min(1, Math.max(0, v))
+const suave = (v) => v * v * (3 - 2 * v)
+
+// A1 y A3 · cien partículas que flotan sueltas, se ordenan en una grilla al bajar, se encienden 62 y después 25 se van.
+// Va con el scroll (y vuelve al subir); el polvo de fondo solo se mueve mientras el panel está a la vista.
+const lienzo38 = document.querySelector('[data-r38-lienzo]')
+if (lienzo38 && ['a1', 'a3'].includes(r38())) {
+  const panel = lienzo38.closest('[data-br-panel]'), num = panel.querySelector('[data-br-num]'), cuando = panel.querySelector('[data-br-cuando]')
+  const cx = lienzo38.getContext('2d'), azar = (k) => { const x = Math.sin(k * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x) }
+  let W = 0, dpr = 1, celda = 0, x0 = 0, y0 = 0, prog = 0, corre = false, visto = -1
+  const gente = [...Array(100).keys()].map((i) => ({ sx: 0.04 + 0.92 * azar(i + 1), sy: 0.04 + 0.92 * azar(i + 101), demora: azar(i + 201) * 0.45, fase: azar(i + 301) * 6.28, va: azar(i + 401) }))
+  const polvo = [...Array(90).keys()].map((i) => ({ x: azar(i + 501), y: azar(i + 601), r: 0.5 + azar(i + 701) * 1.1, a: 0.08 + azar(i + 801) * 0.22, v: 0.004 + azar(i + 901) * 0.01 }))
+  const medir = () => { dpr = Math.min(2, devicePixelRatio || 1); W = lienzo38.clientWidth; lienzo38.width = lienzo38.height = Math.round(W * dpr); celda = W * 0.8 / 10; x0 = W * 0.1 + celda / 2; y0 = W * 0.1 + celda / 2 }
+  const dibujar = (t) => {
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, W)
+    const p = prog, junta = lim(p / 0.32), on = Math.round(62 * lim((p - 0.34) / 0.24)), per = Math.round(25 * lim((p - 0.64) / 0.22))
+    for (const d of polvo) { const y = ((d.y - t * d.v) % 1 + 1) % 1; cx.fillStyle = `rgba(201,233,232,${d.a})`; cx.beginPath(); cx.arc(d.x * W, y * W, d.r, 0, 6.283); cx.fill() }
+    const r = celda * 0.31
+    gente.forEach((g, i) => {
+      const k = suave(lim((junta - g.demora) / (1 - g.demora)))
+      const flota = 1 - k, dx = Math.sin(t * 0.7 + g.fase) * celda * 0.5 * flota, dy = Math.cos(t * 0.6 + g.fase) * celda * 0.5 * flota
+      let x = g.sx * W + dx + (x0 + (i % 10) * celda - g.sx * W - dx) * k, y = g.sy * W + dy + (y0 + Math.floor(i / 10) * celda - g.sy * W - dy) * k
+      const perdido = i >= 62 - per && i < 62, encendido = i < on && !perdido
+      if (perdido) { // se va: vuelve a soltarse y se apaga
+        const q = suave(lim((p - 0.64 - (61 - i) * 0.006) / 0.16))
+        x += (g.sx * W + Math.sin(t * 0.7 + g.fase) * celda * 0.5 - x) * q * 0.8; y += (g.sy * W + Math.cos(t * 0.6 + g.fase) * celda * 0.5 - y) * q * 0.8
+        cx.strokeStyle = `rgba(201,233,232,${0.75 - 0.4 * q})`; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(x, y, r * (1 - 0.25 * q), 0, 6.283); cx.stroke()
+      } else if (encendido) { cx.fillStyle = '#c9e9e8'; cx.beginPath(); cx.arc(x, y, r * 1.04, 0, 6.283); cx.fill() }
+      else { cx.strokeStyle = `rgba(201,233,232,${0.18 + 0.14 * k})`; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(x, y, r, 0, 6.283); cx.stroke() }
+    })
+    const n = on - per
+    if (n !== visto) { visto = n; num.textContent = String(n); cuando.textContent = per > 0 ? 'a los 12 meses' : 'a los 3 meses' }
+  }
+  const medirProg = () => { const R = panel.getBoundingClientRect(); prog = reducir ? 1 : lim((innerHeight * 0.92 - R.top) / (innerHeight * 0.8)) }
+  medir(); medirProg()
+  const bucle = (ahora) => { if (!corre) return; dibujar(ahora / 1000); requestAnimationFrame(bucle) }
+  addEventListener('resize', () => { medir(); if (!corre) dibujar(performance.now() / 1000) })
+  if (reducir) dibujar(0)
+  else {
+    r38f(medirProg)
+    if ('IntersectionObserver' in window) new IntersectionObserver((es) => { const v = es[0].isIntersecting; if (v && !corre) { corre = true; requestAnimationFrame(bucle) } else if (!v) corre = false }).observe(lienzo38)
+    dibujar(0)
+  }
+}
+
+// A3 · las fotos se mueven a distinto ritmo (solo transform)
+const fotos38 = document.querySelector('[data-r38-fotos]')
+if (fotos38 && r38() === 'a3' && !reducir) {
+  const imgs = [...fotos38.querySelectorAll('img')], vel = imgs.map((i) => Number(i.dataset.vel))
+  r38f(() => { const R = fotos38.getBoundingClientRect(), d = R.top + R.height / 2 - innerHeight / 2; imgs.forEach((im, i) => { im.style.transform = `translate3d(0, ${(d * vel[i]).toFixed(1)}px, 0)` }) })
+}
+
+// A2 · el halo crece al llegar al título; las cifras y la tira se cuentan una vez (62 se encienden y luego 25 se apagan)
+const dos38 = document.querySelector('[data-r38-dos]')
+if (dos38 && r38() === 'a2') {
+  const cab = document.querySelector('#problema .r38-cab')
+  if (!reducir) r38f(() => { const R = cab.getBoundingClientRect(); cab.style.setProperty('--h', suave(lim((innerHeight - R.top) / (innerHeight * 0.75))).toFixed(3)) })
+  const pts = [...dos38.querySelectorAll('.r38-tira i')], n62 = dos38.querySelector('[data-r38-n="62"]'), n37 = dos38.querySelector('[data-r38-n="37"]')
+  const estado = (on, per) => pts.forEach((p, i) => { p.className = i < on - per ? 'on' : i < on ? 'perdido' : '' })
+  estado(62, 25)
+  if (!reducir && 'IntersectionObserver' in window) {
+    estado(0, 0); n62.textContent = '0'; n37.textContent = (document.body.dataset.r39 || '').split(' ').includes('mov') ? '0' : '62'
+    const io = new IntersectionObserver((es) => {
+      if (!es[0].isIntersecting) return; io.disconnect()
+      // Ronda 39 · M8: conteo con frenado suave, por tiempo (no a pasos fijos), y la pérdida se desliza hacia atrás
+      if ((document.body.dataset.r39 || '').split(' ').includes('mov')) {
+        const tramo = (dura, f, fin) => { const t0 = performance.now(); const c = (t) => { const k = Math.min(1, (t - t0) / dura); f(1 - Math.pow(1 - k, 3)); if (k < 1) requestAnimationFrame(c); else fin?.() }; requestAnimationFrame(c) }
+        setTimeout(() => tramo(1500, (q) => { const v = Math.round(62 * q); n62.textContent = String(v); n37.textContent = String(v); estado(v, 0) }, () => setTimeout(() => tramo(1400, (q) => { const per = Math.round(25 * q); n37.textContent = String(62 - per); estado(62, per) }), 700)), 250)
+        return
+      }
+      let k = 0
+      const subir = () => { pts[k].className = 'on'; n62.textContent = String(++k); if (k < 62) setTimeout(subir, 18); else setTimeout(bajar, 900) }
+      const bajar = () => { let m = 61; const paso = () => { pts[m].className = 'perdido'; n37.textContent = String(m); m--; if (m >= 37) setTimeout(paso, 50) }; paso() }
+      setTimeout(subir, 300)
+    }, (document.body.dataset.r39 || '').split(' ').includes('mov') ? { threshold: 0.9, rootMargin: '0px 0px -28% 0px' } : { threshold: 0.45 })
+    io.observe(dos38.querySelector('.r38-cifras') || dos38)
+  }
+}
+
+// Ronda 40 · siete títulos para el problema (data-r40t), con entrada al llegar y respuesta al mouse
+const t40 = document.body.dataset.r40t
+const tit40 = document.querySelector('#t-problema .r34-c1')
+if (t40 && tit40 && r38() === 'a2') {
+  const sec = document.querySelector('#problema')
+  const E = '<span class="r38-ac">ejercicio.</span>', C = '<span class="acento">casa.</span>'
+  const raya = '<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 13 C 45 5, 110 4, 197 9"/></svg>'
+  const lineas = (ls) => ls.map((l, i) => `<span class="r40-l"><span class="r40-li" style="--i:${i}">${l}</span></span>`).join('')
+  const letras = (t, k0) => { let k = k0; return t.split(' ').filter(Boolean).map((w) => `<span class="r40-p">${[...w].map((c) => { const i = k++, r = Math.sin(i * 12.9898) * 43758.5453, f = r - Math.floor(r); return `<span class="r40-c" style="--i:${i};--dx:${(f * 2 - 1).toFixed(2)};--dy:${(Math.cos(i * 3.1) * 0.5 + 0.5).toFixed(2)};--g:${(Math.sin(i * 7.3)).toFixed(2)}">${c}</span>` }).join('')}</span>`).join(' ') }
+  const base = (document.querySelector('[data-r38-fotos] img')?.getAttribute('src') || '/fotos/personas/x').replace(/[^/]+$/, '')
+  const foto2 = (f, o, z, i) => `<span class="r40-foto" style="--i:${i};--o:${o};--z:${z}" aria-hidden="true"><img src="${base}${f}-480.webp" alt="" loading="lazy" decoding="async"></span>`
+  const foto = (f, i) => `<span class="r40-foto" style="--i:${i}" aria-hidden="true"><img src="${base}${f}" alt="" loading="lazy" decoding="async"></span>`
+  const H = {
+    t1: lineas(['La artrosis se', `trata con <span class="r40-sub">${E}${raya}</span>`, 'Lo difícil es', `sostenerlo en <span class="r40-sub casa">${C}${raya}</span>`]),
+    t3: `La artrosis se trata con ${E} Lo difícil es ${letras('sostenerlo en', 0)} <span class="acento">${letras('casa.', 12)}</span>`,
+    t5: `<span class="r40-fila r40-f1"><span class="r40-tag" aria-hidden="true">En la consulta</span><span>La artrosis se trata con ${E}</span></span><span class="r40-via" aria-hidden="true"><i></i></span><span class="r40-fila r40-f2"><span class="r40-tag" aria-hidden="true">En la casa</span><span>Lo difícil es sostenerlo en ${C}</span></span>`,
+    t6: (() => {
+      // Ronda 41 · fotos y lugar de las píldoras (data-r41p: antes, despues, ritmo; data-r41f: juego de fotos)
+      const J = { e: ['movilidad-completa', '55% 27%', 1.4, 'despertar-articular', '58% 36%', 1.2], a: ['fuerza-piernas-silla-muy-bien', '58% 66%', 1.75, 'despertar-articular', '60% 58%', 1.6], b: ['fuerza-piernas-silla', '50% 50%', 1, 'despertar-articular', '50% 50%', 1], c: ['fuerza-piernas-silla-muy-bien', '58% 66%', 1.75, 'salir-del-circulo-del-miedo', '52% 62%', 1.45] }[document.body.dataset.r41f || 'e']
+      const f1 = foto2(J[0], J[1], J[2], 0), f2 = foto2(J[3], J[4], J[5], 1)
+      // Ronda 42: sin punto final visible (el punto queda para lectores de pantalla, así la pausa se mantiene)
+      const E = '<span class="r38-ac">ejercicio</span><span class="solo-lector">.</span>', C = '<span class="acento">casa</span><span class="solo-lector">.</span>'
+      const L = { antes: ['La artrosis se trata', `con ${f1} ${E}`, 'Lo difícil es sostenerlo', `en ${f2} ${C}`], despues: ['La artrosis se trata', `con ${E} ${f1}`, 'Lo difícil es sostenerlo', `en ${C} ${f2}`], ritmo: [`La artrosis ${f1} se trata`, `con ${E}`, `Lo difícil es ${f2}`, `sostenerlo en ${C}`] }[document.body.dataset.r41p || 'despues']
+      return L.map((l) => `<span class="r40-l">${l}</span>`).join('')
+    })(),
+    t7: ['La artrosis se', `trata con ${E}`, 'Lo difícil es', `sostenerlo en ${C}`].map((l) => `<span class="r40-l">${l}</span>`).join(''),
+  }
+  if (H[t40]) { tit40.innerHTML = H[t40]; if (t40 === 't3') document.querySelector('#t-problema').setAttribute('aria-label', 'La artrosis se trata con ejercicio. Lo difícil es sostenerlo en casa.') }
+  const cab = sec.querySelector('.r38-cab')
+  if (reducir || !('IntersectionObserver' in window)) sec.classList.add('r40-on')
+  else { const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { sec.classList.add('r40-on'); io.disconnect() } }, { threshold: 0.4 }); io.observe(cab) }
+  if (t40 === 't2' && matchMedia('(hover: hover)').matches) tit40.addEventListener('pointermove', (e) => { const R = tit40.getBoundingClientRect(); tit40.style.setProperty('--x', `${e.clientX - R.left}px`); tit40.style.setProperty('--y', `${e.clientY - R.top}px`) })
+  if (t40 === 't4' && matchMedia('(hover: hover)').matches && !reducir) {
+    const card = sec.querySelector('.cabeza-sec')
+    card.addEventListener('pointermove', (e) => { const R = card.getBoundingClientRect(), u = (e.clientX - R.left) / R.width, v = (e.clientY - R.top) / R.height; card.style.setProperty('--x', `${(u * 100).toFixed(1)}%`); card.style.setProperty('--y', `${(v * 100).toFixed(1)}%`); card.style.setProperty('--ry', `${((u - 0.5) * 3).toFixed(2)}deg`); card.style.setProperty('--rx', `${((0.5 - v) * 3).toFixed(2)}deg`) })
+    card.addEventListener('pointerleave', () => { card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg') })
+  }
+}
+
+// Ronda 41 · fondos del problema (data-r41b)
+const f41 = document.body.dataset.r41b
+const sec41 = document.querySelector('#problema')
+if (f41 && sec41) {
+  // F3: trama de puntos; cerca del mouse los puntos crecen y pasan a Mar
+  const cv = sec41.querySelector('[data-r41-puntos]')
+  if (f41 === 'f3' && cv) {
+    const g = cv.getContext('2d'); let W = 0, H = 0, dpr = 1, mx = -999, my = -999, k = 0, on = false, pend = false
+    const PASO = 26
+    const pintar = () => { pend = false; g.clearRect(0, 0, W, H); for (let y = PASO / 2; y < H; y += PASO) for (let x = PASO / 2; x < W; x += PASO) { const d = Math.hypot(x - mx, y - my), q = Math.max(0, 1 - d / 150) * k; g.fillStyle = q > 0.02 ? `rgb(${36 + 41 * q},${74 + 79 * q},${83 + 70 * q},${0.16 + 0.6 * q})` : 'rgb(36 74 83 / 0.16)'; g.beginPath(); g.arc(x, y, 1.3 + 2.2 * q, 0, 7); g.fill() } }
+    const medir = () => { const R = sec41.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = R.width; H = R.height; cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); pintar() }
+    medir(); addEventListener('resize', medir); new ResizeObserver(medir).observe(sec41)
+    if (matchMedia('(hover: hover)').matches && !reducir) {
+      sec41.addEventListener('pointermove', (e) => { const R = sec41.getBoundingClientRect(); mx = e.clientX - R.left; my = e.clientY - R.top; k = 1; if (!pend) { pend = true; requestAnimationFrame(pintar) } })
+      sec41.addEventListener('pointerleave', () => { k = 0; requestAnimationFrame(pintar) })
+    }
+  }
+  // F4: el hilo se dibuja a medida que la sección pasa por la pantalla
+  const hilo = sec41.querySelector('[data-r41-hilo]')
+  if (f41 === 'f4' && hilo) {
+    const path = hilo.querySelector('path')
+    const trazar = () => {
+      const R = sec41.getBoundingClientRect(), W = R.width, H = R.height; hilo.setAttribute('viewBox', `0 0 ${W} ${H}`)
+      const y = (s, f = 0.5) => { const e = sec41.querySelector(s); if (!e) return H * f; const r = e.getBoundingClientRect(); return r.top - R.top + r.height * f }
+      const t = y('.titulo-sec', 0.5), b = y('.br-tiempos', 0.6), c = y('.r39-tercero', 0.4), d = y('.r38-cifras', 0.5), z = y('.br-cierre', 0.5)
+      path.setAttribute('d', `M -20 ${t - 120} C ${W * 0.12} ${t - 140}, ${W * 0.06} ${t + 40}, ${W * 0.08} ${t + 120} S ${W * 0.3} ${b + 20}, ${W * 0.5} ${b - 30} S ${W * 0.96} ${b + 60}, ${W * 0.93} ${c} S ${W * 0.62} ${d - 40}, ${W * 0.5} ${(d + c) / 2 + 30} S ${W * 0.05} ${d + 60}, ${W * 0.07} ${z - 60} S ${W * 0.4} ${z + 30}, ${W * 0.5} ${z + 70}`)
+    }
+    trazar(); addEventListener('resize', trazar); new ResizeObserver(trazar).observe(sec41)
+    if (reducir) sec41.style.setProperty('--hilo', '0')
+    else r38f(() => { const R = sec41.getBoundingClientRect(); sec41.style.setProperty('--hilo', (1 - lim((innerHeight * 0.85 - R.top) / (R.height + innerHeight * 0.1))).toFixed(4)) })
+  }
+  // F5 y F7: leve desfase con el scroll
+  if ((f41 === 'f5' || f41 === 'f7') && !reducir) {
+    r38f(() => { const R = sec41.getBoundingClientRect(), q = lim((innerHeight - R.top) / (R.height + innerHeight)); if (f41 === 'f5') sec41.style.setProperty('--luz-x', `${((q - 0.5) * 18).toFixed(2)}vw`); else sec41.style.setProperty('--pal-d', `${((0.5 - q) * 160).toFixed(1)}px`) })
+  }
+  if (f41 === 'f7') { const c = sec41.querySelector('.r39-tercero'); const pon = () => { if (!c) return; const R = sec41.getBoundingClientRect(), r = c.getBoundingClientRect(); sec41.style.setProperty('--pal-y', `${(((r.top + r.height / 2) - R.top) / R.height * 100).toFixed(1)}%`) }; pon(); addEventListener('load', pon); if ('ResizeObserver' in window) new ResizeObserver(pon).observe(sec41); else addEventListener('resize', pon) }
+}
+
+// Ronda 42 · F4 y F6 juntos (data-r42): tinte leve en el tramo de la casa y una línea con sentido
+const l42 = document.body.dataset.r42
+const s42 = document.querySelector('#problema')
+const svg42 = s42?.querySelector('[data-r42-svg]')
+if (l42 && s42 && svg42) {
+  const NS = 'http://www.w3.org/2000/svg', fondo = svg42.parentElement
+  const el = (t, a, c) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (c) e.setAttribute('class', c); return e }
+  // se dibuja una sola vez al bajar (no se borra al subir)
+  let piezas = [], curva = null, cy0 = 0, cy1 = 1, dMin = 1
+  const dibujar = () => {
+    const R = s42.getBoundingClientRect(), W = R.width, H = R.height, cel = W < 760
+    const y = (s, f = 0.5) => { const e = s42.querySelector(s); if (!e) return H * f; const r = e.getBoundingClientRect(); return r.top - R.top + r.height * f }
+    const yt = y('.titulo-sec'), ya = y('.br-tiempos', 1), yb = y('.r39-tercero', 0), yl = y('.r38-ley', 1), yc = y('.br-cierre', 0), yz = y('.br-cierre')
+    // tinte: de «Se pierde en casa» hasta la leyenda de los puntos, con bordes largos
+    const pc = (v) => `${(v / H * 100).toFixed(2)}%`
+    s42.style.setProperty('--t0a', pc(yb - (cel ? 160 : 220))); s42.style.setProperty('--t0b', pc(yb - 20)); s42.style.setProperty('--t1a', pc(yl + 10)); s42.style.setProperty('--t1b', pc(yl + (cel ? 110 : 170)))
+    svg42.setAttribute('viewBox', `0 0 ${W} ${H}`); svg42.replaceChildren(); fondo.querySelectorAll('.r42-et').forEach((e) => e.remove()); piezas = []; curva = null
+    if (l42 === 'l1') {
+      const y0 = yb - 30, y1 = yl + 10, base = y0 + (y1 - y0) * 0.08, N = 80, k = 1.7
+      const b = el('path', { d: `M 0 ${base} H ${W}` }, 'r42-base'); b.dataset.y = base; svg42.append(b); piezas.push(b)
+      let d = ''; for (let i = 0; i <= N; i++) { const u = i / N, v = (1 - Math.exp(-k * u)) / (1 - Math.exp(-k)); d += `${i ? 'L' : 'M'} ${(W * u).toFixed(1)} ${(base + (y1 - base) * 0.92 * v).toFixed(1)} ` }
+      curva = el('path', { d, pathLength: 1 }, 'r42-curva'); svg42.append(curva); cy0 = base; cy1 = y1
+    }
+    if (l42 === 'l2') {
+      const x = cel ? 7 : Math.max(14, (y('.envoltura') && s42.querySelector('.envoltura').getBoundingClientRect().left - R.left) * 0.45), y0 = yt, y1 = yz, paso = cel ? 14 : 16
+      const casa = (v) => { const m0 = yb - 80, m1 = yl + 40; if (v < m0 || v > m1) return 0; return Math.sin(Math.PI * (v - m0) / (m1 - m0)) }
+      for (let v = y0, i = 0; v <= y1; v += paso, i++) { const lar = i % 4 === 0 ? (cel ? 6 : 10) : (cel ? 3 : 5), t = el('line', { x1: x, x2: x + lar, y1: v, y2: v }, 'r42-t'); t.style.setProperty('--a', (0.85 - 0.65 * casa(v)).toFixed(2)); t.dataset.y = v; svg42.append(t); piezas.push(t) }
+      const hitos = [[y0, 'Consulta'], [(yb + yl) / 2, 'En casa'], [y1, 'Próximo control']]
+      for (const [v, n] of hitos) {
+        const c = el('circle', { cx: x, cy: v, r: cel ? 3 : 4 }, 'r42-hito'); c.dataset.y = v; svg42.append(c); piezas.push(c)
+        if (W >= 1200) { const e = document.createElement('span'); e.className = 'r42-et'; e.textContent = n; e.style.left = `${x + 16}px`; e.style.top = `${v}px`; e.dataset.y = v; fondo.append(e); piezas.push(e) }
+      }
+    }
+    if (l42 === 'l3') {
+      const xl = cel ? 8 : Math.max(18, W * 0.035), xr = W - xl, g1 = (ya + yb) / 2, g2 = (yl + yc) / 2, cv = cel ? 40 : 90
+      const d = `M ${xl} ${yt - 60} V ${g1 - cv} Q ${xl} ${g1} ${xl + cv} ${g1} H ${xr - cv} Q ${xr} ${g1} ${xr} ${g1 + cv} V ${g2 - cv} Q ${xr} ${g2} ${xr - cv} ${g2} H ${W / 2 + cv} Q ${W / 2} ${g2} ${W / 2} ${g2 + Math.min(cv, (yc - g2) * 0.7)}`
+      const p = el('path', { d, fill: 'none' }); svg42.append(p); const L = p.getTotalLength(); p.remove()
+      const tb = (s) => { const pb = p.getPointAtLength(L * s); return pb }
+      // posición en el recorrido donde empieza y termina el tramo de la casa
+      const sCasa0 = 0.42, sCasa1 = 0.86
+      const bump = (s) => s < sCasa0 || s > sCasa1 ? 0 : Math.sin(Math.PI * (s - sCasa0) / (sCasa1 - sCasa0))
+      svg42.append(p)
+      const r = cel ? 2.2 : 3
+      for (let l = 0; l <= L;) {
+        const s = l / L, q = bump(s), pt = tb(s), mend = s > 0.9
+        const c = el('circle', { cx: pt.x.toFixed(1), cy: pt.y.toFixed(1), r: (r * (1 - 0.25 * q)).toFixed(2) }, 'r42-p' + (q > 0.45 ? ' hueco' : '') + (mend ? ' mend' : ''))
+        c.style.setProperty('--a', (mend ? 0.75 : 0.42 - 0.12 * q).toFixed(2)); c.dataset.y = pt.y; svg42.append(c); piezas.push(c)
+        l += (cel ? 11 : 15) * (1 + 2.6 * q)
+      }
+      p.remove()
+    }
+    mover()
+  }
+  const mover = () => {
+    const R = s42.getBoundingClientRect(), yv = reducir ? Infinity : innerHeight * 0.82 - R.top
+    for (const e of piezas) if (+e.dataset.y < yv) e.classList.add('on')
+    if (curva) { dMin = Math.min(dMin, reducir ? 0 : 1 - lim((yv - cy0) / (cy1 - cy0))); curva.style.setProperty('--d', dMin.toFixed(4)) }
+  }
+  dibujar(); addEventListener('load', dibujar); if ('ResizeObserver' in window) new ResizeObserver(dibujar).observe(s42)
+  r38f(mover)
+}
+
+// Ronda 43 · seis propuestas para «Qué es Mend» (data-r43)
+const q43 = document.body.dataset.r43
+const v43 = q43 && document.querySelector(`.r43-${q43}`)
+if (v43) {
+  const enVista = (el, cb, th = 0.3) => { if (reducir || !('IntersectionObserver' in window)) return cb(); const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { cb(); io.disconnect() } }, { threshold: th }); io.observe(el) }
+  enVista(v43, () => v43.classList.add('r43-on'), 0.25)
+  // Q1: el check-in viaja persona → kinesiólogo → médico, con pausa en cada parada
+  if (q43 === 'q1') {
+    const via = v43.querySelector('.q1-via'), par = via.querySelectorAll('.q1-parada'), X = [16.66, 50, 83.33], nod = v43.querySelectorAll('.q1-cols:first-child .q1-nodo')
+    // ronda 44: cada parte se entera cuando llega el check-in (.q1-llega) y la app lo marca antes de salir (.q1-marca); .llega ya existe en el inicio
+    const pon = (k, marca = true) => { via.style.setProperty('--vx', `${k}%`); via.style.setProperty('--via', `${((k - 16.66) / 66.67 * 100).toFixed(1)}%`); par.forEach((p, i) => p.classList.toggle('on', k >= X[i] - 0.5)); nod.forEach((n, i) => n.classList.toggle('q1-llega', k >= X[i] - 0.5 && (i > 0 || marca))); nod[0]?.classList.toggle('q1-marca', marca) }
+    if (reducir) pon(83.33)
+    else enVista(v43, () => {
+      const D = 1600, P = 1100; let t0 = performance.now()
+      const f = (t) => { const T = (t - t0) % (2 * (D + P) + 1800); let k
+        if (T < P) k = X[0]; else if (T < P + D) { const u = (T - P) / D; k = X[0] + (X[1] - X[0]) * (u * u * (3 - 2 * u)) } else if (T < 2 * P + D) k = X[1]; else if (T < 2 * (P + D)) { const u = (T - 2 * P - D) / D; k = X[1] + (X[2] - X[1]) * (u * u * (3 - 2 * u)) } else k = X[2]
+        pon(k, T > P * 0.45); requestAnimationFrame(f) }
+      requestAnimationFrame(f)
+    }, 0.4)
+  }
+  // Q2: el paso que está al centro de la pantalla manda qué capa se ve
+  if (q43 === 'q2') {
+    const pasos = v43.querySelectorAll('.q2-paso'), capas = v43.querySelectorAll('.q2-capa'), pts = v43.querySelectorAll('.q2-puntos i')
+    const activa = (i) => { pasos.forEach((p, k) => p.classList.toggle('on', k === i)); capas.forEach((c, k) => c.classList.toggle('on', k === i)); pts.forEach((c, k) => c.classList.toggle('on', k === i)) }
+    activa(0)
+    if ('IntersectionObserver' in window) { const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) activa(+e.target.dataset.i) }), { rootMargin: '-45% 0px -45% 0px' }); pasos.forEach((p) => io.observe(p)) }
+  }
+  // Q4: la lista cambia la imagen; avanza sola cada 6 s salvo con el mouse encima, el foco o movimiento reducido
+  if (q43 === 'q4') {
+    const its = v43.querySelectorAll('.q4-item'), ms = v43.querySelectorAll('.q4-m'); let i = 0, tm = null
+    const ir = (k) => { i = k; its.forEach((b, j) => { b.setAttribute('aria-pressed', String(j === k)); const bi = b.querySelector('.q4-barra i'); bi.style.animation = 'none'; void bi.offsetWidth; bi.style.animation = '' }); ms.forEach((m, j) => m.classList.toggle('on', j === k)) }
+    const ciclo = () => { clearInterval(tm); if (!reducir) tm = setInterval(() => { if (!v43.classList.contains('pausa')) ir((i + 1) % its.length) }, 6000) }
+    its.forEach((b, k) => { b.addEventListener('click', () => { ir(k); ciclo() }); if (matchMedia('(hover: hover)').matches) b.addEventListener('pointerenter', () => ir(k)) })
+    v43.addEventListener('pointerenter', () => v43.classList.add('pausa')); v43.addEventListener('pointerleave', () => v43.classList.remove('pausa'))
+    v43.addEventListener('focusin', () => v43.classList.add('pausa')); v43.addEventListener('focusout', () => v43.classList.remove('pausa'))
+    ir(0); enVista(v43, ciclo)
+  }
+  // Q6: la regla se llena con el scroll (una sola vez); los días y las semanas se tiñen con ella
+  if (q43 === 'q6') {
+    const tr = v43.querySelector('.q6-tramo'), dias = v43.querySelector('.q6-dias'); let max = 0
+    const medir = () => { if (dias) tr.style.setProperty('--q6w', `${dias.getBoundingClientRect().width}px`) }
+    medir(); addEventListener('resize', medir)
+    const mover = () => { const R = tr.getBoundingClientRect(), q = reducir ? 1 : lim((innerHeight * 0.7 - R.top) / (R.height * 0.85)); if (q > max) { max = q; tr.style.setProperty('--q6', `${(q * 100).toFixed(1)}%`); tr.classList.toggle('lleno', q > 0.98) } }
+    r38f(mover)
+  }
+}
+
+// Ronda 44 · M2: los dispositivos se inclinan hacia el mouse
+if (document.body.dataset.r44 === 'm2' && matchMedia('(hover: hover)').matches && !reducir) {
+  document.querySelectorAll('.r43-q1 .q1-cols:first-child .q1-nodo').forEach((n) => {
+    const d = n.querySelector('.m2 > div'); if (!d) return
+    n.addEventListener('pointermove', (e) => { const R = n.getBoundingClientRect(), u = (e.clientX - R.left) / R.width - 0.5, v = (e.clientY - R.top) / R.height - 0.5; d.style.setProperty('--ry', `${(u * 10).toFixed(2)}deg`); d.style.setProperty('--rx', `${(-v * 8).toFixed(2)}deg`) })
+    n.addEventListener('pointerleave', () => { d.style.setProperty('--ry', '0deg'); d.style.setProperty('--rx', '0deg') })
+  })
+}
+
+// Ronda 47: en C3, la raya avanza de 01 a 03 al bajar, cada número se llena al llegar y aparece la vuelta al control
+if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
+  const ol = document.querySelector('#como-funciona .pasos'), li = ol ? [...ol.children] : [], vu = document.querySelector('#como-funciona .r46-vuelta')
+  if (ol) {
+    const pon = (k) => { ol.style.setProperty('--r47l', k.toFixed(3)); li.forEach((e, i) => e.classList.toggle('r47-on', k >= i / (li.length - 1) - 0.001)); vu?.classList.toggle('r47-on', k >= 0.999) }
+    if (reducir) pon(1)
+    else {
+      let k0 = 0
+      pon(0)
+      r38f(() => { const r = ol.getBoundingClientRect(), vh = innerHeight; const k = lim((vh * 0.78 - r.top) / (vh * 0.42)); if (k > k0) { k0 = k; pon(k) } })
+    }
+  }
+}
+
+// Ronda 48 · seis propuestas para «Pasos» (data-r48)
+{
+  const v = document.body.dataset.r48, raiz = v && document.querySelector('#como-funciona .r48-' + v)
+  const vh = () => innerHeight
+  if (raiz && v === 'p1') {
+    const li = [...raiz.querySelectorAll('.p1-pasos > li')]
+    const pon = () => {
+      const c = vh() * 0.5; let a = 0
+      li.forEach((e, i) => { const r = e.getBoundingClientRect(); if (r.top < c) a = i })
+      const o = raiz.querySelector('.p1-pasos').getBoundingClientRect(); raiz.querySelector('.p1-pasos').style.setProperty('--f', reducir ? 1 : lim((c - o.top - vh() * 0.3) / Math.max(1, o.height - vh() * 0.6)).toFixed(3))
+      raiz.dataset.paso = a
+      li.forEach((e, i) => { e.classList.toggle('r48-on', i === a); e.classList.toggle('r48-hecho', i < a) })
+    }
+    r38f(pon)
+  }
+  if (raiz && v === 'p2') {
+    const pista = raiz.querySelector('.p2-pista'), fijo = raiz.querySelector('.p2-fijo'), tren = raiz.querySelector('.p2-tren'), est = [...raiz.querySelectorAll('.p2-est')]
+    const plano = matchMedia('(max-width: 899px)')
+    let largo = 0
+    const medir = () => { if (plano.matches || reducir) { pista.style.height = ''; tren.style.setProperty('--x', 0); return } largo = Math.max(0, tren.scrollWidth - fijo.clientWidth); pista.style.height = (largo + vh()) + 'px' }
+    medir(); addEventListener('resize', medir); addEventListener('load', medir)
+    r38f(() => {
+      if (plano.matches || reducir) { est.forEach((e) => e.classList.add('r48-on')); return }
+      const r = pista.getBoundingClientRect(), k = lim(-r.top / Math.max(1, r.height - vh()))
+      tren.style.setProperty('--x', (k * largo).toFixed(1)); tren.style.setProperty('--k', k.toFixed(3))
+      est.forEach((e) => { const b = e.getBoundingClientRect(); e.classList.toggle('r48-on', b.left < innerWidth * 0.6) })
+    })
+  }
+  if (raiz && v === 'p3') {
+    const c = [...raiz.querySelectorAll('.p3-carta')]
+    r38f(() => c.forEach((e) => {
+      const r = e.getBoundingClientRect(), m = (r.top + r.height / 2 - vh() / 2) / vh()
+      if (!reducir) e.querySelector('.p3-foto').style.setProperty('--py', (m * -40).toFixed(1))
+      if (r.top < vh() * 0.8) e.classList.add('r48-on')
+    }))
+  }
+  if (raiz && v === 'p4') {
+    raiz.querySelectorAll('.p4-escala li').forEach((e, i) => e.style.setProperty('--n4', i))
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { raiz.classList.add('r48-vivo'); io.disconnect() } }), { threshold: 0.25 })
+    io.observe(raiz.querySelector('.p4-grid'))
+    if (reducir) raiz.classList.add('r48-vivo')
+    else {
+      // El check-in cambia de respuesta cada tanto, como si alguien lo marcara
+      const ch = [...raiz.querySelectorAll('.p4-b .r48-check span')]; let n = 1
+      setInterval(() => { if (document.hidden) return; n = (n + 1) % ch.length; ch.forEach((s, i) => s.classList.toggle('si', i === n)) }, 1800)
+    }
+  }
+  if (raiz && v === 'p5') {
+    const f = [...raiz.querySelectorAll('.p5-fila')]
+    r38f(() => f.forEach((e) => { const r = e.getBoundingClientRect(); e.classList.toggle('r48-on', r.top < vh() * 0.55 && r.bottom > vh() * 0.35); if (r.top < vh() * 0.75) e.classList.add('r48-visto') }))
+  }
+  if (raiz && v === 'p6') {
+    const esc = raiz.querySelector('.p6-escena'), est = [...raiz.querySelectorAll('.p6-est')], punto = raiz.querySelector('.p6-punto')
+    const ruta = () => raiz.querySelector(getComputedStyle(raiz.querySelector('.p6-ancho')).display === 'none' ? '.p6-alto .p6-ruta' : '.p6-ancho .p6-ruta')
+    const vb = (p) => p.ownerSVGElement.viewBox.baseVal
+    const ubicar = () => { const p = ruta(), L = p.getTotalLength(), b = vb(p); est.forEach((e, i) => { const q = p.getPointAtLength(L * i / 3); e.style.setProperty('--px', (q.x / b.width).toFixed(4)); e.style.setProperty('--py', (q.y / b.height).toFixed(4)) }) }
+    ubicar(); addEventListener('resize', ubicar)
+    r38f(() => {
+      const r = esc.getBoundingClientRect(), k = reducir ? 1 : lim((vh() * 0.85 - r.top) / (r.height + vh() * 0.25))
+      const p = ruta(), L = p.getTotalLength(), b = vb(p), q = p.getPointAtLength(L * (k >= 1 ? 0 : k))
+      esc.style.setProperty('--k6', k.toFixed(3)); punto.style.setProperty('--dx', (q.x / b.width).toFixed(4)); punto.style.setProperty('--dy', (q.y / b.height).toFixed(4))
+      est.forEach((e, i) => e.classList.toggle('r48-on', k >= i / 3 - 0.001))
+      raiz.classList.toggle('r48-cierra', k >= 0.999)
+    })
+  }
+}
+
+// Ronda 49 · el bento (P4): el check-in que cambia la rutina (C1, C2) y la escala que sube hasta el aviso (E1, E2)
+{
+  const raiz = document.querySelector('#como-funciona .r48-p4'), d = document.body.dataset
+  if (raiz && document.body.dataset.r48 === 'p4') {
+    raiz.querySelectorAll('.m2-sem li').forEach((e, i) => e.style.setProperty('--i', i))
+    const tb = raiz.querySelector('.p4-b')
+    if (d.r49c) { let k = 0; tb.dataset.k = reducir ? 1 : 0; if (!reducir) setInterval(() => { if (document.hidden) return; k = (k + 1) % 3; tb.dataset.k = k }, 2600) }
+    const esc = raiz.querySelector(d.r49e === 'e2' ? '.r49-e2' : '.r49-e1')
+    if (d.r49e && esc) {
+      const segs = [...raiz.querySelectorAll('.r49-e1 .e1-barra i')], pal = (n) => (n === 0 ? 'Nada' : n <= 3 ? 'Leve' : n <= 6 ? 'Moderada' : 'Severa')
+      const pon = (v) => { const n = Math.round(v); esc.style.setProperty('--v', v.toFixed(2)); esc.querySelector('.e1-num').textContent = n; esc.querySelector('.e1-pal').textContent = pal(n); segs.forEach((s, i) => s.classList.toggle('on', i <= n)); esc.classList.toggle('e-alto', n >= 7) }
+      if (reducir) pon(7)
+      else {
+        pon(2)
+        const subir = () => { const t0 = performance.now(); const f = (t) => { const q = Math.min(1, (t - t0) / 1800), e = 1 - (1 - q) ** 3; pon(2 + 5 * e); if (q < 1) requestAnimationFrame(f) }; requestAnimationFrame(f) }
+        let on = false
+        new IntersectionObserver((es) => { if (es[0].isIntersecting && !on) { on = true; subir(); setInterval(() => { if (document.hidden) return; pon(2); setTimeout(subir, 500) }, 6500) } }, { threshold: 0.5 }).observe(esc)
+      }
+    }
+  }
+}
+
+// Ronda 50 · el mazo de rutinas sigue al check-in (CA) y la tarjeta se inclina con el mouse (CB)
+{
+  const tb = document.querySelector('#como-funciona .p4-b'), d = document.body.dataset
+  if (tb && d.r50c) {
+    const mazo = [...tb.querySelectorAll('.ca-carta')]
+    const pos = () => { const k = +(tb.dataset.k || 0); mazo.forEach((c) => { c.dataset.pos = (+c.dataset.k - k + 3) % 3 }) }
+    pos(); new MutationObserver(pos).observe(tb, { attributes: true, attributeFilter: ['data-k'] })
+    const giro = tb.querySelector('.cb-giro')
+    if (giro && !reducir && matchMedia('(hover: hover)').matches) {
+      tb.addEventListener('pointermove', (e) => { const r = tb.getBoundingClientRect(); giro.style.setProperty('--mx', ((e.clientY - r.top) / r.height - 0.5).toFixed(3)); giro.style.setProperty('--my', ((e.clientX - r.left) / r.width - 0.5).toFixed(3)) })
+      tb.addEventListener('pointerleave', () => { giro.style.setProperty('--mx', 0); giro.style.setProperty('--my', 0) })
+    }
+  }
+}
+
+// Ronda 56 · Rutinas: seis propuestas (data-r56r). Los clips cargan solo cuando se ven y su variante está elegida; con
+// movimiento reducido no avanza nada solo y quedan las fotos.
+{
+  const r56 = () => document.body.dataset.r56r
+  const reducir56 = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const tocar = (v, si) => {
+    if (!v) return
+    if (si && !reducir56) { if (!v.src) v.src = v.dataset.src56; v.play().then(() => v.parentElement.classList.add('sonando')).catch(() => {}) } else if (!v.paused) v.pause()
+  }
+  const enVista56 = new Map()
+  const io56 = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { enVista56.set(e.target, e.isIntersecting); e.target.dispatchEvent(new CustomEvent('vista56', { detail: e.isIntersecting })) }), { threshold: 0.2 }) : null
+  const mira = (el, cb) => { if (!io56) return cb(true); el.addEventListener('vista56', (e) => cb(e.detail)); io56.observe(el) }
+  const visible = (el) => el.offsetParent !== null
+
+  // GA: avanza sola cada 6 s, con la barra del punto actual llenándose; se detiene con el botón o al tocar un punto
+  const ga = document.querySelector('[data-r56-ga]')
+  if (ga) {
+    const pista = ga.querySelector('.ga-pista'), ds = [...ga.querySelectorAll('.ga-d')], ps = [...ga.querySelectorAll('.ga-puntos button')], boton = ga.querySelector('.ga-pausa')
+    let i = 0, t0 = performance.now(), parado = reducir56, vista = false, raf = 0
+    const DUR = 6000
+    const ir = (n, suave = true) => { i = (n + ds.length) % ds.length; t0 = performance.now(); const d = ds[i]; pista.scrollTo({ left: d.offsetLeft - (pista.clientWidth - d.offsetWidth) / 2, behavior: suave && !reducir56 ? 'smooth' : 'auto' }); marca() }
+    const marca = () => { ds.forEach((d, k) => { d.classList.toggle('activa', k === i); tocar(d.querySelector('video'), k === i && vista && visible(ga)) }); ps.forEach((p, k) => { p.classList.toggle('actual', k === i); p.setAttribute('aria-current', k === i ? 'true' : 'false'); p.querySelector('i').style.setProperty('--p', 0) }) }
+    const bucle = (t) => { if (!vista) return (raf = 0); const p = Math.min(1, (t - t0) / DUR); ps[i].querySelector('i').style.setProperty('--p', parado ? 0 : p); if (parado) t0 = t; else if (p >= 1) ir(i + 1); raf = requestAnimationFrame(bucle) }
+    ps.forEach((p, k) => p.addEventListener('click', () => { parado = true; boton.classList.add('parado'); boton.setAttribute('aria-label', 'Seguir'); ir(k) }))
+    boton.addEventListener('click', () => { parado = !parado; t0 = performance.now(); boton.classList.toggle('parado', parado); boton.setAttribute('aria-label', parado ? 'Seguir' : 'Pausar') })
+    if (reducir56) { boton.classList.add('parado'); boton.setAttribute('aria-label', 'Seguir') }
+    let fin; pista.addEventListener('scroll', () => { clearTimeout(fin); fin = setTimeout(() => { const c = pista.scrollLeft + pista.clientWidth / 2; const k = ds.reduce((m, d, n) => Math.abs(d.offsetLeft + d.offsetWidth / 2 - c) < Math.abs(ds[m].offsetLeft + ds[m].offsetWidth / 2 - c) ? n : m, 0); if (k !== i) { i = k; t0 = performance.now(); marca() } }, 120) }, { passive: true })
+    mira(ga, (v) => { vista = v; marca(); if (v && !raf) { ir(i, false); raf = requestAnimationFrame(bucle) } })
+    addEventListener('resize', () => ir(i, false))
+  }
+
+  // EL: pestañas por tema con el indicador que se desliza; en cada tema, la lista elige la ficha grande
+  const el = document.querySelector('[data-r56-el]')
+  if (el) {
+    const tabs = [...el.querySelectorAll('[role="tab"]')], ind = el.querySelector('.el-ind'), panels = [...el.querySelectorAll('[role="tabpanel"]')]
+    let vista = false, quieto = reducir56, auto = 0
+    const mide = () => { const t = tabs.find((b) => b.getAttribute('aria-selected') === 'true'); ind.style.setProperty('--x', t.offsetLeft + 'px'); ind.style.setProperty('--w', t.offsetWidth + 'px') }
+    const ficha = (p, j) => { p.querySelectorAll('.el-ficha').forEach((f) => { const on = +f.dataset.j === j; f.classList.toggle('activa', on); tocar(f.querySelector('video'), on && vista && visible(el)) }); p.querySelectorAll('.el-lista button').forEach((b) => b.setAttribute('aria-current', +b.dataset.j === j ? 'true' : 'false')) }
+    const actual = () => panels.find((p) => !p.hidden)
+    const tema = (k) => { tabs.forEach((t, n) => { t.setAttribute('aria-selected', n === k ? 'true' : 'false'); t.tabIndex = n === k ? 0 : -1 }); panels.forEach((p, n) => { p.hidden = n !== k }); ficha(panels[k], 0); mide() }
+    tabs.forEach((t, k) => { t.addEventListener('click', () => { quieto = true; tema(k) }); t.addEventListener('keydown', (e) => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (d) { e.preventDefault(); const n = (k + d + tabs.length) % tabs.length; quieto = true; tema(n); tabs[n].focus() } }) })
+    panels.forEach((p) => p.querySelectorAll('.el-lista button').forEach((b) => b.addEventListener('click', () => { quieto = true; ficha(p, +b.dataset.j) })))
+    // Sin tocar nada, recorre las rutinas del tema y luego pasa al siguiente (una vuelta cada 5,5 s)
+    const paso = () => { if (quieto || !vista) return; const p = actual(), n = p.querySelectorAll('.el-ficha').length, j = +p.querySelector('.el-ficha.activa').dataset.j; if (j + 1 < n) ficha(p, j + 1); else tema((panels.indexOf(p) + 1) % panels.length) }
+    tema(0)
+    mira(el, (v) => { vista = v; ficha(actual(), +actual().querySelector('.el-ficha.activa').dataset.j); mide(); clearInterval(auto); if (v) auto = setInterval(paso, 5500) })
+    addEventListener('resize', mide); document.fonts?.ready.then(mide)
+  }
+
+  // CA: al pasar o enfocar una tarjeta, su clip toma la portada; en pantallas táctiles la grande corre sola a la vista
+  const ca = document.querySelector('.r56-ca')
+  if (ca) {
+    const ts = [...ca.querySelectorAll('.ca-t')]
+    ts.forEach((t) => { const v = t.querySelector('video'); const on = () => tocar(v, true), off = () => { tocar(v, false); t.querySelector('.c56').classList.remove('sonando') }; t.addEventListener('mouseenter', on); t.addEventListener('focus', on); t.addEventListener('mouseleave', off); t.addEventListener('blur', off) })
+    if (matchMedia('(hover: none)').matches) mira(ts[0], (v) => tocar(ts[0].querySelector('video'), v && r56() === 'ca'))
+  }
+
+  // MU: cada clip del muro corre solo mientras se ve
+  document.querySelectorAll('.mu-clip').forEach((c) => mira(c, (v) => tocar(c.querySelector('video'), v && r56() === 'mu')))
+
+  // LI: recorre la rutina, 3,6 s por ejercicio; Listo pasa a Hecho y se marca la serie, como en la rutina guiada
+  const li = document.querySelector('[data-r56-li]')
+  if (li) {
+    const pasos = [...li.querySelectorAll('.li-pasos li')], clips = [...li.querySelectorAll('.li-clip')], segs = [...li.querySelectorAll('.li-seg i')], cab = li.querySelector('.li-cabezal')
+    const bloque = li.querySelector('.li-bloque'), num = li.querySelector('.li-paso b'), puntos = li.querySelector('.li-puntos'), btn = li.querySelector('.li-btn'), acc = li.querySelector('.li-a')
+    const DUR = 3600, N = pasos.length, CAL = 3, PESO = [3, 16]
+    let i = 0, t0 = performance.now(), vista = false, raf = 0, serie = -1
+    const pon = (n) => {
+      i = n % N; t0 = performance.now(); serie = -1
+      pasos.forEach((p, k) => { p.classList.toggle('activo', k === i); p.classList.toggle('listo', k < i); p.querySelector('.li-prog').style.setProperty('--p', 0) })
+      clips.forEach((c, k) => { c.classList.toggle('activo', k === i); tocar(c.querySelector('video'), k === i && vista && visible(li)) })
+      bloque.textContent = pasos[i].dataset.bloque; num.textContent = i + 1; acc.textContent = pasos[i].dataset.accion
+      puntos.innerHTML = '<i></i>'.repeat(+pasos[i].dataset.series); btn.classList.remove('hecho')
+    }
+    const bucle = (t) => {
+      if (!vista) return (raf = 0)
+      const p = Math.min(1, (t - t0) / DUR), s = +pasos[i].dataset.series
+      pasos[i].querySelector('.li-prog').style.setProperty('--p', p)
+      const k = Math.min(s - 1, Math.floor(p * s * 0.999)); const fase = p * s - k
+      if (fase > 0.62 && serie < k) { serie = k; btn.classList.add('hecho'); puntos.children[k]?.classList.add('hecho') } else if (fase < 0.62 && serie === k - 1 && btn.classList.contains('hecho')) btn.classList.remove('hecho')
+      // Posición en la línea: los 3 primeros pasos llenan el calentamiento y los otros 5 la fuerza
+      const enCal = i < CAL, f = enCal ? (i + p) / CAL : (i - CAL + p) / (N - CAL)
+      segs[0].style.setProperty('--f', enCal ? f : 1); segs[1].style.setProperty('--f', enCal ? 0 : f)
+      const tot = PESO[0] + PESO[1], x = enCal ? f * PESO[0] / tot : (PESO[0] + f * PESO[1]) / tot
+      cab.style.setProperty('--t', `calc(${(x * 100).toFixed(2)}% + ${(enCal ? 0 : 6 * (1 - x)).toFixed(1)}px)`)
+      if (p >= 1) pon(i + 1)
+      raf = requestAnimationFrame(bucle)
+    }
+    pasos.forEach((p, k) => { p.addEventListener('click', () => pon(k)) })
+    pon(0)
+    mira(li, (v) => { vista = v; if (reducir56) return; pon(i); if (v && !raf) raf = requestAnimationFrame(bucle) })
+  }
+
+  // UT: los paneles se abren al pasar, al tocar o con el teclado; solos avanzan cada 5 s hasta que alguien los toca
+  const ut = document.querySelector('[data-r56-ut]')
+  if (ut) {
+    const ps = [...ut.querySelectorAll('.ut-p')]
+    let k = 0, vista = false, quieto = reducir56, auto = 0
+    const abre = (n) => { k = n; ps.forEach((p, j) => { const on = j === n; p.classList.toggle('activo', on); p.querySelector('.ut-boton').setAttribute('aria-expanded', on); tocar(p.querySelector('video'), on && vista && visible(ut)) }) }
+    ps.forEach((p, j) => { const b = p.querySelector('.ut-boton'); b.addEventListener('click', () => { quieto = true; abre(j) }); if (matchMedia('(hover: hover)').matches) p.addEventListener('mouseenter', () => { quieto = true; abre(j) }) })
+    mira(ut, (v) => { vista = v; abre(k); clearInterval(auto); if (v) auto = setInterval(() => { if (!quieto) abre((k + 1) % ps.length) }, 5000) })
+  }
+}
+
+// Ronda 57 · Rutinas: GA, EL y UT mejoradas y tres nuevas (CI, DO, TE), con data-r57r. Todo avanza solo mientras se ve,
+// con una barra que avisa cuánto falta; al tocar, se queda donde la persona eligió. Con movimiento reducido no avanza nada.
+{
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const tocar = (v, si) => {
+    if (!v) return
+    if (si && !reducir) { if (!v.src) v.src = v.dataset.src56; v.play().then(() => v.parentElement.classList.add('sonando')).catch(() => {}) } else if (!v.paused) v.pause()
+  }
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => e.target.dispatchEvent(new CustomEvent('vista57', { detail: e.isIntersecting }))), { threshold: 0.25 }) : null
+  const mira = (el, cb) => { if (!io) return cb(true); el.addEventListener('vista57', (e) => cb(e.detail)); io.observe(el) }
+  // Un ciclo: n pasos de dur ms; pon(i, vista) dibuja el paso, prog(i, p) la barra
+  const ciclo = (el, n, dur, pon, prog) => {
+    let i = 0, t0 = performance.now(), vista = false, raf = 0, quieto = reducir
+    const ir = (k) => { prog(i, 0); i = (k + n) % n; t0 = performance.now(); pon(i, vista) }
+    const bucle = (t) => { if (!vista) return (raf = 0); const p = Math.min(1, (t - t0) / dur); prog(i, quieto ? 0 : p); if (quieto) t0 = t; else if (p >= 1) ir(i + 1); raf = requestAnimationFrame(bucle) }
+    mira(el, (v) => { vista = v; pon(i, v); if (v && !raf) { t0 = performance.now(); raf = requestAnimationFrame(bucle) } })
+    return { ir, elige: (k) => { quieto = true; ir(k) }, get i() { return i }, get quieto() { return quieto }, set quieto(q) { quieto = q; t0 = performance.now() } }
+  }
+  const barra = (el, p) => el && el.style.setProperty('--p', p)
+
+  // GA2: la galería avanza cada 6,5 s; flechas, puntos y pausa
+  const ga = document.querySelector('[data-r57-ga]')
+  if (ga) {
+    const pista = ga.querySelector('.g2-pista'), ds = [...ga.querySelectorAll('.g2-d')], ps = [...ga.querySelectorAll('.g2-puntos button')], pausa = ga.querySelector('.g2-pausa')
+    let mover = true
+    const c = ciclo(ga, ds.length, 6500, (i, vista) => {
+      if (mover) pista.scrollTo({ left: ds[i].offsetLeft - ds[0].offsetLeft, behavior: reducir ? 'auto' : 'smooth' })
+      ds.forEach((d, k) => { d.classList.toggle('activa', k === i); tocar(d.querySelector('video'), k === i && vista) })
+      ps.forEach((p, k) => { p.classList.toggle('actual', k === i); p.setAttribute('aria-current', k === i ? 'true' : 'false') })
+    }, (i, p) => barra(ds[i].querySelector('.g2-prog'), p))
+    const marcaPausa = () => { pausa.classList.toggle('parado', c.quieto); pausa.setAttribute('aria-label', c.quieto ? 'Seguir' : 'Pausar') }
+    const elige = (k) => { c.elige(k); marcaPausa() }
+    ps.forEach((p, k) => p.addEventListener('click', () => elige(k)))
+    ga.querySelector('.g2-ant').addEventListener('click', () => elige(c.i - 1))
+    ga.querySelector('.g2-sig').addEventListener('click', () => elige(c.i + 1))
+    pausa.addEventListener('click', () => { c.quieto = !c.quieto; marcaPausa() })
+    marcaPausa()
+    // Si la persona desliza la pista, la diapositiva que queda al inicio pasa a ser la activa
+    let fin; pista.addEventListener('scroll', () => { clearTimeout(fin); fin = setTimeout(() => { const x = pista.scrollLeft + ds[0].offsetLeft; const k = ds.reduce((m, d, n) => Math.abs(d.offsetLeft - x) < Math.abs(ds[m].offsetLeft - x) ? n : m, 0); if (k !== c.i) { mover = false; c.ir(k); mover = true } }, 140) }, { passive: true })
+    addEventListener('resize', () => pista.scrollTo({ left: ds[c.i].offsetLeft - ds[0].offsetLeft }))
+  }
+
+  // EL2: pestañas por tema; sin tocar, recorre cada rutina del tema (6 s) y pasa al siguiente
+  const el = document.querySelector('[data-r57-el]')
+  if (el) {
+    const tabs = [...el.querySelectorAll('[role="tab"]')], ind = el.querySelector('.e2-ind'), panels = [...el.querySelectorAll('[role="tabpanel"]')]
+    const pasos = panels.flatMap((p, t) => [...p.querySelectorAll('.e2-ficha')].map((f, j) => [t, j]))
+    const mide = () => { const t = tabs.find((b) => b.getAttribute('aria-selected') === 'true'); ind.style.setProperty('--x', t.offsetLeft + 'px'); ind.style.setProperty('--w', t.offsetWidth + 'px') }
+    const boton = (t, j) => panels[t].querySelector(`.e2-lista [data-j="${j}"]`)
+    const c = ciclo(el, pasos.length, 6000, (k, vista) => {
+      const [t, j] = pasos[k]
+      tabs.forEach((b, n) => { b.setAttribute('aria-selected', n === t ? 'true' : 'false'); b.tabIndex = n === t ? 0 : -1 })
+      panels.forEach((p, n) => { p.hidden = n !== t })
+      panels[t].querySelectorAll('.e2-ficha').forEach((f) => { const on = +f.dataset.j === j; f.classList.toggle('activa', on); tocar(f.querySelector('video'), on && vista) })
+      panels[t].querySelectorAll('.e2-lista button').forEach((b) => b.setAttribute('aria-current', +b.dataset.j === j ? 'true' : 'false'))
+      const b = boton(t, j); if (b && vista) { const l = b.closest('.e2-lista'); if (l.scrollWidth > l.clientWidth) l.scrollTo({ left: b.parentElement.offsetLeft - l.firstElementChild.offsetLeft, behavior: reducir ? 'auto' : 'smooth' }) }
+      mide()
+    }, (k, p) => barra(boton(...pasos[k])?.querySelector('.e2-t'), p))
+    const a = (t, j = 0) => pasos.findIndex(([x, y]) => x === t && y === j)
+    tabs.forEach((b, t) => {
+      b.addEventListener('click', () => c.elige(a(t)))
+      b.addEventListener('keydown', (e) => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (d) { e.preventDefault(); const n = (t + d + tabs.length) % tabs.length; c.elige(a(n)); tabs[n].focus() } })
+    })
+    panels.forEach((p, t) => p.querySelectorAll('.e2-lista button').forEach((b) => b.addEventListener('click', () => c.elige(a(t, +b.dataset.j)))))
+    addEventListener('resize', mide); document.fonts?.ready.then(mide); mide()
+  }
+
+  // UT2: los paneles se abren por turno cada 5 s; al tocar uno, se queda abierto
+  const ut = document.querySelector('[data-r57-ut]')
+  if (ut) {
+    const ps = [...ut.querySelectorAll('.u2-p')]
+    const c = ciclo(ut, ps.length, 5000, (i, vista) => ps.forEach((p, k) => { const on = k === i; p.classList.toggle('activo', on); p.querySelector('.u2-boton').setAttribute('aria-expanded', on ? 'true' : 'false'); tocar(p.querySelector('video'), on && vista) }),
+      (i, p) => barra(ps[i].querySelector('.u2-prog'), p))
+    ps.forEach((p, k) => p.querySelector('.u2-boton').addEventListener('click', () => c.elige(k)))
+  }
+
+  // CI: el check-in real; recorre las cinco respuestas (4,5 s) y muestra lo que Mend sugiere para cada una
+  const ci = document.querySelector('[data-r57-ci]')
+  if (ci) {
+    const ops = [...ci.querySelectorAll('[role="radio"]')], fs = [...ci.querySelectorAll('.c2-ficha')]
+    const c = ciclo(ci, ops.length, 4500, (i, vista) => {
+      ops.forEach((o, k) => { o.setAttribute('aria-checked', k === i ? 'true' : 'false'); o.tabIndex = k === i ? 0 : -1 })
+      fs.forEach((f) => { const on = +f.dataset.k === i; f.classList.toggle('activa', on); tocar(f.querySelector('video'), on && vista) })
+    }, (i, p) => barra(ops[i].querySelector('.c2-t'), p))
+    ops.forEach((o, k) => {
+      o.addEventListener('click', () => c.elige(k))
+      o.addEventListener('keydown', (e) => { const d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (d) { e.preventDefault(); const n = (k + d + ops.length) % ops.length; c.elige(n); ops[n].focus() } })
+    })
+  }
+
+  // DO: los puntos de la foto (cadera, rodilla, tobillo) se encienden por turno; al tocar uno, queda elegido
+  const dn = document.querySelector('[data-r57-do]')
+  if (dn) {
+    const pts = [...dn.querySelectorAll('.d2-punto')], zs = [...dn.querySelectorAll('.d2-zona')]
+    const c = ciclo(dn, pts.length, 5000, (i) => { pts.forEach((p, k) => { p.classList.toggle('activo', k === i); p.setAttribute('aria-pressed', k === i ? 'true' : 'false') }); zs.forEach((z) => z.classList.toggle('activa', +z.dataset.k === i)) }, () => {})
+    pts.forEach((p, k) => p.addEventListener('click', () => c.elige(k)))
+  }
+
+  // TE: las capturas reales de la app pasan como en el teléfono (empujando hacia la izquierda), cada 4 s
+  const te = document.querySelector('[data-r57-te]')
+  if (te) {
+    const caps = [...te.querySelectorAll('.t2-cap')], lis = [...te.querySelectorAll('.t2-pasos li')]
+    const c = ciclo(te, lis.length, 4000, (i) => {
+      caps.forEach((f, k) => { f.classList.toggle('activa', k === i); f.classList.toggle('antes', k < i) })
+      lis.forEach((l, k) => { l.classList.toggle('activo', k === i); l.querySelector('button').setAttribute('aria-current', k === i ? 'step' : 'false') })
+    }, (i, p) => barra(lis[i].querySelector('.t2-t'), p))
+    lis.forEach((l, k) => l.querySelector('button').addEventListener('click', () => c.elige(k)))
+  }
+}
+
+// Ronda 58 · Aprender: seis propuestas (data-r58a). Los audios y el video son los de la app y cargan solo al tocar (el video,
+// sin sonido, también cuando se ve su pestaña). Los subtítulos y la letra salen de los tiempos de la voz de la app. Suena uno a la vez.
+{
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => e.target.dispatchEvent(new CustomEvent('vista58', { detail: e.isIntersecting }))), { threshold: 0.25 }) : null
+  const mira = (el, cb) => { if (!io) return cb(true); el.addEventListener('vista58', (e) => cb(e.detail)); io.observe(el) }
+  const barra = (el, p) => el && el.style.setProperty('--p', p)
+  const ciclo = (el, n, dur, pon, prog) => {
+    let i = 0, t0 = performance.now(), vista = false, raf = 0, quieto = reducir
+    const durDe = (k) => (typeof dur === 'function' ? dur(k) : dur)
+    const ir = (k) => { prog(i, 0); i = (k + n) % n; t0 = performance.now(); pon(i, vista) }
+    const bucle = (t) => { if (!vista) return (raf = 0); const p = Math.min(1, (t - t0) / durDe(i)); prog(i, quieto ? 0 : p); if (quieto) t0 = t; else if (p >= 1) ir(i + 1); raf = requestAnimationFrame(bucle) }
+    mira(el, (v) => { vista = v; pon(i, v); if (v && !raf) { t0 = performance.now(); raf = requestAnimationFrame(bucle) } })
+    return { ir, elige: (k) => { quieto = true; ir(k) }, get i() { return i }, get quieto() { return quieto }, set quieto(q) { quieto = q; t0 = performance.now() } }
+  }
+  const mmss = (x) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, '0')}`
+  const esc = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
+  const todos = new Set()
+
+  // Un reproductor: el medio, sus tiempos (frases por lámina) y lo que se dibuja con ellos
+  const reproductor = (caja) => {
+    const m = caja.querySelector('.a8-medio'), tr = JSON.parse(caja.querySelector('.a8-tr').textContent)
+    const frases = tr.l.flatMap((l, k) => l.f.map((f) => ({ i: f[0], f: f[1], t: f[2], h: f[3], lam: k })))
+    const sub = caja.querySelector('.a8-sub'), lam = caja.querySelector('.a8-lam'), quien = caja.querySelector('.a8-quien')
+    const bs = [...caja.querySelectorAll('.a8-barra')], va = caja.querySelector('.a8-va'), play = caja.querySelector('.a8-play:not([data-sonido])')
+    const letra = [...caja.querySelectorAll('.es-letra button')], lista = caja.querySelector('.es-letra')
+    const esVideo = m.tagName === 'VIDEO'
+    let ultima = -1, raf = 0
+    const carga = () => { if (!m.src) m.src = m.dataset.src }
+    const dibuja = () => {
+      const t = m.currentTime || 0
+      bs.forEach((b) => barra(b.firstElementChild, Math.min(1, t / tr.dur)))
+      if (va) va.textContent = mmss(t)
+      let k = frases.findIndex((f) => t < f.f); if (k < 0) k = frases.length - 1
+      const f = frases[k]
+      if (k !== ultima) {
+        ultima = k
+        if (sub) sub.innerHTML = esVideo ? `<span>${esc(f.t)}</span>` : f.t.split(' ').map((w) => `<span>${esc(w)}</span>`).join(' ')
+        if (lam && tr.l[f.lam].cap) lam.innerHTML = esc(tr.l[f.lam].cap).replace(/\*(.+?)\*/g, '<span class="acento">$1</span>')
+        if (quien) quien.textContent = f.h === 'A' ? 'Pregunta' : 'Responde'
+        letra.forEach((b, n) => b.classList.toggle('ahora', n === k))
+        if (lista && letra[k]) lista.scrollTo({ top: letra[k].offsetTop - lista.offsetTop - lista.clientHeight * 0.3, behavior: reducir ? 'auto' : 'smooth' })
+      }
+      if (sub && !esVideo) { const ws = sub.children, p = (t - f.i) / Math.max(0.1, f.f - f.i); for (let n = 0; n < ws.length; n++) ws[n].classList.toggle('dicho', t >= f.i && n < Math.ceil(p * ws.length)) }
+    }
+    const bucle = () => { dibuja(); if (!m.paused) raf = requestAnimationFrame(bucle); else raf = 0 }
+    const etq = play?.querySelector('span'), txt0 = etq?.textContent
+    const rotula = (si) => { if (!play) return; if (etq) etq.textContent = si ? 'Pausar' : txt0; else play.setAttribute('aria-label', si ? 'Pausar' : 'Escuchar') }
+    m.addEventListener('play', () => { caja.classList.add('suena'); if (!m.muted) todos.forEach((o) => o !== api && o.pausa()); if (!raf) raf = requestAnimationFrame(bucle); rotula(true) })
+    m.addEventListener('pause', () => { caja.classList.remove('suena'); rotula(false) })
+    m.addEventListener('ended', () => { if (esVideo && m.muted) { m.currentTime = 0; m.play().catch(() => {}) } })
+    const api = {
+      caja, conSonido: () => !m.paused && !m.muted,
+      toca: () => { carga(); if (m.paused) m.play().catch(() => {}); else m.pause() },
+      ve: (si) => { if (!esVideo || reducir) return; if (si) { carga(); m.muted = true; m.loop = false; m.play().catch(() => {}) } else if (!m.paused) m.pause() },
+      sonido: () => { carga(); m.muted = false; m.currentTime = 0; m.play().catch(() => {}) },
+      va: (t) => { carga(); m.currentTime = t; ultima = -1; dibuja(); if (m.paused) m.play().catch(() => {}) },
+      lento: (si) => { m.playbackRate = si ? 0.85 : 1 },
+      pausa: () => { if (!m.paused) m.pause() },
+    }
+    if (play) play.addEventListener('click', api.toca)
+    caja.querySelector('[data-sonido]')?.addEventListener('click', api.sonido)
+    letra.forEach((b) => b.addEventListener('click', () => api.va(+b.dataset.t)))
+    caja.querySelector('.es-lento')?.addEventListener('click', (e) => { const b = e.currentTarget, si = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', si); api.lento(si) })
+    bs.forEach((b) => { b.style.cursor = 'pointer'; b.addEventListener('click', (e) => { const r = b.getBoundingClientRect(); api.va(((e.clientX - r.left) / r.width) * tr.dur) }) })
+    dibuja()
+    mira(caja, (v) => { if (!v) api.pausa() })
+    todos.add(api)
+    return api
+  }
+
+  // RU: la ruta avanza pieza por pieza (2,4 s) y cambia de etapa cuando corresponde
+  const ru = document.querySelector('[data-r58-ru]')
+  if (ru) {
+    const bs = [...ru.querySelectorAll('.ru-lista button')].sort((a, b) => a.dataset.k - b.dataset.k), cols = [...ru.querySelectorAll('.ru-col')], tabs = [...ru.querySelectorAll('.ru-tabs button')]
+    const etapa = (b) => +b.closest('.ru-col').dataset.e
+    const c = ciclo(ru, bs.length, 2400, (i) => {
+      bs.forEach((b, k) => b.setAttribute('aria-current', k === i ? 'true' : 'false'))
+      const e = etapa(bs[i]); cols.forEach((x, n) => x.classList.toggle('activa', n === e)); tabs.forEach((t, n) => t.setAttribute('aria-selected', n === e ? 'true' : 'false'))
+    }, (i, p) => barra(bs[i].querySelector('.ru-t'), p))
+    bs.forEach((b, k) => b.addEventListener('click', () => c.elige(k)))
+    tabs.forEach((t, n) => t.addEventListener('click', () => c.elige(bs.findIndex((b) => etapa(b) === n))))
+  }
+
+  // FO: una pestaña por formato (8 s cada una) hasta que alguien toque; si algo suena con sonido, no cambia sola
+  const fo = document.querySelector('[data-r58-fo]')
+  if (fo) {
+    const tabs = [...fo.querySelectorAll('[role="tab"]')], ps = tabs.map((t) => fo.querySelector('#' + t.getAttribute('aria-controls')))
+    const rs = ps.map((p) => (p.hasAttribute('data-medio') ? reproductor(p) : null))
+    const c = ciclo(fo, tabs.length, 8000, (i, vista) => {
+      tabs.forEach((t, k) => { t.setAttribute('aria-selected', k === i ? 'true' : 'false'); t.tabIndex = k === i ? 0 : -1 })
+      ps.forEach((p, k) => { p.hidden = k !== i; if (k !== i) rs[k]?.pausa() })
+      rs[i]?.ve(vista)
+    }, (i, p) => { if (rs.some((r) => r?.conSonido())) c.quieto = true; barra(tabs[i].querySelector('.fo-t'), p) })
+    tabs.forEach((t, k) => {
+      t.addEventListener('click', () => c.elige(k))
+      t.addEventListener('keydown', (e) => { const d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (d) { e.preventDefault(); const n = (k + d + tabs.length) % tabs.length; c.elige(n); tabs[n].focus() } })
+    })
+  }
+
+  // ES: el episodio entero, con la letra que sigue la voz
+  const es = document.querySelector('[data-r58-es]')
+  if (es) reproductor(es)
+
+  // CK: recorre las cinco respuestas del check-in (4,5 s) y muestra lo que Aprender sugiere
+  const ck = document.querySelector('[data-r58-ck]')
+  if (ck) {
+    const ops = [...ck.querySelectorAll('[role="radio"]')], rs = [...ck.querySelectorAll('.ck-res')]
+    const c = ciclo(ck, ops.length, 4500, (i) => { ops.forEach((o, k) => { o.setAttribute('aria-checked', k === i ? 'true' : 'false'); o.tabIndex = k === i ? 0 : -1 }); rs.forEach((r) => r.classList.toggle('activa', +r.dataset.k === i)) },
+      (i, p) => barra(ops[i].querySelector('.ck-t'), p))
+    ops.forEach((o, k) => {
+      o.addEventListener('click', () => c.elige(k))
+      o.addEventListener('keydown', (e) => { const d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (d) { e.preventDefault(); const n = (k + d + ops.length) % ops.length; c.elige(n); ops[n].focus() } })
+    })
+  }
+
+  // ED: la portada cambia entre cinco destacadas (6 s); el índice abre cualquiera de las 16
+  const ed = document.querySelector('[data-r58-ed]')
+  if (ed) {
+    const ds = [...ed.querySelectorAll('.ed-d')], bs = [...ed.querySelectorAll('.ed-ind button')], dest = bs.filter((b) => b.hasAttribute('data-dest'))
+    const muestra = (id) => { ds.forEach((d) => d.classList.toggle('activa', d.dataset.id === id)); bs.forEach((b) => b.setAttribute('aria-current', b.dataset.id === id ? 'true' : 'false')) }
+    const orden = ['salir-del-circulo-del-miedo', 'el-ejercicio-es-tratamiento', 'caminar-paso-a-paso', 'un-dia-dificil', 'tu-regla-de-dolor'].filter((id) => dest.some((b) => b.dataset.id === id))
+    const c = ciclo(ed, orden.length, 6000, (i) => muestra(orden[i]), () => {})
+    bs.forEach((b) => b.addEventListener('click', () => { c.quieto = true; muestra(b.dataset.id) }))
+  }
+
+  // ID: la idea de cada pieza se enciende palabra por palabra y pasa a la siguiente
+  const id = document.querySelector('[data-r58-id]')
+  if (id) {
+    const is = [...id.querySelectorAll('.id-i')], ps = [...id.querySelectorAll('.id-puntos button')], cuenta = id.querySelector('.id-cuenta b'), pausa = id.querySelector('.id-pausa')
+    const largo = (k) => 1800 + is[k].querySelectorAll('p span').length * 260
+    const c = ciclo(id, is.length, largo, (i) => {
+      is.forEach((x, k) => { x.classList.toggle('activa', k === i); if (k !== i) x.querySelectorAll('p span').forEach((s) => s.classList.remove('lit')) })
+      ps.forEach((p, k) => p.setAttribute('aria-current', k === i ? 'true' : 'false')); cuenta.textContent = String(i + 1).padStart(2, '0')
+    }, (i, p) => { const ws = is[i].querySelectorAll('p span'), n = Math.ceil(Math.min(1, (p * largo(i)) / (ws.length * 260 + 1)) * ws.length); ws.forEach((s, k) => s.classList.toggle('lit', c?.quieto || k < n)) })
+    const marca = () => { pausa.classList.toggle('parado', c.quieto); pausa.setAttribute('aria-label', c.quieto ? 'Seguir' : 'Pausar') }
+    ps.forEach((p, k) => p.addEventListener('click', () => { c.elige(k); marca() }))
+    pausa.addEventListener('click', () => { c.quieto = !c.quieto; marca() }); marca()
+  }
+}
+
+// Ronda 59 · FO auditada (data-r59f): los cuatro formatos con lo que tiene la app. Las 10 lecturas, los 2 videos, la
+// charla con sus 8 láminas (lo que la voz nombra aparece en ese momento, con los tiempos de cada palabra de la app) y los
+// 3 podcasts con la conversación que sigue la voz. Al verse, el video, la charla y el podcast corren sin sonido; con un
+// toque suenan desde el comienzo. El recorrido se puede pausar y se detiene al tocar cualquier cosa. Suena uno a la vez.
+{
+  const raiz = document.querySelector('[data-r59]')
+  if (raiz) {
+    const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const BASE = raiz.dataset.base || '.'
+    const mmss = (x) => `${Math.floor(Math.max(0, x) / 60)}:${String(Math.floor(Math.max(0, x) % 60)).padStart(2, '0')}`
+    const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+    const acentua = (t) => esc(t).replace(/\*(.+?)\*/g, '<span class="acento">$1</span>')
+    const barra = (el, p) => el && el.style.setProperty('--p', Math.max(0, Math.min(1, p)))
+    const cache = {}
+    const pide = (url) => (cache[url] ??= fetch(url).then((r) => r.json()))
+    const tabs = [...raiz.querySelectorAll('[role="tab"]')]
+    const ps = tabs.map((t) => raiz.querySelector('#' + t.getAttribute('aria-controls')))
+    const rec = raiz.querySelector('.f9-recorrido'), recTx = rec.querySelector('span')
+    const IC = JSON.parse(raiz.querySelector('.f9-iconos').textContent)
+    const DUR = [8000, 11000, 13000, 11000]
+    let vista = false, i = 0, t0 = performance.now(), quieto = reducir, raf = 0
+    const todos = []
+
+    const marcaRec = () => { rec.setAttribute('aria-pressed', quieto ? 'true' : 'false'); recTx.textContent = quieto ? 'Seguir el recorrido' : 'Pausar el recorrido' }
+    const detiene = () => { if (!quieto) { quieto = true; marcaRec() } }
+    const muestra = (k) => {
+      i = k; t0 = performance.now()
+      tabs.forEach((t, n) => { t.setAttribute('aria-selected', n === k ? 'true' : 'false'); t.tabIndex = n === k ? 0 : -1; barra(t.querySelector('.f9-t'), 0) })
+      ps.forEach((p, n) => { p.classList.toggle('activo', n === k); p.inert = n !== k })
+      todos.forEach((m) => (m.panel === ps[k] ? m.ve(vista) : m.fuera()))
+    }
+    const bucle = (t) => {
+      if (!vista) return (raf = 0)
+      if (todos.some((m) => m.conSonido())) detiene()
+      const p = quieto ? 0 : (t - t0) / DUR[i]
+      barra(tabs[i].querySelector('.f9-t'), p)
+      if (!quieto && p >= 1) muestra((i + 1) % tabs.length)
+      raf = requestAnimationFrame(bucle)
+    }
+
+    // Un reproductor (video, charla o podcast): el medio, sus tiempos y lo que se dibuja con ellos
+    const reproductor = (panel, tipo, dibujaTipo, alCargar) => {
+      const m = panel.querySelector('.f9-medio')
+      const bs = [...panel.querySelectorAll('.f9-barra')], play = panel.querySelector('.f9-play'), etq = play.querySelector('span'), txt0 = etq.textContent
+      let d = null, raf2 = 0, conSonido = false
+      const carga = async () => { if (!m.src) m.src = m.dataset.src; if (!d) { d = await pide(m.dataset.json); alCargar?.(d); dibuja() } return d }
+      const rotula = () => { etq.textContent = !conSonido ? txt0 : m.paused ? 'Seguir' : 'Pausar' }
+      const dibuja = () => {
+        if (!d) return
+        const t = m.currentTime || 0
+        bs.forEach((b) => barra(b.firstElementChild, t / d.dur))
+        dibujaTipo(d, t, !m.paused || t > 0.05)
+      }
+      const bucle2 = () => { dibuja(); raf2 = m.paused ? 0 : requestAnimationFrame(bucle2) }
+      m.addEventListener('play', () => { panel.classList.add('suena'); if (!m.muted) todos.forEach((o) => o !== api && o.pausa()); if (!raf2) raf2 = requestAnimationFrame(bucle2); rotula() })
+      m.addEventListener('pause', () => { panel.classList.remove('suena'); rotula(); dibuja() })
+      m.addEventListener('ended', () => { if (!conSonido) { m.currentTime = 0; m.play().catch(() => {}) } })
+      m.addEventListener('seeked', dibuja)
+      const api = {
+        panel, conSonido: () => conSonido && !m.paused,
+        ve: async (si) => { if (!si) return api.pausa(); await carga(); if (!conSonido && !reducir) { m.muted = true; m.play().catch(() => {}) } },
+        fuera: () => api.pausa(),
+        pausa: () => { if (!m.paused) m.pause() },
+        va: async (t) => { await carga(); m.currentTime = Math.max(0, Math.min(d.dur - 0.1, t)); dibuja(); if (m.paused) m.play().catch(() => {}) },
+        toca: async () => {
+          detiene(); await carga()
+          if (!conSonido) { conSonido = true; panel.classList.add('con-sonido'); m.muted = false; m.currentTime = 0; m.play().catch(() => {}) }
+          else if (m.paused) m.play().catch(() => {}); else m.pause()
+          rotula()
+        },
+        cambia: (src, json) => { m.pause(); m.removeAttribute('src'); m.dataset.src = src; m.dataset.json = json; d = null; conSonido = false; panel.classList.remove('con-sonido', 'suena'); rotula(); m.load(); if (panel.classList.contains('activo') && vista) api.ve(true); else carga() },
+        oye: (t) => { detiene(); conSonido = true; panel.classList.add('con-sonido'); m.muted = false; api.va(t).then(rotula) },
+        get d() { return d }, m,
+      }
+      play.addEventListener('click', api.toca)
+      bs.forEach((b) => b.addEventListener('click', (e) => { if (!d) return; const r = b.getBoundingClientRect(); api.oye(((e.clientX - r.left) / r.width) * d.dur) }))
+      todos.push(api)
+      return api
+    }
+    const cortes = (panel, d) => panel.querySelectorAll('.f9-cortes').forEach((b) => { b.querySelectorAll('b').forEach((x) => x.remove()); d.l.slice(1).forEach((l) => { const x = document.createElement('b'); x.style.left = `${(l.i / d.dur) * 100}%`; b.append(x) }) })
+    const fraseEn = (d, t) => { let k = -1; for (let n = 0; n < d.fr.length; n++) if (d.fr[n][0] <= t + 0.05) k = n; return k }
+
+    // Lecturas: el riel abre cualquiera de las 10; «Entendido» la marca como leída, como en la app
+    {
+      const p = ps[0], L = JSON.parse(p.querySelector('.f9-datos').textContent), leidas = new Set()
+      const foto = p.querySelector('.f9-lec-foto img'), cuerpo = p.querySelector('.f9-cuerpo'), ent = p.querySelector('.f9-entendido'), entTx = ent.querySelector('span')
+      const riel = [...p.querySelectorAll('.f9-riel button')]
+      let k = +(p.querySelector('.f9-riel [aria-current]')?.dataset.i ?? 0)
+      const fin = () => cuerpo.classList.toggle('fin', cuerpo.scrollTop + cuerpo.clientHeight >= cuerpo.scrollHeight - 4)
+      const marca = () => { const si = leidas.has(L[k].id); ent.setAttribute('aria-pressed', si ? 'true' : 'false'); entTx.textContent = si ? 'Leída' : 'Entendido' }
+      const abre = (n) => {
+        k = n; const x = L[n]
+        foto.style.opacity = 0
+        setTimeout(() => { foto.src = `${BASE}/fotos/aprender/${x.id}-640.webp`; foto.onload = () => (foto.style.opacity = 1) }, 180)
+        p.querySelector('.f9-meta').textContent = x.m; p.querySelector('.f9-tit').innerHTML = x.t; p.querySelector('.f9-lead').textContent = x.s
+        cuerpo.innerHTML = x.p.map((t) => `<p>${esc(t)}</p>`).join(''); cuerpo.scrollTop = 0; p.querySelector('.f9-idea-tx').textContent = x.i
+        riel.forEach((b, j) => (j === n ? b.setAttribute('aria-current', 'true') : b.removeAttribute('aria-current')))
+        marca(); fin()
+      }
+      riel.forEach((b, j) => b.addEventListener('click', () => { detiene(); abre(j) }))
+      ent.addEventListener('click', () => { detiene(); const id = L[k].id; leidas.has(id) ? leidas.delete(id) : leidas.add(id); riel[k].classList.toggle('leida', leidas.has(id)); marca() })
+      cuerpo.addEventListener('scroll', fin, { passive: true }); cuerpo.addEventListener('pointerdown', detiene); cuerpo.addEventListener('wheel', detiene, { passive: true })
+      fin()
+    }
+
+    // Video: subtítulos de la voz de la app; los 2 videos se pueden elegir
+    {
+      const p = ps[1], V = JSON.parse(p.querySelector('.f9-datos').textContent), sub = p.querySelector('.f9-vsub')
+      let ult = -2
+      const r = reproductor(p, 'video', (d, t) => { const k = fraseEn(d, t), f = d.fr[k]; const vis = f && t < f[1] + 0.35 ? k : -1; if (vis !== ult) { ult = vis; sub.innerHTML = vis < 0 ? '' : `<span>${esc(f[2])}</span>` } }, () => (ult = -2))
+      const lista = [...p.querySelectorAll('.f9-lista button')]
+      lista.forEach((b, j) => b.addEventListener('click', () => {
+        detiene(); if (b.hasAttribute('aria-current')) return
+        lista.forEach((x) => x.removeAttribute('aria-current')); b.setAttribute('aria-current', 'true')
+        const x = V[j]; p.querySelector('.f9-meta').textContent = x.m; p.querySelector('.f9-tit').innerHTML = x.t; p.querySelector('.f9-lead').textContent = x.s
+        r.m.poster = `${BASE}/medios/aprender/${x.id}.webp`; r.m.setAttribute('aria-label', 'Video: ' + p.querySelector('.f9-tit').textContent); sub.innerHTML = ''
+        r.cambia(`${BASE}/medios/aprender/${x.id}.mp4`, `${BASE}/medios/aprender/${x.id}.json`)
+      }))
+    }
+
+    // Charla: cada lámina como en la app (CharlaPage); lo que tiene «clave» aparece cuando la voz lo dice
+    {
+      const p = ps[2], lam = p.querySelector('.f9-lam'), subs = p.querySelector('.f9-subs'), portada = lam.innerHTML, va = p.querySelector('.f9-tiempo')
+      const filas = [...p.querySelectorAll('.f9-lams button')]
+      const cap = (it, icono) => `<li class="f9-cap" data-clave="${esc(it.clave)}" data-cap>${icono}${esc(it.texto)}</li>`
+      const zona = (n) => (n <= 3 ? 0 : n <= 6 ? 1 : 2)
+      const html = (l) => {
+        const tit = `<p class="f9-lh">${acentua(l.titulo)}</p>`, nota = typeof l.nota === 'string' ? `<p class="f9-ln">${esc(l.nota)}</p>` : ''
+        switch (l.tipo) {
+          case 'portada': return portada
+          case 'icono': return `<div class="f9-l"><div class="f9-circ">${l.iconos.map((n) => `<span>${IC[n] ?? ''}</span>`).join('')}</div>${tit}${nota}</div>`
+          case 'regla': {
+            const c = (n) => `<span class="z${zona(n)}" data-z="${zona(n)}">${n}</span>`
+            return `<div class="f9-l">${tit}<div class="f9-esc10" aria-hidden="true"><div>${[0, 1, 2, 3, 4, 5].map(c).join('')}</div><div>${[6, 7, 8, 9, 10].map(c).join('')}</div></div>`
+              + `<ul class="f9-zonas">${l.zonas.map((z) => `<li data-clave="${esc(z.clave)}"><b>${esc(z.rango)}</b><span>${esc(z.texto)}</span></li>`).join('')}</ul>`
+              + (l.nota ? `<p class="f9-ln" data-clave="${esc(l.nota.clave)}">${esc(l.nota.texto)}</p>` : '') + '</div>'
+          }
+          case 'lista': return `<div class="f9-l">${tit}<ul class="f9-cl">${l.items.map((it) => cap(it, IC[it.icono] ?? '')).join('')}</ul></div>`
+          case 'ejemplo': return `<div class="f9-l f9-l-ejemplo"><div class="f9-foto"><img src="${BASE}/fotos/rutinas/${l.foto}-ficha-720.webp" alt=""><i class="f9-velo"></i><div><p class="f9-lh" style="font-size:1.375rem">${acentua(l.titulo)}</p><span class="f9-lm">${esc(l.rotulo)}</span></div></div><ul class="f9-cl">${l.items.map((it) => cap(it, `<span class="f9-chk">${IC.Check}</span>`)).join('')}</ul></div>`
+          case 'senales': return `<div class="f9-l"><span class="f9-info">${IC.Info}</span>${tit}${Object.entries(l.grupos ?? { todos: 'Para y consulta si tienes' }).map(([g, h]) => `<section class="f9-grupo"><h5>${esc(h)}</h5><ul>${l.items.filter((it) => !l.grupos || it.grupo === g).map((it) => `<li data-clave="${esc(it.clave)}">${IC[it.icono] ?? ''}${esc(it.texto)}</li>`).join('')}</ul></section>`).join('')}</div>`
+          case 'cierre': return `<div class="f9-l"><span class="f9-isotipo">${IC.Isotipo}</span>${tit}</div>`
+          default: return `<div class="f9-l">${tit}</div>`
+        }
+      }
+      // Subtítulos en partes de hasta dos líneas (unos 60 caracteres), como partesDe de la app
+      const partes = (ws) => { const total = ws.reduce((n, w) => n + w.t.length + 1, 0), meta = total / Math.ceil(total / 60), out = [[]]; let largo = 0; for (const w of ws) { if (largo + w.t.length / 2 > meta && out.at(-1).length) { out.push([]); largo = 0 } out.at(-1).push(w); largo += w.t.length + 1 } return out }
+      let ultL = -1, ultP = '', els = []
+      const r = reproductor(p, 'charla', (d, t, empezado) => {
+        let k = 0; d.l.forEach((l, n) => { if (l.i <= t + 0.05) k = n })
+        const l = d.l[k]
+        if (k !== ultL) { ultL = k; lam.innerHTML = html(l); els = [...lam.querySelectorAll('[data-clave]')] }
+        els.forEach((el) => { const c = l.claves[el.dataset.clave]; const ya = empezado && c !== undefined && t >= c; el.classList.toggle('ya', ya); if (el.hasAttribute('data-cap')) el.classList.toggle('reciente', ya && t - c < 2.2) })
+        if (l.tipo === 'regla') lam.querySelectorAll('.f9-esc10 span').forEach((s) => { const z = l.zonas[+s.dataset.z]; s.classList.toggle('apagado', empezado && !(t >= (l.claves[z.clave] ?? Infinity))) })
+        filas.forEach((b, n) => { if (n === k) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); barra(b.querySelector('.f9-lp i'), n === k ? (t - l.i) / (l.f - l.i) : 0) })
+        va.textContent = empezado ? mmss(t) : mmss(d.dur)
+        const fk = fraseEn(d, t), f = d.fr[fk]
+        if (!empezado || !f || t > f[1] + 0.35) { if (ultP) { subs.innerHTML = ''; ultP = '' } return }
+        const ws = f[2].split(' ').map((w, n) => ({ t: w, i: f[5][n] ?? f[0] })), pp = partes(ws)
+        const pa = pp.find((x) => x.some((w) => w.i > t)) ?? pp.at(-1), clave = fk + ':' + pp.indexOf(pa)
+        if (clave !== ultP) { ultP = clave; subs.innerHTML = pa.map((w) => `<span>${esc(w.t)}</span>`).join(' ') }
+        pa.forEach((w, n) => subs.children[n]?.classList.toggle('dicho', t >= w.i))
+      }, (d) => { cortes(p, d); ultL = -1 })
+      filas.forEach((b) => b.addEventListener('click', () => r.oye(+b.dataset.t + 0.01)))
+    }
+
+    // Podcast: al centro la frase y quién la dice; al lado, la conversación que sigue la voz (se toca para ir ahí)
+    {
+      const p = ps[3], E = JSON.parse(p.querySelector('.f9-datos').textContent)
+      const quien = p.querySelector('.f9-quien span'), frase = p.querySelector('.f9-frase'), letra = p.querySelector('.f9-letra'), vaEl = p.querySelector('.f9-va'), resta = p.querySelector('.f9-resta'), lento = p.querySelector('.f9-lento')
+      let ult = -1, bs = []
+      const cabeza = (l) => (l.tipo === 'mito' ? `Mito ${l.numero}` : l.tipo === 'portada' ? '' : (l.titulo || '').replace(/\*/g, ''))
+      const arma = (d) => {
+        let lam = -1, h = null
+        letra.innerHTML = d.fr.map((f, n) => {
+          let s = ''
+          if (f[4] !== lam) { lam = f[4]; const c = cabeza(d.l[lam]); if (c) s += `<h5>${esc(c)}</h5>`; h = null }
+          if (f[3] !== h) { h = f[3]; s += `<span class="q">${esc(d.hablantes?.[h] ?? '')}</span>` }
+          return `<li>${s}<button type="button" data-n="${n}">${esc(f[2])}</button></li>`
+        }).join('')
+        bs = [...letra.querySelectorAll('button')]
+        bs.forEach((b) => b.addEventListener('click', () => r.oye(d.fr[+b.dataset.n][0] + 0.01)))
+        cortes(p, d); ult = -1
+      }
+      const r = reproductor(p, 'podcast', (d, t) => {
+        const k = Math.max(0, fraseEn(d, t)), f = d.fr[k]
+        vaEl.textContent = mmss(t); resta.textContent = '-' + mmss(d.dur - t)
+        if (k === ult) return
+        ult = k; quien.textContent = d.hablantes?.[f[3]] ?? ''
+        frase.textContent = f[2]; frase.classList.remove('entra'); void frase.offsetWidth; frase.classList.add('entra')
+        bs.forEach((b, n) => b.classList.toggle('ahora', n === k))
+        const b = bs[k]; if (b) letra.scrollTo({ top: b.offsetTop - letra.clientHeight * 0.35, behavior: reducir ? 'auto' : 'smooth' })
+      }, arma)
+      p.querySelectorAll('.f9-salto').forEach((b) => b.addEventListener('click', () => r.oye((r.m.currentTime || 0) + +b.dataset.s)))
+      lento.addEventListener('click', () => { detiene(); const si = lento.getAttribute('aria-pressed') !== 'true'; lento.setAttribute('aria-pressed', si ? 'true' : 'false'); r.m.playbackRate = si ? 0.85 : 1 })
+      r.m.addEventListener('play', () => { r.m.playbackRate = lento.getAttribute('aria-pressed') === 'true' ? 0.85 : 1 })
+      const eps = [...p.querySelectorAll('.f9-eps button')]
+      eps.forEach((b, j) => b.addEventListener('click', () => {
+        detiene(); if (b.hasAttribute('aria-current')) return
+        eps.forEach((x) => x.removeAttribute('aria-current')); b.setAttribute('aria-current', 'true')
+        const x = E[j]; p.querySelector('.f9-meta').textContent = x.m; p.querySelector('.f9-tit').innerHTML = x.t; p.querySelector('.f9-pod-cab img').src = `${BASE}/fotos/aprender/${x.id}-cuadrada.webp`
+        letra.innerHTML = ''; frase.textContent = ''; resta.textContent = '-' + mmss(x.dur); vaEl.textContent = '0:00'
+        r.cambia(`${BASE}/medios/aprender/${x.id}.m4a`, `${BASE}/medios/aprender/${x.id}.json`)
+      }))
+    }
+
+    tabs.forEach((t, k) => {
+      t.addEventListener('click', () => { detiene(); if (k !== i) muestra(k) })
+      t.addEventListener('keydown', (e) => { const dd = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (dd) { e.preventDefault(); detiene(); const n = (k + dd + tabs.length) % tabs.length; muestra(n); tabs[n].focus() } })
+    })
+    rec.addEventListener('click', () => { quieto = !quieto; t0 = performance.now(); marcaRec() })
+    marcaRec(); muestra(0)
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver(([e]) => { vista = e.isIntersecting; if (vista) { t0 = performance.now(); todos.forEach((m) => m.panel === ps[i] && m.ve(true)); if (!raf) raf = requestAnimationFrame(bucle) } else todos.forEach((m) => m.pausa()) }, { threshold: 0.25 }) : null
+    io ? io.observe(raiz) : (vista = true)
+  }
+}
+
+// Ronda 60 · «Para cada uno» (data-r60p): seis propuestas. Cada una tiene pasos ([data-ir] elige, [data-en] dice en qué
+// pasos se ve algo). Las que tienen tiempos (data-durs) avanzan solas mientras se ven, se pueden pausar y se detienen al
+// tocar cualquier paso. PA mueve el punto del hilo hacia quien actúa; PC acerca la captura al punto elegido; PD cambia la
+// imagen de cada paso; PE desliza las capturas al verse.
+{
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches
+  document.querySelectorAll('.r6-v[data-v]').forEach((v) => {
+    const n = +(v.dataset.pasos || 0)
+    const durs = (v.dataset.durs || '').split(',').filter(Boolean).map(Number)
+    const focos = (v.dataset.focos || '').split(',').filter(Boolean)
+    const auto = durs.length > 0 && !reducir
+    const botones = [...v.querySelectorAll('[data-ir]')]
+    const pausa = v.querySelector('.r6-pausa')
+    const punto = v.querySelector('.pa-punto')
+    let paso = 0, t = null, enVista = false, pausado = false, tocado = false, visto = false
+    const corre = () => auto && enVista && !pausado && !tocado
+    const mueveHilo = () => {
+      const esc = v.querySelector('.pa-esc'), c = v.querySelector('[data-col].foco')
+      if (!punto || !esc || !c || !esc.offsetWidth) return
+      const r = esc.getBoundingClientRect(), q = c.getBoundingClientRect()
+      punto.style.setProperty('--px', `${((q.left + q.width / 2 - r.left) / r.width) * 100}%`)
+    }
+    const pinta = (k) => {
+      paso = k
+      v.dataset.paso = k
+      v.querySelectorAll('[data-en]').forEach((el) => el.classList.toggle('ve', el.dataset.en.split(' ').includes(String(k))))
+      botones.forEach((b) => {
+        const si = +b.dataset.ir === k
+        b.classList.toggle('activo', si)
+        if (b.getAttribute('role') === 'tab') { b.setAttribute('aria-selected', String(si)); b.tabIndex = si ? 0 : -1 }
+        else if (b.classList.contains('pd-card')) b.setAttribute('aria-expanded', String(si))
+        else if (si) b.setAttribute('aria-current', 'step')
+        else b.removeAttribute('aria-current')
+      })
+      if (focos.length) v.querySelectorAll('[data-col]').forEach((c) => c.classList.toggle('foco', c.dataset.col === focos[k]))
+      mueveHilo()
+      v.style.setProperty('--dur', `${durs[k] || 8000}ms`)
+      v.classList.remove('corre', 'fluye')
+      void v.offsetWidth
+      if (corre()) v.classList.add('corre')
+      v.classList.add('fluye')
+      v.querySelectorAll('.pc-p').forEach((p) => p.r6Suelta?.())
+    }
+    const programa = () => {
+      clearTimeout(t)
+      if (corre()) t = setTimeout(() => { pinta((paso + 1) % n); programa() }, durs[paso] || 8000)
+    }
+    // Para que las animaciones de adentro corran de nuevo, se quita «ve» a todo antes de pintar.
+    const reinicia = () => { v.querySelectorAll('[data-en].ve').forEach((el) => el.classList.remove('ve')); void v.offsetWidth; pinta(paso); programa() }
+    const marcaPausa = () => pausa?.setAttribute('aria-pressed', String(pausado || tocado))
+    botones.forEach((b) => b.addEventListener('click', () => {
+      if (auto) { tocado = true; marcaPausa() }
+      if (+b.dataset.ir !== paso) pinta(+b.dataset.ir)
+      programa()
+    }))
+    pausa?.addEventListener('click', () => {
+      if (pausado || tocado) { pausado = false; tocado = false } else pausado = true
+      marcaPausa()
+      if (corre()) reinicia(); else { clearTimeout(t); v.classList.remove('corre') }
+    })
+    v.querySelectorAll('[role="tablist"]').forEach((tl) => tl.addEventListener('keydown', (e) => {
+      const tabs = [...tl.querySelectorAll('[role="tab"]')], i = tabs.indexOf(document.activeElement)
+      if (i < 0) return
+      const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]
+      const j = d ? (i + d + tabs.length) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1
+      if (j < 0) return
+      e.preventDefault(); tabs[j].focus(); tabs[j].click()
+    }))
+    if (pausa && !auto) pausa.hidden = true
+    pinta(0)
+    new IntersectionObserver((es) => es.forEach((e) => {
+      const antes = enVista
+      enVista = e.isIntersecting
+      if (enVista && !visto) { visto = true; reinicia() }
+      else if (enVista !== antes) { if (corre()) reinicia(); else { clearTimeout(t); v.classList.remove('corre') } }
+    }), { threshold: 0.3 }).observe(v)
+    addEventListener('resize', mueveHilo)
+
+    // PC: acercar la captura al punto elegido (el número queda donde estaba y crece lo de alrededor).
+    v.querySelectorAll('.pc-p').forEach((p) => {
+      const zoom = p.querySelector('.pc-zoom'), hs = [...p.querySelectorAll('.pc-hs')], items = [...p.querySelectorAll('.pc-lista button')]
+      let actual = null
+      const elige = (j) => {
+        actual = j
+        hs.concat(items).forEach((x) => x.classList.toggle('activo', +x.dataset.pt === j))
+        items.forEach((x) => x.setAttribute('aria-pressed', String(+x.dataset.pt === j)))
+        const h = hs.find((x) => +x.dataset.pt === j)
+        if (j === null || !h) { zoom.style.setProperty('--zs', 1); p.classList.remove('zoom'); return }
+        const fig = h.parentElement
+        const x = fig.offsetLeft + h.offsetLeft, y = fig.offsetTop + h.offsetTop
+        zoom.style.setProperty('--zx', `${(x / zoom.offsetWidth) * 100}%`)
+        zoom.style.setProperty('--zy', `${(y / zoom.offsetHeight) * 100}%`)
+        zoom.style.setProperty('--zs', p.querySelector('.pc-tels') ? 1.75 : 2.1)
+        p.classList.add('zoom')
+      }
+      p.r6Suelta = () => elige(null)
+      hs.concat(items).forEach((b) => b.addEventListener('click', () => elige(+b.dataset.pt === actual ? null : +b.dataset.pt)))
+      p.querySelector('.pc-todo')?.addEventListener('click', () => elige(null))
+      items.forEach((x) => x.setAttribute('aria-pressed', 'false'))
+    })
+
+    // PD: cada paso muestra su captura.
+    v.querySelectorAll('.pd-p').forEach((p) => {
+      const bs = [...p.querySelectorAll('.pd-pasos button[data-paso]')], fs = [...p.querySelectorAll('.pd-f')]
+      bs.forEach((b) => b.addEventListener('click', () => {
+        const j = +b.dataset.paso
+        bs.forEach((x) => x.setAttribute('aria-pressed', String(+x.dataset.paso === j)))
+        fs.forEach((f) => f.classList.toggle('ve', +f.dataset.paso === j))
+      }))
+    })
+  })
+  // PE: al verse, las capturas se deslizan una vez hacia lo importante.
+  const pe = document.querySelectorAll('.pe-card')
+  if (pe.length && !reducir) {
+    const o = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('visto'); o.unobserve(e.target) } }), { threshold: 0.55 })
+    pe.forEach((c) => o.observe(c))
+  }
+}
+// fin ronda 60

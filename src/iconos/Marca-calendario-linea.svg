@@ -1,0 +1,20 @@
+<svg width="1em" height="1em" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63.94 69.08">
+  <g>
+    <g>
+      <rect fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="3px" x="1.5" y="6.64" width="60.94" height="60.94" rx="10.04" ry="10.04"/>
+      <line fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="3px" x1="1.5" y1="27.96" x2="62.44" y2="27.96"/>
+      <g>
+        <circle fill="currentColor" cx="18.78" cy="40.81" r="3.7"/>
+        <circle fill="currentColor" cx="31.97" cy="40.81" r="3.7"/>
+        <circle fill="currentColor" cx="45.16" cy="40.81" r="3.7"/>
+        <circle fill="currentColor" cx="18.78" cy="53.66" r="3.7"/>
+        <circle fill="currentColor" cx="31.97" cy="53.66" r="3.7"/>
+        <circle fill="currentColor" cx="45.16" cy="53.66" r="3.7"/>
+      </g>
+      <g>
+        <path fill="currentColor" d="M20.88,1.5v5.14c0,.78.69,1.54,1.5,1.5s1.5-.66,1.5-1.5V1.5C23.88.72,23.19-.04,22.38,0s-1.5.66-1.5,1.5h0Z"/>
+        <path fill="currentColor" d="M40.05,1.5v5.14c0,.78.69,1.54,1.5,1.5s1.5-.66,1.5-1.5V1.5c0-.78-.69-1.54-1.5-1.5s-1.5.66-1.5,1.5h0Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -46,7 +46,7 @@ async function reemplazar(html, actual) {
     const n = m.slice(6, -2)
     html = html.replaceAll(m, `<span class="ic"><span class="linea">${await icono(n)}</span><span class="lleno">${await icono(`${n}-fill`)}</span></span>`)
   }
-  for (const m of [...new Set(html.match(/\{\{i:\w+\}\}/g) ?? [])]) html = html.replaceAll(m, `<span class="ic">${await icono(m.slice(4, -2))}</span>`)
+  for (const m of [...new Set(html.match(/\{\{i:[\w-]+\}\}/g) ?? [])]) html = html.replaceAll(m, `<span class="ic">${await icono(m.slice(4, -2))}</span>`)
   // Los íconos dobles: cada svg se posiciona solo
   return html.replaceAll('<span class="linea"><svg', '<svg class="linea"').replaceAll('<span class="lleno"><svg', '<svg class="lleno"').replace(/(<svg class="(?:linea|lleno)"[\s\S]*?<\/svg>)<\/span>/g, '$1')
 }
@@ -82,7 +82,7 @@ async function pagina(origen, destino) {
   const hojas = ['base', 'cabecera', 'barra', ...(meta.css ?? []), ...(meta.css?.includes('paginas') ? ['fondos', 'fondos-variantes'] : [])]
   const css = `<style>\n${(await Promise.all(hojas.map((c) => leer(`estilos/${c}.css`)))).join('\n').replace(/url\((["']?)\.\.\//g, 'url($1{{base}}/')}\n</style>`
   // La barra elegida es N1 (ronda 3, 12 nov); una propuesta puede pedir otra con data-nav
-  const attrs = Object.entries({ 'data-nav': 'n1', 'data-r13n': 'vb', 'data-r14c': 'c2', 'data-r15n': 'p2', 'data-r16h': 'h5', 'data-r16i': 'i2', 'data-r18m': 'm2', 'data-r19b': 'b2', 'data-r23t': 't2', 'data-r23p': 'p2', 'data-r23x': 'x2', 'data-r23a': 'a4', 'data-r23f': 'f2', 'data-r24q': 'q2', 'data-r24e': 'e2', 'data-r25g': 'g2', 'data-r25t': 't2', 'data-r25l': 'l2', 'data-r25m': 'm2', 'data-r25c': 'c2', 'data-r25r': 'r1', 'data-r26e': 'e7', 'data-r29c': 'c2', 'data-r29s': 's1', 'data-r30p': 'q1', 'data-r31s': 'r4', 'data-r32p': 'p1', 'data-r32m': 'm1', 'data-r33v': 'v1', 'data-fondos': 'paneles abre marca aurora gp gr gc ge vi', ...(meta.cuerpo ?? {}) }).map(([k, v]) => ` ${k}="${v}"`).join('')
+  const attrs = Object.entries({ 'data-nav': 'n1', 'data-r13n': 'vb', 'data-r14c': 'c2', 'data-r15n': 'p2', 'data-r16h': 'h5', 'data-r16i': 'i2', 'data-r18m': 'm2', 'data-r19b': 'b2', 'data-r23t': 't2', 'data-r23p': 'p2', 'data-r23x': 'x2', 'data-r23a': 'a4', 'data-r23f': 'f2', 'data-r24q': 'q2', 'data-r24e': 'e2', 'data-r25g': 'g2', 'data-r25t': 't2', 'data-r25l': 'l2', 'data-r25m': 'm2', 'data-r25c': 'c2', 'data-r25r': 'r1', 'data-r26e': 'e7', 'data-r29c': 'c2', 'data-r29s': 's1', 'data-r30p': 'q1', 'data-r31s': 'r4', 'data-r32p': 'p1', 'data-r32m': 'm1', 'data-r33v': 'v1', 'data-r34c': 'c1', 'data-r34g': 'g2', 'data-r38p': 'a2', 'data-r39': 'titulo tiempos linea tira cel cierre mov', 'data-r40c': 'corta', 'data-r40t': 't6', 'data-r42': 'l2', 'data-r43': 'q1', 'data-r44': 'm1', 'data-r45': 'f3', 'data-r46': 'c3', 'data-r48': 'p4', 'data-r49q': 'q2', 'data-r49c': 'c2', 'data-r49n': 'n1', 'data-r49e': 'e1', 'data-r49m': 'm2', 'data-r50q': 'qb', 'data-r50c': 'ca', 'data-r50n': 'na', 'data-r52n': 'nh', 'data-r53b': 'b1', 'data-r54c': 'c3', 'data-r54s': 's3', 'data-r55s': 's4', 'data-r56r': 'hoy', 'data-r57r': 'ut', 'data-r58a': 'fo', 'data-r59f': 'f2', 'data-r60p': 'pa2', 'data-fondos': 'paneles abre marca aurora gp gr gc ge vi', ...(meta.cuerpo ?? {}) }).map(([k, v]) => ` ${k}="${v}"`).join('')
   let html = `<!doctype html>
 <html lang="es-CL">
 <head>
