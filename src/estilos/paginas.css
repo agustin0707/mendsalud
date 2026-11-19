@@ -3448,8 +3448,11 @@ html body[data-r48][data-r57r]:not([data-r57r="hoy"]) #rutinas { --tono-fondo: l
 .f9-vid-cuadro { position: relative; height: 100%; max-height: 596px; aspect-ratio: 9 / 16; border-radius: 26px; overflow: hidden; background: #1b3940; }
 .f9-vid-cuadro video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .f9-vid-cuadro .f9-mudo { top: 14px; left: 14px; }
-.f9-vsub { position: absolute; left: 12px; right: 12px; bottom: 26px; text-align: center; font-size: 0.9375rem; font-weight: 500; line-height: 1.65; }
-.f9-vsub span { padding: 3px 8px; border-radius: 6px; background: rgb(20 40 46 / 0.85); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.f9-vsub { position: absolute; left: 14px; right: 14px; bottom: 24px; text-align: center; font-size: 1rem; font-weight: 500; line-height: 1.6; text-wrap: balance; }
+/* 18 nov: subtítulos como en la app (VideoPage): caja Petróleo al 85 %, radio 10, palabras al 80 % que se aclaran al decirse */
+.f9-vsub .f9-vtramo { display: inline; padding: 4px 10px; border-radius: 10px; background: rgb(36 74 83 / 0.85); line-height: 1.6; -webkit-box-decoration-break: clone; box-decoration-break: clone; animation: el-entra 0.35s var(--ease-salida) both; }
+.f9-vsub .f9-vtramo span { color: rgb(253 253 253 / 0.8); transition: color 0.2s; }
+.f9-vsub .f9-vtramo span.dicho { color: var(--blanco); }
 .f9-vid-cuadro .f9-barra { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; border-radius: 0; }
 .f9-vid-tx .f9-play { margin-top: 22px; }
 .f9-vid-tx .f9-ceja { margin-top: 30px; }

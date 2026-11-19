@@ -1614,14 +1614,24 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     const ps = tabs.map((t) => raiz.querySelector('#' + t.getAttribute('aria-controls')))
     const rec = raiz.querySelector('.f9-recorrido'), recTx = rec.querySelector('span')
     const IC = JSON.parse(raiz.querySelector('.f9-iconos').textContent)
-    const DUR = [8000, 11000, 13000, 11000]
-    let vista = false, i = 0, t0 = performance.now(), quieto = reducir, raf = 0
+    // Ronda 62 · A1 (data-r62a="a1"): el recorrido también cambia de pieza dentro de cada formato (3 lecturas, los 2 videos,
+    // 2 episodios); tocar una pestaña o una pieza deja fijo lo elegido, y «Seguir el recorrido» lo retoma
+    const A1 = document.body.dataset.r62a === 'a1'
+    const PIEZAS = A1 ? [3, 2, 1, 2] : [1, 1, 1, 1]
+    const DUR = A1 ? [18000, 18000, 13000, 16000] : [8000, 11000, 13000, 11000]
+    let vista = false, i = 0, t0 = performance.now(), quieto = reducir, raf = 0, auto = false, pieza = 0
+    const siguientePieza = (k) => {
+      const panel = ps[k]; const bs = [...panel.querySelectorAll(k === 0 ? '.f9-riel button' : k === 1 ? '.f9-lista button' : '.f9-eps button')]
+      if (!bs.length) return
+      const actual = bs.findIndex((b) => b.hasAttribute('aria-current') || b.getAttribute('aria-pressed') === 'true')
+      auto = true; bs[(Math.max(0, actual) + 1) % bs.length].click(); auto = false
+    }
     const todos = []
 
     const marcaRec = () => { rec.setAttribute('aria-pressed', quieto ? 'true' : 'false'); recTx.textContent = quieto ? 'Seguir el recorrido' : 'Pausar el recorrido' }
-    const detiene = () => { if (!quieto) { quieto = true; marcaRec() } }
+    const detiene = () => { if (auto) return; if (!quieto) { quieto = true; marcaRec() } }
     const muestra = (k) => {
-      i = k; t0 = performance.now()
+      i = k; t0 = performance.now(); pieza = 0
       tabs.forEach((t, n) => { t.setAttribute('aria-selected', n === k ? 'true' : 'false'); t.tabIndex = n === k ? 0 : -1; barra(t.querySelector('.f9-t'), 0) })
       ps.forEach((p, n) => { p.classList.toggle('activo', n === k); p.inert = n !== k })
       todos.forEach((m) => (m.panel === ps[k] ? m.ve(vista) : m.fuera()))
@@ -1631,6 +1641,7 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
       if (todos.some((m) => m.conSonido())) detiene()
       const p = quieto ? 0 : (t - t0) / DUR[i]
       barra(tabs[i].querySelector('.f9-t'), p)
+      if (!quieto && PIEZAS[i] > 1) { const n = Math.min(PIEZAS[i] - 1, Math.floor(p * PIEZAS[i])); if (n > pieza) { pieza = n; siguientePieza(i) } }
       if (!quieto && p >= 1) muestra((i + 1) % tabs.length)
       raf = requestAnimationFrame(bucle)
     }
@@ -1703,14 +1714,24 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     // Video: subtítulos de la voz de la app; los 2 videos se pueden elegir
     {
       const p = ps[1], V = JSON.parse(p.querySelector('.f9-datos').textContent), sub = p.querySelector('.f9-vsub')
-      let ult = -2
-      const r = reproductor(p, 'video', (d, t) => { const k = fraseEn(d, t), f = d.fr[k]; const vis = f && t < f[1] + 0.35 ? k : -1; if (vis !== ult) { ult = vis; sub.innerHTML = vis < 0 ? '' : `<span>${esc(f[2])}</span>` } }, () => (ult = -2))
+      // 18 nov: como en la app (VideoPage): la frase en tramos de ~60 letras, caja Petróleo al 85 % y cada palabra se aclara al decirse
+      const tramos = (ws) => { const total = ws.reduce((n, w) => n + w.t.length + 1, 0), meta = total / Math.ceil(total / 60), out = [[]]; let largo = 0; for (const w of ws) { if (largo + w.t.length / 2 > meta && out.at(-1).length) { out.push([]); largo = 0 } out.at(-1).push(w); largo += w.t.length + 1 } return out }
+      let ult = ''
+      const r = reproductor(p, 'video', (d, t) => {
+        const k = fraseEn(d, t), f = d.fr[k]
+        if (!f || t > f[1] + 0.35) { if (ult) { sub.innerHTML = ''; ult = '' } return }
+        const ws = f[2].split(' ').map((w, n) => ({ t: w, i: (f[5] || [])[n] ?? f[0] })), pp = tramos(ws)
+        const pa = pp.find((x) => x.some((w) => w.i > t)) ?? pp.at(-1), clave = k + ':' + pp.indexOf(pa)
+        if (clave !== ult) { ult = clave; sub.innerHTML = `<span class="f9-vtramo">${pa.map((w) => `<span>${esc(w.t)}</span>`).join(' ')}</span>` }
+        const sp = sub.firstElementChild?.children ?? []
+        pa.forEach((w, n) => sp[n]?.classList.toggle('dicho', t >= w.i))
+      }, () => (ult = ''))
       const lista = [...p.querySelectorAll('.f9-lista button')]
       lista.forEach((b, j) => b.addEventListener('click', () => {
         detiene(); if (b.hasAttribute('aria-current')) return
         lista.forEach((x) => x.removeAttribute('aria-current')); b.setAttribute('aria-current', 'true')
         const x = V[j]; p.querySelector('.f9-meta').textContent = x.m; p.querySelector('.f9-tit').innerHTML = x.t; p.querySelector('.f9-lead').textContent = x.s
-        r.m.poster = `${BASE}/medios/aprender/${x.id}.webp`; r.m.setAttribute('aria-label', 'Video: ' + p.querySelector('.f9-tit').textContent); sub.innerHTML = ''
+        r.m.poster = `${BASE}/medios/aprender/${x.id}.webp`; r.m.setAttribute('aria-label', 'Video: ' + p.querySelector('.f9-tit').textContent); sub.innerHTML = ''; ult = ''
         r.cambia(`${BASE}/medios/aprender/${x.id}.mp4`, `${BASE}/medios/aprender/${x.id}.json`)
       }))
     }
