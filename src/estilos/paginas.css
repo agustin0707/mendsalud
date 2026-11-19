@@ -4929,7 +4929,7 @@ html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::after { inset
   html body:is([data-r65p="p11"], [data-r65p="p12"]) #aprender { background-color: color-mix(in oklab, #f4efe6 calc(var(--q66, 0) * 100%), var(--hueso)) !important; }
   html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno { background-color: color-mix(in oklab, #f4efe6 calc(var(--q66, 0) * 100%), var(--hueso)) !important; }
   html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::before,
-  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::after { opacity: var(--q66, 0); }
+  html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno::after { opacity: var(--a66, var(--q66, 0)); }
   html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno .r6-cab.revela { opacity: 1 !important; transform: none !important; transition: none !important; }
   html body:is([data-r65p="p11"], [data-r65p="p12"]) #para-cada-uno .r6-cab .titulo-sec { position: relative; z-index: 5; }
 }

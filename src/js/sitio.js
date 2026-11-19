@@ -2227,8 +2227,15 @@ if (document.body.dataset.r47 && document.body.dataset.r46 === 'c3') {
     let ti = null
     tareas.push((h) => {
       const st = pcu.getBoundingClientRect().top
-      const q = cl((h * 0.95 - st) / (h * 0.5)).toFixed(4), e = suave(cl((h * 0.95 - st) / (h * 0.72)))
-      apr.style.setProperty('--q66', q); pcu.style.setProperty('--q66', q)
+      const e = suave(cl((h * 0.95 - st) / (h * 0.72)))
+      // ronda 67 (r67f): F2 el color cambia en una pantalla entera; F3 en 1,6 pantallas, desde antes. En las dos, la
+      // aurora y el grano de «Para cada uno» aparecen recién cuando el borde ya salió de la pantalla, así no hay línea.
+      let q = cl((h * 0.95 - st) / (h * 0.5)), a = q
+      if (d.r67f === 'f2' || d.r67f === 'f3') {
+        const largo = d.r67f === 'f2' ? 1 : 1.6
+        q = suave(cl((h * largo - st) / (h * largo))); a = suave(cl((h * 0.1 - st) / (h * 0.6)))
+      }
+      apr.style.setProperty('--q66', q.toFixed(4)); pcu.style.setProperty('--q66', q.toFixed(4)); pcu.style.setProperty('--a66', a.toFixed(4))
       partes.forEach(([sel, a]) => {
         const el = vis(sel); if (!el) return
         if (e >= 1) { el.style.opacity = ''; el.style.translate = ''; return }
